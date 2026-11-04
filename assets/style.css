@@ -1,0 +1,139 @@
+/* 台帳屋 サイト共通の見た目。取扱説明書のように、飾らず事実を読みやすく並べる */
+:root {
+  --bg: #ffffff;
+  --band: #f5f6f7;        /* 区切りの帯 */
+  --text: #222222;
+  --muted: #5f6368;
+  --line: #d9dde1;
+  --link: #1a5fb4;
+  --button: #2b2b2b;
+  --pc: #3498db;          /* 権限チェッカーのアイコンの色 */
+  --dd: #27ae60;          /* 設計書ジェネレーターのアイコンの色 */
+  --am: #8e44ad;          /* アプリ相関マップのアイコンの色 */
+  --focus: #e3a008;
+  --sans: "BIZ UDPGothic", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", "Noto Sans JP", "Noto Sans CJK JP", sans-serif;
+  --wide: 960px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 16px; line-height: 1.8; }
+img { max-width: 100%; height: auto; display: block; }
+a { color: var(--link); text-underline-offset: 3px; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+.wrap { max-width: var(--wide); margin: 0 auto; padding: 0 24px; }
+.prose { max-width: 42em; }
+
+/* ヘッダー */
+.site-head { border-bottom: 1px solid var(--line); }
+.site-head .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px 24px; min-height: 60px; flex-wrap: wrap; }
+.brand { text-decoration: none; color: var(--text); display: flex; align-items: baseline; gap: 10px; }
+.brand-name { font-size: 20px; font-weight: 700; }
+.brand-sub { font-size: 13px; color: var(--muted); }
+.site-nav { display: flex; gap: 20px; flex-wrap: wrap; font-size: 15px; }
+.site-nav a { color: var(--text); text-decoration: none; }
+.site-nav a:hover, .site-nav a[aria-current="page"] { text-decoration: underline; }
+
+/* 見出しと本文 */
+h1, h2, h3 { line-height: 1.5; word-break: auto-phrase; }
+h1 { font-size: clamp(24px, 3.2vw, 30px); margin: 0 0 12px; }
+h2 { font-size: 22px; margin: 0 0 16px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+h3 { font-size: 18px; margin: 28px 0 8px; }
+p { margin: 0 0 1em; }
+ul, ol { padding-left: 1.4em; margin: 0 0 1em; }
+li { margin-bottom: 4px; }
+.note { color: var(--muted); font-size: 14px; }
+section { padding: 48px 0; }
+.band { background: var(--band); }
+
+/* ボタン */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 20px;
+  border: 1px solid var(--button); border-radius: 4px; background: var(--bg); color: var(--button);
+  font-size: 15px; font-weight: 700; text-decoration: none;
+}
+.btn:hover { background: #f0f0f0; }
+.btn-primary { background: var(--button); color: #fff; }
+.btn-primary:hover { background: #000; }
+.btn[aria-disabled="true"] { border-color: var(--line); color: var(--muted); background: var(--band); font-weight: 400; cursor: default; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
+
+/* はじめの部分 */
+.intro { padding: 40px 0 24px; }
+.intro .lead { font-size: 17px; max-width: 42em; }
+.intro .shot { margin-top: 28px; }
+
+/* 製品の一覧表 */
+.catalog { width: 100%; border-collapse: collapse; font-size: 15px; }
+.catalog th, .catalog td { padding: 12px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+.catalog thead th { font-size: 13px; color: var(--muted); font-weight: 400; border-bottom: 2px solid var(--text); white-space: nowrap; }
+.catalog .name { display: flex; align-items: center; gap: 10px; font-weight: 700; white-space: nowrap; }
+.catalog .name img { width: 28px; height: 28px; }
+.catalog td.out, .catalog td.state { white-space: nowrap; }
+.table-scroll { overflow-x: auto; }
+.catalog td, .facts th, .facts td { word-break: auto-phrase; }
+
+/* 製品の紹介 */
+.product { padding-top: 8px; }
+.product + .product { margin-top: 48px; }
+.product-head { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.product-head img { width: 36px; height: 36px; }
+.product-head h3 { margin: 0; font-size: 21px; }
+.shot { margin: 16px 0 0; border: 1px solid var(--line); }
+.shot a { display: block; cursor: zoom-in; }
+.shot figcaption { font-size: 13px; color: var(--muted); padding: 8px 12px; border-top: 1px solid var(--line); background: var(--band); }
+
+/* 事実を並べる表（導入前の確認・動作条件・比較） */
+.facts { width: 100%; border-collapse: collapse; font-size: 15px; }
+.facts th, .facts td { padding: 12px 14px; border: 1px solid var(--line); text-align: left; vertical-align: top; line-height: 1.7; }
+.facts thead th { background: var(--band); font-size: 14px; }
+.facts tbody th { width: 22%; background: var(--band); font-weight: 700; }
+.facts td.center { text-align: center; }
+.facts code, .api code { font-family: Consolas, "SFMono-Regular", Menlo, monospace; font-size: 13px; }
+.table-scroll + .note, .table-scroll + p { margin-top: 12px; }
+.api { margin: 0; padding: 0; list-style: none; }
+.api li { margin: 0; }
+
+/* よくある質問 */
+.qa dt { font-weight: 700; margin-top: 20px; }
+.qa dt::before { content: "Q. "; }
+.qa dd { margin: 4px 0 0; padding-left: 1.6em; }
+
+/* 下層ページ */
+.page { padding: 32px 0 64px; }
+.page h2 { margin-top: 44px; }
+.breadcrumb { font-size: 14px; color: var(--muted); margin-bottom: 8px; }
+.breadcrumb a { color: var(--muted); }
+.page-head { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+.page-head img { width: 44px; height: 44px; }
+.page-head h1 { margin: 0; }
+.download { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; border: 1px solid var(--line); background: var(--band); padding: 16px 20px; }
+.download p { margin: 0; }
+.legal h2 { font-size: 19px; margin-top: 32px; }
+.price strong { font-size: 20px; }
+
+/* フッター */
+.site-foot { border-top: 1px solid var(--line); background: var(--band); padding: 28px 0 36px; font-size: 14px; color: var(--muted); }
+.site-foot nav { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-bottom: 12px; }
+.site-foot a { color: var(--text); }
+
+/* スマートフォン */
+@media (max-width: 720px) {
+  .wrap { padding: 0 16px; }
+  section { padding: 36px 0; }
+  .intro { padding: 28px 0 16px; }
+  .facts tbody th { width: 30%; }
+  /* 狭い画面では、製品の一覧を1つずつ縦に並べる */
+  .catalog thead { display: none; }
+  .catalog, .catalog tbody, .catalog tr, .catalog td { display: block; }
+  .catalog tbody { border-top: 2px solid var(--text); }
+  .catalog tr { padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .catalog td { padding: 2px 0; border: none; }
+  .catalog td.out, .catalog td.state { display: inline; color: var(--muted); font-size: 14px; }
+  .catalog td.out::before { content: "書き出し："; }
+  .catalog td.state::before { content: "　公開："; }
+  .site-nav { gap: 14px; font-size: 14px; }
+}
+.lead { font-size: 17px; }
+.page .shot { margin: 20px 0 0; }

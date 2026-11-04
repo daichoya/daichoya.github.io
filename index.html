@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>台帳屋｜kintoneの無料プラグイン（権限チェッカー・設計書ジェネレーター・アプリ相関マップ）</title>
+<meta name="description" content="kintoneの権限・設計・アプリ同士のつながりを、一覧や資料に書き出す無料プラグイン。読み取った設定は外部に送りません。">
+<meta property="og:title" content="台帳屋｜kintoneの無料プラグイン（権限チェッカー・設計書ジェネレーター・アプリ相関マップ）">
+<meta property="og:description" content="kintoneの権限・設計・アプリ同士のつながりを、一覧や資料に書き出す無料プラグイン。読み取った設定は外部に送りません。">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="brand-name">台帳屋</span><span class="brand-sub">kintoneの無料プラグイン</span></a>
+    <nav class="site-nav" aria-label="サイト内のページ"><a href="index.html#plugins">プラグイン</a><a href="index.html#security">導入前の確認</a><a href="pro.html">有料版（準備中）</a><a href="index.html#faq">よくある質問</a></nav>
+  </div>
+</header>
+<main>
+<section class="intro">
+  <div class="wrap">
+    <h1>kintone管理者向けの無料プラグイン</h1>
+    <p class="lead">台帳屋は、kintoneの権限・アプリの設計・アプリ同士のつながりを、一覧や資料に書き出すプラグインを作っています。読み取った設定は、お使いのkintoneとブラウザの中だけで扱い、外部には送りません。</p>
+    <div class="table-scroll">
+      <table class="catalog">
+        <thead><tr><th scope="col">プラグイン</th><th scope="col">できること</th><th scope="col">書き出し</th><th scope="col">公開</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><a class="name" href="plugins/permission-checker.html"><img src="images/icons/permission-checker.png" alt="" width="28" height="28">権限チェッカー</a></td>
+            <td>アプリ・レコード・フィールドの権限を、1つの画面にまとめて表示</td>
+            <td class="out">CSV</td>
+            <td class="state">2027年1月予定</td>
+          </tr>
+          <tr>
+            <td><a class="name" href="plugins/design-doc.html"><img src="images/icons/design-doc.png" alt="" width="28" height="28">設計書ジェネレーター</a></td>
+            <td>アプリの設定を、7枚のシートの設計書（Excel）にする</td>
+            <td class="out">Excel</td>
+            <td class="state">2027年1月予定</td>
+          </tr>
+          <tr>
+            <td><a class="name" href="plugins/app-map.html"><img src="images/icons/app-map.png" alt="" width="28" height="28">アプリ相関マップ</a></td>
+            <td>ルックアップ・関連レコード一覧・アクションでつながるアプリを図にする</td>
+            <td class="out">PNG・CSV</td>
+            <td class="state">2027年1月予定</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">3本とも無料です。使う人数やアプリの数の制限はありません。kintoneのスタンダードコース・ワイドコースで使えます（ライトコースではプラグインを使えません）。</p>
+  </div>
+</section>
+
+<section id="plugins">
+  <div class="wrap">
+    <h2>プラグイン</h2>
+
+    <article class="product">
+      <div class="product-head"><img src="images/icons/permission-checker.png" alt="" width="36" height="36"><h3>権限チェッカー</h3></div>
+      <p class="prose">kintoneの権限は、アプリ・レコード・フィールドの3か所で別々に設定します。権限チェッカーは、この3つを1つの画面に並べ、kintoneが判定する順番（上にあるものほど優先）のまま表示します。表はCSVに書き出せます。</p>
+      <figure class="shot">
+        <a href="images/permission-checker.webp" title="画像を大きく表示"><img src="images/permission-checker.webp" width="1100" height="717" alt="権限チェッカーの画面。案件管理アプリのアプリ・レコード・フィールドのアクセス権が3つの表に並んでいる" loading="lazy"></a>
+        <figcaption>見本のアプリ「案件管理」で表示した例</figcaption>
+      </figure>
+      <p><a href="plugins/permission-checker.html">権限チェッカーの使い方と導入手順</a></p>
+    </article>
+
+    <article class="product">
+      <div class="product-head"><img src="images/icons/design-doc.png" alt="" width="36" height="36"><h3>設計書ジェネレーター</h3></div>
+      <p class="prose">アプリの設定を読み取り、概要・フィールド・一覧・プロセス管理・通知・アクセス権・プラグインの7枚のシートからなるExcelの設計書を作ります。フィールドはフォームの配置順に並び、ルックアップの参照先や計算式も書き出します。</p>
+      <figure class="shot">
+        <a href="images/design-doc-excel.webp" title="画像を大きく表示"><img src="images/design-doc-excel.webp" width="1100" height="418" alt="設計書のフィールドのシート。フィールド名・種類・必須・初期値・計算式やルックアップの参照先が表に並んでいる" loading="lazy"></a>
+        <figcaption>見本のアプリで作った設計書の「フィールド」シート</figcaption>
+      </figure>
+      <p><a href="plugins/design-doc.html">設計書ジェネレーターの使い方と導入手順</a></p>
+    </article>
+
+    <article class="product">
+      <div class="product-head"><img src="images/icons/app-map.png" alt="" width="36" height="36"><h3>アプリ相関マップ</h3></div>
+      <p class="prose">選んだアプリを中央に置き、そのアプリを参照しているアプリを左に、参照しているアプリを右に並べて線で結びます。図のアプリを押すと、そのアプリを中心に切り替わります。図はPNG、つながりの一覧はCSVで保存できます。</p>
+      <figure class="shot">
+        <a href="images/app-map.webp" title="画像を大きく表示"><img src="images/app-map-diagram.webp" width="1100" height="480" alt="アプリ相関マップの画面。中央の案件管理アプリに、左から見積書と請求管理、右から顧客マスタ・対応履歴・商品マスタが線でつながっている" loading="lazy"></a>
+        <figcaption>見本のアプリ「案件管理」を中心にした例</figcaption>
+      </figure>
+      <p><a href="plugins/app-map.html">アプリ相関マップの使い方と導入手順</a></p>
+    </article>
+  </div>
+</section>
+
+<section id="security" class="band">
+  <div class="wrap">
+    <h2>導入前の確認（情報システム部門の方へ）</h2>
+    <p class="prose">社内のkintoneにプラグインを入れる前の確認に使える情報です。3本とも同じ作りです。</p>
+    <div class="table-scroll">
+      <table class="facts">
+        <tbody>
+          <tr><th scope="row">通信先</th><td>お使いのkintoneだけです。台帳屋のサーバーや外部のサービスとは通信しません。</td></tr>
+          <tr><th scope="row">読み取るもの</th><td>アプリの設定だけです（下の表）。レコードの中身は読み取りません。</td></tr>
+          <tr><th scope="row">書き込み</th><td>ありません。kintoneの設定やレコードを変更しません。</td></tr>
+          <tr><th scope="row">保存</th><td>読み取った内容は画面の中だけで扱い、どこにも保存しません。ファイルは、利用者が書き出しや保存のボタンを押した時だけ、その人のパソコンに保存されます。</td></tr>
+          <tr><th scope="row">設定・認証</th><td>プラグインの設定画面はありません。APIトークンやパスワードの入力も不要で、kintoneにログインしている人の権限で動きます。</td></tr>
+          <tr><th scope="row">コード</th><td>圧縮や難読化をしていないJavaScriptです。ダウンロードしたzipを開けば、中身を確かめられます。</td></tr>
+          <tr><th scope="row">動作確認</th><td>2026年11月、kintone（クラウド版）とGoogle Chromeで確認しました。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>読み取るAPI（すべて読み取り専用のGET）</h3>
+    <div class="table-scroll">
+      <table class="facts">
+        <thead><tr><th scope="col">プラグイン</th><th scope="col">kintone REST API</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">権限チェッカー</th><td><ul class="api"><li><code>/k/v1/apps.json</code></li><li><code>/k/v1/app/form/fields.json</code></li><li><code>/k/v1/app/acl.json</code>・<code>/k/v1/record/acl.json</code>・<code>/k/v1/field/acl.json</code></li></ul></td></tr>
+          <tr><th scope="row">設計書ジェネレーター</th><td><ul class="api"><li><code>/k/v1/apps.json</code>・<code>/k/v1/app.json</code></li><li><code>/k/v1/app/form/fields.json</code>・<code>/k/v1/app/form/layout.json</code>・<code>/k/v1/app/views.json</code>・<code>/k/v1/app/status.json</code></li><li><code>/k/v1/app/notifications/general.json</code>・<code>perRecord.json</code>・<code>reminder.json</code></li><li><code>/k/v1/app/acl.json</code>・<code>/k/v1/record/acl.json</code>・<code>/k/v1/field/acl.json</code>・<code>/k/v1/app/plugins.json</code></li></ul></td></tr>
+          <tr><th scope="row">アプリ相関マップ</th><td><ul class="api"><li><code>/k/v1/apps.json</code></li><li><code>/k/v1/app/form/fields.json</code>・<code>/k/v1/app/actions.json</code></li></ul></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>有料版（準備中）</h2>
+    <p class="prose">無料版は、アプリを1つずつ確かめる道具です。すべてのアプリをまとめて点検し、前回の点検から変わったところ（フィールド・権限・プラグインの追加や削除）を見つける有料版「棚卸し・変更監視パック」を、2027年春の提供に向けて準備しています。予定価格は月3,300円（税込）で、30日間は無料で試せます。</p>
+    <p><a href="pro.html">有料版の予定と先行登録</a></p>
+  </div>
+</section>
+
+<section id="faq" class="band">
+  <div class="wrap">
+    <h2>よくある質問</h2>
+    <dl class="qa prose">
+      <dt>本当に無料ですか？</dt>
+      <dd>はい。3本とも無料で、機能や期間の制限はありません。有料版を始めた後も、無料版の提供は続けます。</dd>
+      <dt>アプリの管理者でなくても使えますか？</dt>
+      <dd>設定を読み取るには、そのアプリの管理権限が必要です。権限がなくて読めない項目があると、その理由を画面に表示します。</dd>
+      <dt>ゲストスペースのアプリにも使えますか？</dt>
+      <dd>今は対応していません。</dd>
+      <dt>サイボウズの製品ですか？</dt>
+      <dd>いいえ。台帳屋は、サイボウズ株式会社とは関係のない個人の開発者が作っています。</dd>
+    </dl>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>運営者について</h2>
+    <p class="prose">台帳屋は、個人で開発・運営しています。不具合の修正やkintoneの仕様変更への対応は、各プラグインのページの更新履歴でお知らせします。お問い合わせへの返信は平日の夜と土日にまとめて行うため、数日いただくことがあります。</p>
+    <p>お問い合わせ：<a href="mailto:daichoya.plugins@gmail.com">daichoya.plugins@gmail.com</a></p>
+  </div>
+</section>
+
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <nav aria-label="規約とお問い合わせ">
+      <a href="privacy.html">プライバシーポリシー</a>
+      <a href="terms.html">利用規約</a>
+      <span>お問い合わせ：<a href="mailto:daichoya.plugins@gmail.com">daichoya.plugins@gmail.com</a></span>
+    </nav>
+    <p>kintoneはサイボウズ株式会社の登録商標です。台帳屋は、サイボウズ株式会社とは関係のない個人の開発者が提供しています。</p>
+    <p>&copy; 2026 台帳屋</p>
+  </div>
+</footer>
+</body>
+</html>

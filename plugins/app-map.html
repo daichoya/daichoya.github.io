@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>アプリ相関マップ｜台帳屋</title>
+<meta name="description" content="ルックアップ・関連レコード一覧・アクションでつながっているkintoneアプリを図で表示し、画像とCSVで保存する無料プラグイン。">
+<meta property="og:title" content="アプリ相関マップ｜台帳屋">
+<meta property="og:description" content="ルックアップ・関連レコード一覧・アクションでつながっているkintoneアプリを図で表示し、画像とCSVで保存する無料プラグイン。">
+<meta property="og:type" content="website">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="../index.html"><span class="brand-name">台帳屋</span><span class="brand-sub">kintoneの無料プラグイン</span></a>
+    <nav class="site-nav" aria-label="サイト内のページ"><a href="../index.html#plugins" aria-current="page">プラグイン</a><a href="../index.html#security">導入前の確認</a><a href="../pro.html">有料版（準備中）</a><a href="../index.html#faq">よくある質問</a></nav>
+  </div>
+</header>
+<main>
+<div class="page">
+  <div class="wrap">
+    <p class="breadcrumb"><a href="../index.html">台帳屋</a> ／ 無料プラグイン</p>
+    <div class="page-head"><img src="../images/icons/app-map.png" alt="" width="44" height="44"><h1>アプリ相関マップ</h1></div>
+    <p class="lead prose">ルックアップ・関連レコード一覧・アクションでつながっているアプリを図で表示します。アプリを作り直す前や引き継ぎの時に、影響が出るアプリを確かめられます。</p>
+    <figure class="shot">
+      <a href="../images/app-map.webp" title="画像を大きく表示"><img src="../images/app-map.webp" width="1100" height="848" alt="アプリ相関マップの画面。中央の案件管理アプリに、左から見積書と請求管理、右から顧客マスタ・対応履歴・商品マスタが線でつながっている"></a>
+      <figcaption>見本のアプリで表示した例。図の下には、つながりの一覧が出ます。</figcaption>
+    </figure>
+
+    <h2>できること</h2>
+    <ul class="prose">
+      <li>選んだアプリを中央に置き、左に「このアプリを参照しているアプリ」、右に「このアプリが参照しているアプリ」を並べます。</li>
+      <li>お互いに参照し合っているアプリは、行きと帰りの2本の線で表します。</li>
+      <li>図のアプリを押すと、そのアプリを中心にした図に切り替わります。</li>
+      <li>テーブルの中のルックアップや、同じアプリの中のルックアップも見つけます。</li>
+      <li>図は画像（PNG）、つながりの一覧はCSV（Excelで開ける形式）で保存できます。</li>
+    </ul>
+    <p class="note prose">最初に表示する時は、すべてのアプリの設定を調べるため、アプリの数に応じて時間がかかります。2回目からの切り替えは、調べ直しません。</p>
+
+    <h2>動作条件</h2>
+    <div class="table-scroll">
+      <table class="facts">
+        <tbody>
+          <tr><th scope="row">kintoneのコース</th><td>スタンダードコース・ワイドコース</td></tr>
+          <tr><th scope="row">導入する人</th><td>kintoneシステム管理者</td></tr>
+          <tr><th scope="row">使う人</th><td>アプリを閲覧できる人。アクションのつながりを見るには、そのアプリの管理権限が必要です</td></tr>
+          <tr><th scope="row">画面</th><td>パソコン版の一覧画面（動作の確認はGoogle Chromeで行っています）</td></tr>
+          <tr><th scope="row">通信と書き込み</th><td>お使いのkintoneとだけ通信し、kintoneの設定やレコードは変更しません（<a href="../index.html#security">導入前の確認</a>）</td></tr>
+          <tr><th scope="row">データの扱い</th><td>図と一覧はブラウザの中で作ります。外部には送りません</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>導入の手順</h2>
+    <ol class="prose">
+      <li>このページの下にあるボタンから、プラグインのファイル（zip）をダウンロードします。zipは展開せずにそのまま使います。</li>
+      <li>kintoneの歯車のマークから「kintoneシステム管理」を開き、「プラグイン」の「読み込む」でファイルを読み込みます。</li>
+      <li>使いたいアプリの「アプリの設定」から「プラグイン」を開き、「台帳屋 アプリ相関マップ」を追加します。</li>
+      <li>「アプリを更新」を押します。</li>
+      <li>アプリの一覧画面の上に「相関マップ」のボタンが出ます。</li>
+    </ol>
+
+    <h2>ダウンロード</h2>
+    <div class="download">
+      <span class="btn" aria-disabled="true">公開準備中（2027年1月公開予定）</span>
+      <p class="note">利用の前に<a href="../terms.html">利用規約</a>をお読みください。</p>
+    </div>
+
+    <h2>更新履歴</h2>
+    <ul class="prose">
+      <li>1.0.0（2027年1月予定）：最初の公開版</li>
+    </ul>
+
+    <h2>困った時は</h2>
+    <ul class="prose">
+      <li>相手のアプリが「（不明）」と出る時は、参照先のアプリを見る権限がありません。</li>
+      <li>「アクションを読めなかったアプリ」がある時は、そのアプリの管理権限を持つ人が開くと、アクションも図に出ます。</li>
+      <li>ゲストスペースのアプリには、現在は対応していません。</li>
+      <li>そのほかの不具合や要望は、<a href="mailto:daichoya.plugins@gmail.com">daichoya.plugins@gmail.com</a> までお知らせください。</li>
+    </ul>
+  </div>
+</div>
+
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <nav aria-label="規約とお問い合わせ">
+      <a href="../privacy.html">プライバシーポリシー</a>
+      <a href="../terms.html">利用規約</a>
+      <span>お問い合わせ：<a href="mailto:daichoya.plugins@gmail.com">daichoya.plugins@gmail.com</a></span>
+    </nav>
+    <p>kintoneはサイボウズ株式会社の登録商標です。台帳屋は、サイボウズ株式会社とは関係のない個人の開発者が提供しています。</p>
+    <p>&copy; 2026 台帳屋</p>
+  </div>
+</footer>
+</body>
+</html>
