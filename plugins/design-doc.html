@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>設計書ジェネレーター｜台帳屋</title>
-<meta name="description" content="kintoneアプリのフィールド・一覧・プロセス管理・通知・アクセス権・プラグインを、人が読める設計書（Excel）にまとめる無料プラグイン。">
+<meta name="description" content="kintoneアプリのフィールド・一覧・プロセス管理・通知・アクセス権・プラグインを、Excelの設計書にまとめる無料プラグイン。">
 <meta property="og:title" content="設計書ジェネレーター｜台帳屋">
-<meta property="og:description" content="kintoneアプリのフィールド・一覧・プロセス管理・通知・アクセス権・プラグインを、人が読める設計書（Excel）にまとめる無料プラグイン。">
+<meta property="og:description" content="kintoneアプリのフィールド・一覧・プロセス管理・通知・アクセス権・プラグインを、Excelの設計書にまとめる無料プラグイン。">
 <meta property="og:type" content="website">
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../assets/style.css">
@@ -21,63 +21,65 @@
 <main>
 <div class="page">
   <div class="wrap">
-    <p class="breadcrumb"><a href="../index.html">台帳屋</a> ／ 無料プラグイン</p>
+    <p class="breadcrumb"><a href="../index.html">台帳屋</a> ／ プラグイン</p>
     <div class="page-head"><img src="../images/icons/design-doc.png" alt="" width="44" height="44"><h1>設計書ジェネレーター</h1></div>
-    <p class="lead prose">kintoneアプリの設定を読み取り、人が読める設計書をExcelで作ります。引き継ぎや監査で設計資料を求められた時に、手で書き写す必要がなくなります。</p>
+    <div class="lead prose">
+      <p>kintoneアプリの設定を読み取り、Excelの設計書を作成するプラグインです。</p>
+      <p>引き継ぎや監査で設計資料が必要になったときに、設定画面を見ながら書き写す手間を省けます。</p>
+    </div>
     <figure class="shot">
       <a href="../images/design-doc-excel.webp" title="画像を大きく表示"><img src="../images/design-doc-excel.webp" width="1100" height="418" alt="設計書のフィールドのシート。フィールド名・種類・必須・初期値・計算式やルックアップの参照先が表に並んでいる"></a>
-      <figcaption>見本のアプリで作った設計書の「フィールド」シート</figcaption>
+      <figcaption>見本のアプリで作成した設計書（「フィールド」シート）</figcaption>
     </figure>
 
-    <h2>設計書の中身</h2>
+    <h2>設計書の内容</h2>
     <div class="table-scroll">
       <table class="facts">
-        <thead><tr><th scope="col">シート</th><th scope="col">書いてあること</th></tr></thead>
+        <thead><tr><th scope="col">シート</th><th scope="col">記載される内容</th></tr></thead>
         <tbody>
-          <tr><th scope="row">概要</th><td>アプリ名・ID・説明・作成者・更新日時・フィールドや一覧の数</td></tr>
+          <tr><th scope="row">概要</th><td>アプリ名、ID、説明、作成者、更新日時、フィールド数、一覧の数</td></tr>
           <tr><th scope="row">フィールド</th><td>フォームの配置順に、種類・必須・重複禁止・初期値・選択肢・計算式・ルックアップの参照先・テーブルやグループ</td></tr>
-          <tr><th scope="row">一覧</th><td>一覧ごとの絞り込み条件・並び順・表示するフィールド</td></tr>
+          <tr><th scope="row">一覧</th><td>一覧ごとの絞り込み条件、並び順、表示するフィールド</td></tr>
           <tr><th scope="row">プロセス管理</th><td>ステータスと作業者、アクション（実行前・実行後・条件）</td></tr>
-          <tr><th scope="row">通知</th><td>アプリの条件通知・レコードの条件通知・リマインダー</td></tr>
+          <tr><th scope="row">通知</th><td>アプリの条件通知、レコードの条件通知、リマインダー</td></tr>
           <tr><th scope="row">アクセス権</th><td>アプリ・レコード・フィールドのアクセス権</td></tr>
-          <tr><th scope="row">プラグイン</th><td>追加されているプラグインと、有効か無効か</td></tr>
+          <tr><th scope="row">プラグイン</th><td>追加されているプラグインと、有効・無効の状態</td></tr>
         </tbody>
       </table>
     </div>
-    <p class="note prose">読み取るのは運用中の設定です。アプリの設定画面で保存しただけで、まだ「アプリを更新」していない変更は含みません。</p>
+    <p class="note prose">読み取るのは運用中の設定です。<br>設定画面で保存しただけで、まだ「アプリを更新」していない変更は含まれません。</p>
 
-    <figure class="shot" style="margin-top: 32px; max-width: 720px;">
+    <figure class="shot dialog-shot">
       <a href="../images/design-doc-dialog.webp" title="画像を大きく表示"><img src="../images/design-doc-dialog.webp" width="720" height="206" alt="設計書ジェネレーターの画面。アプリを選んでExcelで設計書を作成するボタンがある" loading="lazy"></a>
-      <figcaption>アプリを選んでボタンを押すと、Excelのファイルが保存されます。</figcaption>
+      <figcaption>アプリを選んでボタンを押すと、Excelファイルが保存されます</figcaption>
     </figure>
 
-    <h2>動作条件</h2>
+    <h2>動作環境</h2>
     <div class="table-scroll">
       <table class="facts">
         <tbody>
-          <tr><th scope="row">kintoneのコース</th><td>スタンダードコース・ワイドコース</td></tr>
+          <tr><th scope="row">対応コース</th><td>スタンダードコース・ワイドコース</td></tr>
           <tr><th scope="row">導入する人</th><td>kintoneシステム管理者</td></tr>
-          <tr><th scope="row">使う人</th><td>設計書を作りたいアプリの管理権限を持つ人</td></tr>
-          <tr><th scope="row">画面</th><td>パソコン版の一覧画面（動作の確認はGoogle Chromeで行っています）</td></tr>
-          <tr><th scope="row">通信と書き込み</th><td>お使いのkintoneとだけ通信し、kintoneの設定やレコードは変更しません（<a href="../index.html#security">導入前の確認</a>）</td></tr>
-          <tr><th scope="row">データの扱い</th><td>Excelのファイルはブラウザの中で作ります。外部には送りません</td></tr>
+          <tr><th scope="row">利用する人</th><td>設計書を作りたいアプリの管理権限を持つユーザー</td></tr>
+          <tr><th scope="row">画面</th><td>パソコン版の一覧画面（動作確認はGoogle Chrome）</td></tr>
+          <tr><th scope="row">通信と書き込み</th><td>kintone環境とのみ通信し、設定やレコードは変更しません。Excelファイルはブラウザの中で作成します（<a href="../index.html#security">導入前の確認事項</a>）</td></tr>
         </tbody>
       </table>
     </div>
 
-    <h2>導入の手順</h2>
+    <h2>導入方法</h2>
     <ol class="prose">
-      <li>このページの下にあるボタンから、プラグインのファイル（zip）をダウンロードします。zipは展開せずにそのまま使います。</li>
-      <li>kintoneの歯車のマークから「kintoneシステム管理」を開き、「プラグイン」の「読み込む」でファイルを読み込みます。</li>
-      <li>使いたいアプリの「アプリの設定」から「プラグイン」を開き、「台帳屋 設計書ジェネレーター」を追加します。</li>
-      <li>「アプリを更新」を押します。</li>
-      <li>アプリの一覧画面の上に「設計書を作成」のボタンが出ます。</li>
+      <li>下の「ダウンロード」から、プラグインのファイル（zip）を保存します。zipは展開せず、そのまま使います。</li>
+      <li>kintoneの歯車アイコンから「kintoneシステム管理」を開き、「プラグイン」の「読み込む」でファイルを読み込みます。</li>
+      <li>利用するアプリの「アプリの設定」→「プラグイン」で、「台帳屋 設計書ジェネレーター」を追加します。</li>
+      <li>「アプリを更新」をクリックします。</li>
+      <li>アプリの一覧画面の上部に「設計書を作成」ボタンが表示されます。</li>
     </ol>
 
     <h2>ダウンロード</h2>
     <div class="download">
       <span class="btn" aria-disabled="true">公開準備中（2027年1月公開予定）</span>
-      <p class="note">利用の前に<a href="../terms.html">利用規約</a>をお読みください。</p>
+      <p class="note">ご利用の前に<a href="../terms.html">利用規約</a>をお読みください。</p>
     </div>
 
     <h2>更新履歴</h2>
@@ -85,12 +87,12 @@
       <li>1.0.0（2027年1月予定）：最初の公開版</li>
     </ul>
 
-    <h2>困った時は</h2>
+    <h2>困ったときは</h2>
     <ul class="prose">
-      <li>「アプリの管理権限が必要です」と書かれたシートは、そのアプリの管理権限を持つ人が作り直してください。</li>
-      <li>JavaScriptやCSSでのカスタマイズの中身は、kintoneの仕組み上、設計書に含められません。</li>
-      <li>ゲストスペースのアプリには、現在は対応していません。</li>
-      <li>そのほかの不具合や要望は、<a href="mailto:daichoya.plugins@gmail.com">daichoya.plugins@gmail.com</a> までお知らせください。</li>
+      <li>「アプリの管理権限が必要です」と書かれたシートがある場合は、そのアプリの管理権限を持つユーザーが作成し直してください。</li>
+      <li>JavaScriptやCSSによるカスタマイズの内容は、kintoneの仕組み上、設計書に含められません。</li>
+      <li>ゲストスペースのアプリには、現在対応していません。</li>
+      <li>そのほかの不具合やご要望は、<a href="mailto:daichoya.plugins@gmail.com">daichoya.plugins@gmail.com</a> までお知らせください。</li>
     </ul>
   </div>
 </div>

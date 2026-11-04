@@ -61,7 +61,7 @@ section { padding: 48px 0; }
 
 /* はじめの部分 */
 .intro { padding: 40px 0 24px; }
-.intro .lead { font-size: 17px; max-width: 42em; }
+.intro .lead { font-size: 17px; max-width: 38em; }
 .intro .shot { margin-top: 28px; }
 
 /* 製品の一覧表 */
@@ -137,3 +137,15 @@ section { padding: 48px 0; }
 }
 .lead { font-size: 17px; }
 .page .shot { margin: 20px 0 0; }
+
+/* 改行と行の長さ：文節の途中で折り返さない（Chrome・Edge）。最後の行に1〜2文字だけ残らないようにする */
+p, li, dt, dd, td, th, figcaption { word-break: auto-phrase; text-wrap: pretty; line-break: strict; }
+h1, h2, h3 { text-wrap: balance; }
+code { overflow-wrap: anywhere; word-break: normal; }
+.prose { max-width: 38em; }
+.lead p { margin-bottom: 0.6em; }
+.lead p:last-child { margin-bottom: 0; }
+.page .lead { margin-bottom: 4px; }
+.intro .lead { margin-bottom: 24px; }
+.dialog-shot { max-width: 720px; margin-top: 28px; }
+.actions + .note { margin-top: 12px; }
