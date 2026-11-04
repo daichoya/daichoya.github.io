@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>台帳屋｜kintoneの無料プラグイン（権限チェッカー・設計書ジェネレーター・アプリ相関マップ）</title>
-<meta name="description" content="kintoneの権限一覧・設計書・アプリの関係図を書き出す無料プラグイン。読み取った設定は外部に送信しません。">
-<meta property="og:title" content="台帳屋｜kintoneの無料プラグイン（権限チェッカー・設計書ジェネレーター・アプリ相関マップ）">
-<meta property="og:description" content="kintoneの権限一覧・設計書・アプリの関係図を書き出す無料プラグイン。読み取った設定は外部に送信しません。">
+<title>台帳屋｜kintoneの権限一覧・設計書・関係図を書き出すプラグイン</title>
+<meta name="description" content="kintoneの権限の一覧表・アプリの設計書・アプリの関係図を、kintoneの画面から作成するプラグイン。無料版3本と、全アプリを点検する有料版。">
+<meta property="og:title" content="台帳屋｜kintoneの権限一覧・設計書・関係図を書き出すプラグイン">
+<meta property="og:description" content="kintoneの権限の一覧表・アプリの設計書・アプリの関係図を、kintoneの画面から作成するプラグイン。無料版3本と、全アプリを点検する有料版。">
 <meta property="og:type" content="website">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/style.css">
@@ -14,51 +14,68 @@
 <body>
 <header class="site-head">
   <div class="wrap">
-    <a class="brand" href="index.html"><span class="brand-name">台帳屋</span><span class="brand-sub">kintoneの無料プラグイン</span></a>
-    <nav class="site-nav" aria-label="サイト内のページ"><a href="index.html#plugins">プラグイン</a><a href="index.html#security">導入前の確認</a><a href="pro.html">有料版（準備中）</a><a href="index.html#faq">よくある質問</a></nav>
+    <a class="brand" href="index.html"><span class="brand-name">台帳屋</span><span class="brand-sub">kintone管理者向けプラグイン</span></a>
+    <nav class="site-nav" aria-label="サイト内のページ"><a href="index.html#plugins">プラグイン</a><a href="index.html#price">料金</a><a href="index.html#security">導入前の確認</a><a href="index.html#faq">よくある質問</a></nav>
   </div>
 </header>
 <main>
 <section class="intro">
   <div class="wrap">
-    <h1>kintone管理者向けの無料プラグイン</h1>
+    <h1>kintoneの設定を、権限の一覧表・設計書・関係図に書き出すプラグイン</h1>
     <div class="lead">
-      <p>台帳屋は、kintoneの設定を一覧や資料に書き出すプラグインを作っています。</p>
-      <p>権限の一覧、アプリの設計書、アプリ同士の関係図の3種類を、無料で公開する予定です。</p>
-      <p>読み取った設定はkintoneとブラウザの中だけで処理し、外部には送信しません。</p>
+      <p>台帳屋は、kintone管理者向けのプラグインです。</p>
+      <p>アプリの権限や設定を読み取り、点検や引き継ぎに使える資料を、kintoneの画面から作成します。</p>
     </div>
+    <ul class="outputs">
+      <li>
+        <a href="plugins/permission-checker.html">
+          <span class="thumb"><img src="images/permission-checker.webp" alt="権限チェッカーで表示した権限の一覧表" width="1100" height="717" style="object-position: center 55%;"></span>
+          <strong>権限の一覧表</strong>
+          <span class="desc">アプリ・レコード・フィールドの権限を、1つの画面にまとめて表示。CSVで保存できます。</span>
+          <span class="by"><img src="images/icons/permission-checker.png" alt="" width="20" height="20">権限チェッカー</span>
+        </a>
+      </li>
+      <li>
+        <a href="plugins/design-doc.html">
+          <span class="thumb"><img src="images/design-doc-excel.webp" alt="設計書ジェネレーターで作成した設計書のフィールドのシート" width="1100" height="418" style="object-position: left top;"></span>
+          <strong>アプリの設計書</strong>
+          <span class="desc">フィールド・一覧・プロセス管理・通知・権限などを、7シートのExcelにまとめます。</span>
+          <span class="by"><img src="images/icons/design-doc.png" alt="" width="20" height="20">設計書ジェネレーター</span>
+        </a>
+      </li>
+      <li>
+        <a href="plugins/app-map.html">
+          <span class="thumb"><img src="images/app-map-thumb.webp" alt="アプリ相関マップで表示したアプリの関係図" width="800" height="500"></span>
+          <strong>アプリの関係図</strong>
+          <span class="desc">ルックアップ・関連レコード・アクションでつながるアプリを図に。PNGとCSVで保存できます。</span>
+          <span class="by"><img src="images/icons/app-map.png" alt="" width="20" height="20">アプリ相関マップ</span>
+        </a>
+      </li>
+    </ul>
+    <p class="note">無料版の3本は、2027年1月に公開する予定です。<br>すべてのアプリをまとめて点検する有料版（月額3,300円）も準備しています。</p>
+  </div>
+</section>
+
+<section id="scenes">
+  <div class="wrap">
+    <h2>使う場面</h2>
     <div class="table-scroll">
-      <table class="catalog">
-        <thead><tr><th scope="col">プラグイン</th><th scope="col">できること</th><th scope="col">書き出し</th><th scope="col">公開</th></tr></thead>
+      <table class="facts scenes">
+        <thead><tr><th scope="col">場面</th><th scope="col">使うプラグイン</th><th scope="col">作れる資料</th></tr></thead>
         <tbody>
-          <tr>
-            <td><a class="name" href="plugins/permission-checker.html"><img src="images/icons/permission-checker.png" alt="" width="28" height="28">権限チェッカー</a></td>
-            <td>アプリ・レコード・フィールドの権限を1画面で確認</td>
-            <td class="out">CSV</td>
-            <td class="state">2027年1月予定</td>
-          </tr>
-          <tr>
-            <td><a class="name" href="plugins/design-doc.html"><img src="images/icons/design-doc.png" alt="" width="28" height="28">設計書ジェネレーター</a></td>
-            <td>アプリの設定からExcelの設計書を作成</td>
-            <td class="out">Excel</td>
-            <td class="state">2027年1月予定</td>
-          </tr>
-          <tr>
-            <td><a class="name" href="plugins/app-map.html"><img src="images/icons/app-map.png" alt="" width="28" height="28">アプリ相関マップ</a></td>
-            <td>ルックアップなどでつながるアプリを図で表示</td>
-            <td class="out">PNG・CSV</td>
-            <td class="state">2027年1月予定</td>
-          </tr>
+          <tr><td>管理者の交代で、アプリの設定を引き継ぐ</td><td><a href="plugins/design-doc.html">設計書ジェネレーター</a></td><td>アプリごとの設計書（Excel）</td></tr>
+          <tr><td>監査や社内の確認で、誰がどのデータを見られるかを説明する</td><td><a href="plugins/permission-checker.html">権限チェッカー</a></td><td>権限の一覧表（CSV）</td></tr>
+          <tr><td>アプリを改修する前に、影響するアプリを洗い出す</td><td><a href="plugins/app-map.html">アプリ相関マップ</a></td><td>アプリの関係図（PNG）とつながりの一覧（CSV）</td></tr>
+          <tr><td>年に一度の棚卸しで、すべてのアプリをまとめて点検する</td><td><a href="pro.html">有料版（準備中）</a></td><td>全アプリの権限・設計書・変更点の報告書（Excel）</td></tr>
         </tbody>
       </table>
     </div>
-    <p class="note">3本とも無料で、利用人数やアプリ数の制限はありません。<br>スタンダードコース・ワイドコースで利用できます（ライトコースはプラグインに対応していません）。</p>
   </div>
 </section>
 
 <section id="plugins">
   <div class="wrap">
-    <h2>プラグインの紹介</h2>
+    <h2>各プラグインの詳細</h2>
 
     <article class="product">
       <div class="product-head"><img src="images/icons/permission-checker.png" alt="" width="36" height="36"><h3>権限チェッカー</h3></div>
@@ -133,14 +150,30 @@
   </div>
 </section>
 
-<section>
+<section id="price">
   <div class="wrap">
-    <h2>有料版（準備中）</h2>
-    <div class="prose">
-      <p>すべてのアプリをまとめて点検できる有料版「棚卸し・変更監視パック」を準備中です。前回の点検からの変更点（フィールド・権限・プラグインの追加や削除）も検出します。</p>
-      <p>2027年春の提供開始を予定しています。予定価格は月額3,300円（税込）で、30日間の無料試用があります。</p>
+    <h2>料金</h2>
+    <div class="table-scroll">
+      <table class="facts price-table">
+        <thead><tr><th scope="col">プラン</th><th scope="col">内容</th><th scope="col">料金（税込）</th><th scope="col">提供時期</th></tr></thead>
+        <tbody>
+          <tr>
+            <th scope="row">無料版</th>
+            <td>権限チェッカー・設計書ジェネレーター・アプリ相関マップの3本。アプリを1つずつ確認・出力します。</td>
+            <td><strong>0円</strong><br>利用人数・アプリ数の制限なし</td>
+            <td>2027年1月公開予定</td>
+          </tr>
+          <tr>
+            <th scope="row">有料版<br>棚卸し・変更監視パック</th>
+            <td>すべてのアプリをまとめて出力し、前回の点検からの変更点を検出します。点検報告書（Excel）も作成します。</td>
+            <td><strong>月額3,300円</strong><br>年額33,000円<br>30日間の無料試用あり</td>
+            <td>2027年春予定<br>先行登録を受付中</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-    <p><a href="pro.html">有料版の詳細と先行登録</a></p>
+    <p class="note">どちらも、kintoneのスタンダードコース・ワイドコースで利用できます（ライトコースはプラグインに対応していません）。<br>有料版はkintone環境ごとの料金で、利用人数による追加料金はありません。</p>
+    <div class="actions"><a class="btn btn-primary" href="pro.html">有料版の詳細と先行登録</a></div>
   </div>
 </section>
 
