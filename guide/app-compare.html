@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>kintoneの本番アプリと検証アプリの設定の違いを確かめる方法｜台帳屋</title>
+<meta name="description" content="kintoneで検証用のアプリから本番のアプリに設定を反映したあと、アクセス権・条件通知・プロセス管理などが同じになっているかを確かめる方法。画面・REST API・プラグインで比べる手順。">
+<link rel="canonical" href="https://daichoya.github.io/guide/app-compare.html">
+<meta property="og:title" content="kintoneの本番アプリと検証アプリの設定の違いを確かめる方法｜台帳屋">
+<meta property="og:description" content="kintoneで検証用のアプリから本番のアプリに設定を反映したあと、アクセス権・条件通知・プロセス管理などが同じになっているかを確かめる方法。画面・REST API・プラグインで比べる手順。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://daichoya.github.io/guide/app-compare.html">
+<meta property="og:site_name" content="台帳屋">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:image" content="https://daichoya.github.io/images/ogp.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="google-site-verification" content="J1TnZ6bD5c5EjVGtQBBk2eRmLsDje0VapbpwCEnbA6M">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="../index.html"><span class="brand-name">台帳屋</span><span class="brand-sub">kintone管理者向けプラグイン</span></a>
+    <nav class="site-nav" aria-label="サイト内のページ"><a href="../index.html#plugins">プラグイン</a><a href="../demo.html">デモ</a><a href="../index.html#price">料金</a><a href="../guide/index.html" aria-current="page">ガイド</a><a href="../security.html">セキュリティ</a><a href="../index.html#faq">よくある質問</a></nav>
+  </div>
+</header>
+<main>
+<div class="page">
+  <div class="wrap">
+    <p class="breadcrumb"><a href="../index.html">台帳屋</a> ／ <a href="../guide/index.html">使い方ガイド</a></p>
+    <h1>kintoneの本番アプリと検証アプリの設定の違いを確かめる方法</h1>
+    <p class="updated">2026年11月5日</p>
+    <div class="lead prose">
+      <p>運用中のアプリを直すときは、検証用のアプリで試してから、本番のアプリに反映すると安全です。<br>そのときに気になるのが、「反映したあと、本番と検証で設定がそろっているか」です。</p>
+      <p>このページでは、引き継がれにくい設定と、2つのアプリの設定を比べる方法をまとめます。</p>
+    </div>
+
+    <h2>検証用のアプリと、引き継がれない設定</h2>
+    <div class="prose">
+      <p>サイボウズの「開発環境を用意する場合の設計」では、検証用のアプリの置き方として、本番と同じドメインに置く方法と、別のドメインに置く方法が紹介されています。</p>
+      <ul>
+        <li><strong>同じドメイン</strong>：本番の組織やユーザーを使えるため、アクセス権・プロセス管理・通知を本番と同じように設定できます。誤って使われないよう、非公開のスペースに置くことがすすめられています。</li>
+        <li><strong>別のドメイン</strong>：データを本番と完全に分けられます。本番への移行は、アプリテンプレートが基本です。</li>
+      </ul>
+      <p>アプリテンプレートでは、条件通知・アクセス権・プロセス管理・アクション、プラグインなどの拡張機能の設定は引き継がれません。これらは手で設定し直すことになり、ミスが起きやすくなります。<br>同じガイドでも、反映のあとに、アクセス権や通知が想定どおりに設定されているかを確かめることがすすめられています。</p>
+    </div>
+
+    <h2>確かめたい設定</h2>
+    <div class="table-scroll">
+      <table class="facts">
+        <thead><tr><th scope="col">設定</th><th scope="col">確かめるところ</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">フィールド</th><td>種類・必須・選択肢・計算式・初期値、ルックアップと関連レコード一覧の参照先</td></tr>
+          <tr><th scope="row">一覧・グラフ</th><td>表示項目・絞り込み・並び順</td></tr>
+          <tr><th scope="row">アクセス権</th><td>アプリ・レコード・フィールドの権限と、アプリのアクセス権の優先順位（上から順に適用されるため）</td></tr>
+          <tr><th scope="row">プロセス管理</th><td>ステータス・作業者・アクションの条件</td></tr>
+          <tr><th scope="row">通知</th><td>アプリの条件通知・レコードの条件通知・リマインダーの条件通知の条件と通知先</td></tr>
+          <tr><th scope="row">そのほか</th><td>アプリアクション、レコードのタイトル、プラグイン、JavaScript・CSSのファイル</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note prose">ルックアップや関連レコード一覧は、参照先のアプリIDで設定されています。本番と検証で参照先のアプリが違う（検証用のマスタを見ている）ことがあるため、反映のあとは特に確かめてください。</p>
+
+    <h2>画面で比べる</h2>
+    <div class="prose">
+      <p>2つのアプリの「アプリの設定」を別々のタブで開き、上の表の画面を1つずつ見比べます。<br>設定の画面が多いアプリでは時間がかかり、見落としも起きやすい方法です。比べた結果は、あとから見返せるように記録しておくと安心です。</p>
+    </div>
+
+    <h2>REST APIで比べる</h2>
+    <div class="prose">
+      <p>アプリの設定は、kintoneのREST APIで取得できます（そのアプリの管理権限が必要です）。2つのアプリで同じAPIを呼び、結果を比べます。</p>
+      <ul>
+        <li>フィールド・一覧・グラフ：<code>/k/v1/app/form/fields.json</code>・<code>/k/v1/app/views.json</code>・<code>/k/v1/app/reports.json</code></li>
+        <li>アクセス権：<code>/k/v1/app/acl.json</code>・<code>/k/v1/record/acl.json</code>・<code>/k/v1/field/acl.json</code></li>
+        <li>プロセス管理・通知：<code>/k/v1/app/status.json</code>・<code>/k/v1/app/notifications/general.json</code>・<code>perRecord.json</code>・<code>reminder.json</code></li>
+        <li>アクション・アプリの設定・プラグイン：<code>/k/v1/app/actions.json</code>・<code>/k/v1/app/settings.json</code>・<code>/k/v1/app/plugins.json</code></li>
+      </ul>
+      <p>結果には、設定の版（revision）やアプリIDなど、アプリごとに必ず違う値も入っています。そのまま比べると違いが多く出るため、名前やフィールドコードで対応づけて比べます。</p>
+    </div>
+
+    <h2>プラグインで比べる</h2>
+    <div class="prose">
+      <p>台帳屋の<a href="../plugins/app-diff.html">アプリ設定の比較</a>（無料）は、上のAPIで2つのアプリの設定を読み取り、違うところだけを一覧にするプラグインです。<br>違いは「違う」「このアプリだけ」「比べるアプリだけ」に分かれ、CSVにも書き出せます。同じkintone環境の中のアプリどうしを比べます。</p>
+    </div>
+    <figure class="shot">
+      <a href="../images/app-diff.webp" title="画像を大きく表示"><img src="../images/app-diff.webp" width="1100" height="873" alt="アプリ設定の比較の画面。本番と検証のアプリの、フィールドの選択肢や計算式、アクセス権、条件通知の違いが一覧になっている" loading="lazy"></a>
+      <figcaption>見本のアプリで、本番と検証のアプリを比べた例</figcaption>
+    </figure>
+    <div class="actions"><a class="btn btn-primary" href="../demo.html">アプリ設定の比較をデモで試す</a></div>
+    <div class="prose">
+      <p>別のドメインのアプリと比べるときは、それぞれの環境で<a href="../plugins/design-doc.html">設計書ジェネレーター</a>（無料）の設計書を作り、見比べる方法もあります。<br>なお、テスト環境から本番への反映を自動で行うデプロイツール（gusuku Deploitなど）には、差分を確かめる機能があります。</p>
+    </div>
+
+    <h2>参考</h2>
+    <ul class="prose refs">
+      <li><a href="https://kintone.cybozu.co.jp/kintone-signpost/guide/development_environment.html" rel="noopener">開発環境を用意する場合の設計（kintone パターン実践ガイド）</a></li>
+      <li><a href="https://kintone.cybozu.co.jp/kintone-signpost/pattern/3-32.html" rel="noopener">開発環境の用意（kintone パターン実践ガイド）</a></li>
+    </ul>
+  </div>
+</div>
+
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <nav aria-label="規約とお問い合わせ">
+      <a href="../privacy.html">プライバシーポリシー</a>
+      <a href="../terms.html">利用規約</a>
+      <a href="../tokushoho.html">特定商取引法に基づく表記</a>
+      <span>お問い合わせ：<a href="mailto:daichoya.plugins@gmail.com">daichoya.plugins@gmail.com</a></span>
+    </nav>
+    <p>kintoneはサイボウズ株式会社の登録商標です。台帳屋は、サイボウズ株式会社とは関係のない個人の開発者が提供しています。</p>
+    <p>&copy; 2026 台帳屋</p>
+  </div>
+</footer>
+</body>
+</html>

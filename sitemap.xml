@@ -2,12 +2,14 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://daichoya.github.io/</loc></url>
   <url><loc>https://daichoya.github.io/demo.html</loc></url>
+  <url><loc>https://daichoya.github.io/guide/app-compare.html</loc></url>
   <url><loc>https://daichoya.github.io/guide/app-references.html</loc></url>
   <url><loc>https://daichoya.github.io/guide/design-doc.html</loc></url>
   <url><loc>https://daichoya.github.io/guide/field-usage.html</loc></url>
   <url><loc>https://daichoya.github.io/guide/index.html</loc></url>
   <url><loc>https://daichoya.github.io/guide/permission-list.html</loc></url>
   <url><loc>https://daichoya.github.io/guide/user-references.html</loc></url>
+  <url><loc>https://daichoya.github.io/plugins/app-diff.html</loc></url>
   <url><loc>https://daichoya.github.io/plugins/app-map.html</loc></url>
   <url><loc>https://daichoya.github.io/plugins/design-doc.html</loc></url>
   <url><loc>https://daichoya.github.io/plugins/field-impact.html</loc></url>

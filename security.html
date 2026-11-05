@@ -32,7 +32,7 @@
     <h1>導入前の確認事項</h1>
     <div class="lead prose">
       <p>社内のkintoneにプラグインを導入する前の確認にお使いください。</p>
-      <p>無料の5つのプラグイン（権限チェッカー・設計書ジェネレーター・アプリ相関マップ・異動・退職チェッカー・フィールド影響チェッカー）は、同じ仕組みで動作します。<br>有料版（棚卸し・変更監視パック）の違いは、<a href="#pro">ページの下</a>にまとめています。</p>
+      <p>無料の6つのプラグイン（権限チェッカー・設計書ジェネレーター・アプリ相関マップ・異動・退職チェッカー・フィールド影響チェッカー・アプリ設定の比較）は、同じ仕組みで動作します。<br>有料版（棚卸し・変更監視パック）の違いは、<a href="#pro">ページの下</a>にまとめています。</p>
     </div>
 
     <h2>動作の仕組み</h2>
@@ -60,6 +60,7 @@
           <tr><th scope="row">アプリ相関マップ</th><td><ul class="api"><li><code>/k/v1/apps.json</code></li><li><code>/k/v1/app/form/fields.json</code>・<code>/k/v1/app/actions.json</code></li></ul></td></tr>
           <tr><th scope="row">異動・退職チェッカー</th><td><ul class="api"><li><code>/k/v1/apps.json</code></li><li><code>/k/v1/app/acl.json</code>・<code>/k/v1/record/acl.json</code>・<code>/k/v1/field/acl.json</code></li><li><code>/k/v1/app/status.json</code></li><li><code>/k/v1/app/notifications/general.json</code>・<code>perRecord.json</code>・<code>reminder.json</code></li><li><code>/k/v1/app/form/fields.json</code>・<code>/k/v1/app/views.json</code>・<code>/k/v1/app/reports.json</code>・<code>/k/v1/app/actions.json</code></li><li>cybozu.comのUser API：<code>/v1/users.json</code>・<code>/v1/organizations.json</code>・<code>/v1/groups.json</code>（設定に出てきたコードが、いまもあるかの確認だけ）</li></ul></td></tr>
           <tr><th scope="row">フィールド影響チェッカー</th><td><ul class="api"><li><code>/k/v1/apps.json</code></li><li><code>/k/v1/app/form/fields.json</code>・<code>/k/v1/app/views.json</code>・<code>/k/v1/app/reports.json</code>・<code>/k/v1/app/settings.json</code></li><li><code>/k/v1/record/acl.json</code>・<code>/k/v1/field/acl.json</code>・<code>/k/v1/app/status.json</code></li><li><code>/k/v1/app/notifications/general.json</code>・<code>perRecord.json</code>・<code>reminder.json</code>・<code>/k/v1/app/actions.json</code></li><li><code>/k/v1/app/customize.json</code>・<code>/k/v1/file.json</code>（アプリに読み込まれたJavaScriptのファイルの中身。チェックを外すと使いません）</li></ul></td></tr>
+          <tr><th scope="row">アプリ設定の比較</th><td><ul class="api"><li><code>/k/v1/apps.json</code></li><li><code>/k/v1/app/form/fields.json</code>・<code>/k/v1/app/views.json</code>・<code>/k/v1/app/reports.json</code>・<code>/k/v1/app/settings.json</code></li><li><code>/k/v1/app/acl.json</code>・<code>/k/v1/record/acl.json</code>・<code>/k/v1/field/acl.json</code>・<code>/k/v1/app/status.json</code></li><li><code>/k/v1/app/notifications/general.json</code>・<code>perRecord.json</code>・<code>reminder.json</code>・<code>/k/v1/app/actions.json</code></li><li><code>/k/v1/app/plugins.json</code>・<code>/k/v1/app/customize.json</code>（ファイル名だけ。ファイルの中身は読みません）</li></ul></td></tr>
         </tbody>
       </table>
     </div>

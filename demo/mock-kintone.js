@@ -117,6 +117,28 @@
       css: [{ type: 'FILE', file: { name: '一覧の見た目.css', fileKey: 'demo2', contentType: 'text/css', size: '512' } }]
     }, mobile: { js: [], css: [] }, revision: '5' } }
   };
+  // アプリ設定の比較の見本：案件管理をコピーして作った検証用のアプリ（いくつかの設定を変えてある）
+  apps.push({ appId: '17', name: '案件管理（検証）', spaceId: '', createdAt: '2026-10-20T01:00:00Z', creator: { code: 'kanri', name: '情報システム課' }, modifiedAt: '2026-11-04T07:40:00Z', modifier: { code: 'kanri', name: '情報システム課' } });
+  Object.keys(data).forEach(function (path) {
+    if (data[path][12]) data[path][17] = JSON.parse(JSON.stringify(data[path][12]));
+  });
+  (function (d) {
+    var f = d['/k/v1/app/form/fields.json'][17].properties;
+    f.受注確度.options.保留 = { label: '保留', index: '4' };
+    f.値引き = { type: 'NUMBER', code: '値引き', label: '値引き', unit: '円', defaultValue: '0' };
+    f.金額.expression = 'SUM(小計)-値引き';
+    delete f.業種;
+    f.顧客ID.lookup.fieldMappings = [{ field: '顧客名', relatedField: '会社名' }];
+    var v = d['/k/v1/app/views.json'][17].views;
+    Object.keys(v).forEach(function (name) { if (v[name].filterCond) v[name].filterCond = v[name].filterCond.replace('"A", "B"', '"A", "B", "保留"'); });
+    d['/k/v1/app/acl.json'][17].rights.splice(1, 0, { entity: { type: 'USER', code: 'tanaka' }, includeSubs: false, appEditable: true, recordViewable: true, recordAddable: true, recordEditable: true, recordDeletable: true, recordImportable: true, recordExportable: true });
+    d['/k/v1/app/notifications/perRecord.json'][17].notifications[0].filterCond = '金額 >= 500000';
+    d['/k/v1/app/plugins.json'][17].plugins = d['/k/v1/app/plugins.json'][17].plugins.slice(0, 1);
+    d['/k/v1/app/customize.json'][17].desktop.js[0].file.name = '金額の入力チェック_改修中.js';
+    d['/k/v1/app/settings.json'][17].name = '案件管理（検証）';
+    d['/k/v1/app.json'][17].appId = '17';
+    d['/k/v1/app.json'][17].name = '案件管理（検証）';
+  })(data);
   // kintoneのアプリには、更新日時のフィールドが必ずある
   Object.keys(data['/k/v1/app/form/fields.json']).forEach(function (id) {
     var props = data['/k/v1/app/form/fields.json'][id].properties;
@@ -177,7 +199,7 @@
             return;
           }
           if (path === '/k/v1/records.json') {
-            var activity = { 11: ['2026-11-02T09:00:00Z', 318], 12: ['2026-11-04T08:30:00Z', 105], 13: ['2026-11-04T05:10:00Z', 1240], 14: ['2025-12-18T02:00:00Z', 57], 15: ['2026-10-31T07:00:00Z', 96], 16: ['2026-01-20T00:00:00Z', 24] }[String(params.app)];
+            var activity = { 11: ['2026-11-02T09:00:00Z', 318], 12: ['2026-11-04T08:30:00Z', 105], 13: ['2026-11-04T05:10:00Z', 1240], 14: ['2025-12-18T02:00:00Z', 57], 15: ['2026-10-31T07:00:00Z', 96], 16: ['2026-01-20T00:00:00Z', 24], 17: ['2026-11-04T07:45:00Z', 12] }[String(params.app)];
             var rec = {};
             if (activity) rec[(params.fields || ['更新日時'])[0]] = { type: 'UPDATED_TIME', value: activity[0] };
             resolve({ records: activity ? [rec] : [], totalCount: String(activity ? activity[1] : 0) });

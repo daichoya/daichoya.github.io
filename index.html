@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>台帳屋｜kintoneの権限一覧・設計書・関係図を自動で作成するプラグイン</title>
-<meta name="description" content="kintoneの権限の一覧表・アプリの設計書・アプリの関係図・異動や退職の前の確認・フィールドの影響調査を、設定から自動で行うプラグイン。無料・登録不要。データは外部に送信しません。">
+<meta name="description" content="kintoneの権限の一覧表・アプリの設計書・アプリの関係図・異動や退職の前の確認・フィールドの影響調査・アプリの設定の比較を、設定から自動で行うプラグイン。無料・登録不要。データは外部に送信しません。">
 <link rel="canonical" href="https://daichoya.github.io/">
 <meta property="og:title" content="台帳屋｜kintoneの権限一覧・設計書・関係図を自動で作成するプラグイン">
-<meta property="og:description" content="kintoneの権限の一覧表・アプリの設計書・アプリの関係図・異動や退職の前の確認・フィールドの影響調査を、設定から自動で行うプラグイン。無料・登録不要。データは外部に送信しません。">
+<meta property="og:description" content="kintoneの権限の一覧表・アプリの設計書・アプリの関係図・異動や退職の前の確認・フィールドの影響調査・アプリの設定の比較を、設定から自動で行うプラグイン。無料・登録不要。データは外部に送信しません。">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://daichoya.github.io/">
 <meta property="og:site_name" content="台帳屋">
@@ -31,14 +31,14 @@
     <p class="badge">無料・登録不要のkintoneプラグイン</p>
     <h1><span class="phrase">kintoneの点検・引き継ぎの資料を、</span><span class="phrase">設定から自動で作成</span></h1>
     <div class="lead">
-      <p>権限の一覧表、アプリの設計書、アプリの関係図、異動・退職やフィールドの変更の前の確認。</p>
-      <p>管理者が手作業でまとめていた資料を、5つのプラグインで作成できます。</p>
+      <p>権限の一覧表、アプリの設計書、アプリの関係図、異動・退職やフィールドの変更の前の確認、本番と検証のアプリの比較。</p>
+      <p>管理者が手作業でまとめていた資料を、6つのプラグインで作成できます。</p>
     </div>
     <div class="actions">
       <a class="btn btn-primary btn-large" href="demo.html">デモを試す（登録不要）</a>
       <a class="btn btn-large" href="#plugins">プラグインの一覧を見る</a>
     </div>
-    <p class="assure"><span>5本とも無料でダウンロードできます</span><span>利用人数・アプリ数の制限なし</span><span>データは外部に送信しません</span></p>
+    <p class="assure"><span>6本とも無料でダウンロードできます</span><span>利用人数・アプリ数の制限なし</span><span>データは外部に送信しません</span></p>
   </div>
 </section>
 
@@ -101,6 +101,17 @@
       <figure class="pain-shot"><a href="plugins/field-impact.html"><img src="images/field-impact.webp" alt="フィールド影響チェッカーで調べた、フィールドが使われている場所の一覧" width="1100" height="629" loading="lazy"></a></figure>
     </article>
 
+    <article class="pain">
+      <div class="pain-text">
+        <p class="pain-q">検証用のアプリで直した内容を本番に反映した。アクセス権や通知の設定漏れがないか、画面を見比べて確かめている。</p>
+        <div class="pain-a">
+          <p class="pain-by"><img src="images/icons/app-diff.png" alt="" width="24" height="24"><a href="plugins/app-diff.html">アプリ設定の比較</a>なら</p>
+          <p>2つのアプリの設定を比べて、フィールド・一覧・アクセス権・プロセス管理・通知などの違うところだけを一覧にします。</p>
+        </div>
+      </div>
+      <figure class="pain-shot"><a href="plugins/app-diff.html"><img src="images/app-diff.webp" alt="アプリ設定の比較で、本番と検証のアプリの違いを一覧にした画面" width="1100" height="873" loading="lazy"></a></figure>
+    </article>
+
     <p class="note prose">サイボウズの「<a href="https://kintone.cybozu.co.jp/material/pdf/kintone_governance_guideline.pdf" rel="noopener">kintoneガバナンスガイドライン</a>」でも、アプリの定期的な棚卸しや、重要なアプリの設計資料の作成がすすめられています。</p>
   </div>
 </section>
@@ -119,7 +130,7 @@
       </div>
       <div>
         <h3>無料で使える</h3>
-        <p>5本とも無料です。利用人数やアプリ数の制限もありません。</p>
+        <p>6本とも無料です。利用人数やアプリ数の制限もありません。</p>
       </div>
     </div>
   </div>
@@ -131,7 +142,7 @@
       <h2>登録不要のデモで、すぐに試せます</h2>
       <div class="prose">
         <p>架空の会社のアプリ（案件管理・顧客マスタなど）を使ったデモです。</p>
-        <p>kintoneの環境がなくても、ブラウザで5つのプラグインを操作できます。</p>
+        <p>kintoneの環境がなくても、ブラウザで6つのプラグインを操作できます。</p>
       </div>
       <div class="actions"><a class="btn btn-primary btn-large" href="demo.html">デモを試す</a></div>
     </div>
@@ -177,6 +188,12 @@
             <td class="state">無料</td>
           </tr>
           <tr>
+            <td><a class="name" href="plugins/app-diff.html"><img src="images/icons/app-diff.png" alt="" width="28" height="28">アプリ設定の比較</a></td>
+            <td>2つのアプリ（本番と検証、コピー元とコピー先）の設定の違いを一覧にする</td>
+            <td class="out">CSV</td>
+            <td class="state">無料</td>
+          </tr>
+          <tr>
             <td><a class="name" href="pro.html">棚卸し・変更監視パック</a></td>
             <td>全アプリの点検台帳（Excel）。前回からの変更点と、使われていないアプリも見つける</td>
             <td class="out">Excel</td>
@@ -210,7 +227,7 @@
           <tr>
             <th scope="row">無料版</th>
             <td>特定のアプリの権限や設計を、資料にまとめたい方</td>
-            <td>5つのプラグイン。アプリを1つずつ確認・出力します。<br>公開中</td>
+            <td>6つのプラグイン。アプリを1つずつ確認・出力します。<br>公開中</td>
             <td><strong>0円</strong><br>利用人数・アプリ数の制限なし</td>
           </tr>
           <tr>
@@ -259,7 +276,7 @@
     <h2>よくあるご質問</h2>
     <dl class="qa prose">
       <dt>本当に無料ですか？</dt>
-      <dd>はい。5本とも無料で、機能や期間の制限はありません。有料版の提供開始後も、無料版は引き続き提供します。</dd>
+      <dd>はい。6本とも無料で、機能や期間の制限はありません。有料版の提供開始後も、無料版は引き続き提供します。</dd>
       <dt>利用人数やアプリ数に制限はありますか？</dt>
       <dd>ありません。無料版・有料版とも、利用人数やアプリ数が増えても料金は変わりません。</dd>
       <dt>アプリの管理者でなくても使えますか？</dt>
@@ -281,7 +298,7 @@
 <section class="final">
   <div class="wrap">
     <h2>まずはデモで、使い心地を確かめてください</h2>
-    <p class="prose">登録は不要です。見本のアプリで、5つのプラグインをすべて試せます。</p>
+    <p class="prose">登録は不要です。見本のアプリで、6つのプラグインをすべて試せます。</p>
     <div class="actions">
       <a class="btn btn-primary btn-large" href="demo.html">デモを試す</a>
       <a class="btn btn-large" href="pro.html#trial">有料版を30日間無料で試す</a>

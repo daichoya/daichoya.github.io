@@ -1,0 +1,84 @@
+/* 台帳屋 アプリ設定の比較：kintone本体の見た目に干渉しないよう、すべて dcy-ad- で始まるクラス名を使う */
+.dcy-ad-btn {
+  height: 48px;
+  padding: 0 16px;
+  margin-left: 8px;
+  border: 1px solid #e3e7e8;
+  border-radius: 0;
+  vertical-align: top;
+  font-family: inherit;
+  background: #f7f9fa;
+  color: #3498db;
+  font-size: 14px;
+  cursor: pointer;
+}
+.dcy-ad-btn:hover { background: #eef3f6; }
+.dcy-ad-btn[disabled] { color: #a8a8a8; cursor: not-allowed; }
+.dcy-ad-btn:focus-visible, .dcy-ad-close:focus-visible, .dcy-ad-select:focus-visible { outline: 2px solid #3498db; outline-offset: 1px; }
+.dcy-ad-primary { background: #3498db; border-color: #3498db; color: #fff; }
+.dcy-ad-primary[disabled] { background: #a8cbe8; border-color: #a8cbe8; color: #fff; }
+.dcy-ad-primary:hover { background: #217dbb; }
+
+.dcy-ad-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 16px;
+  background: rgba(0, 0, 0, 0.5);
+  overflow-y: auto;
+}
+.dcy-ad-dialog {
+  width: 100%;
+  max-width: 1100px;
+  padding: 0 0 24px;
+  border-radius: 0;
+  background: #fff;
+  color: #333;
+  box-sizing: border-box;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+.dcy-ad-dialog > :not(.dcy-ad-head) { margin-left: 24px; margin-right: 24px; }
+.dcy-ad-head { display: flex; align-items: center; justify-content: space-between; min-height: 64px; padding-left: 24px; border-bottom: 1px solid #e3e7e8; }
+.dcy-ad-head h2 { margin: 0; padding: 0; border: none; font-size: 20px; font-weight: bold; line-height: 1.4; color: #333; }
+.dcy-ad-close { width: 64px; height: 64px; border: none; background: none; font-size: 28px; line-height: 1; cursor: pointer; color: #a8a8a8; }
+.dcy-ad-close:hover { color: #333; }
+.dcy-ad-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 20px; margin-bottom: 8px; }
+.dcy-ad-controls .dcy-ad-btn { margin-left: 0; }
+.dcy-ad-select { height: 48px; min-width: 320px; max-width: 100%; padding: 0 12px; border: 1px solid #e3e7e8; border-radius: 0; background: #fff; color: #333; font-size: 14px; font-family: inherit; }
+.dcy-ad-status { min-height: 20px; margin-top: 8px; margin-bottom: 8px; color: #666; font-size: 14px; }
+.dcy-ad-result h3 { margin: 24px 0 8px; padding: 0; border: none; font-size: 16px; font-weight: bold; line-height: 1.4; color: #333; }
+.dcy-ad-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.dcy-ad-table th,
+.dcy-ad-table td { padding: 6px 8px; border: 1px solid #e3e7e8; text-align: left; vertical-align: top; }
+.dcy-ad-table th { background: #f5f5f5; font-weight: bold; white-space: nowrap; }
+.dcy-ad-yes { color: #1a7f37; text-align: center !important; }
+.dcy-ad-no { color: #b0b0b0; text-align: center !important; }
+.dcy-ad-empty { color: #888; text-align: center !important; }
+.dcy-ad-more { margin: 24px 0 0; padding-top: 12px; border-top: 1px solid #e3e7e8; color: #666; font-size: 13px; }
+.dcy-ad-more a { color: #3498db; }
+.dcy-ad-lead { margin-top: 16px; font-size: 14px; line-height: 1.7; }
+.dcy-ad-filter { height: 40px; min-width: 280px; max-width: 100%; padding: 0 12px; border: 1px solid #e3e7e8; border-radius: 0; font-size: 14px; font-family: inherit; box-sizing: border-box; }
+.dcy-ad-filter:focus-visible { outline: 2px solid #3498db; outline-offset: 1px; }
+.dcy-ad-summary { margin: 16px 0 8px; padding: 12px 16px; background: #f7f9fa; border-left: 4px solid #3498db; font-size: 14px; line-height: 1.7; }
+.dcy-ad-summary p { margin: 0; }
+.dcy-ad-summary .dcy-ad-alert { color: #c0392b; font-weight: bold; }
+.dcy-ad-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 16px 0 8px; }
+.dcy-ad-state-2 { color: #c0392b; font-weight: bold; white-space: nowrap; }
+.dcy-ad-state-1 { color: #b9770e; font-weight: bold; white-space: nowrap; }
+.dcy-ad-state-0 { color: #1a7f37; white-space: nowrap; }
+.dcy-ad-table td.dcy-ad-detail { color: #555; word-break: break-all; }
+.dcy-ad-note { margin-top: 12px; color: #666; font-size: 13px; line-height: 1.7; }
+.dcy-ad-options { display: flex; flex-direction: column; gap: 6px; margin: 4px 0 8px; font-size: 14px; }
+.dcy-ad-options label { display: flex; align-items: flex-start; gap: 8px; }
+.dcy-ad-options input { margin-top: 4px; }
+.dcy-ad-star { color: #c0392b; font-weight: bold; }
+.dcy-ad-select-field { min-width: 280px; }
+.dcy-ad-label { font-size: 14px; color: #333; }
+.dcy-ad-kind { white-space: nowrap; font-weight: bold; }
+.dcy-ad-kind-diff { color: #b9770e; }
+.dcy-ad-kind-a { color: #2471a3; }
+.dcy-ad-kind-b { color: #7d3c98; }
+.dcy-ad-table td:nth-child(1), .dcy-ad-table td:nth-child(2) { white-space: nowrap; }
