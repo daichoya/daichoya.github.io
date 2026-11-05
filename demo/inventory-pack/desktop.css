@@ -88,9 +88,11 @@
 /* 使い始めてからご契約までの3つの段階（無料＝緑、試用＝橙、ご契約＝紺。サイトの流れの図と同じ） */
 .dcy-ip-steps { display: flex; gap: 6px; margin: 0 0 14px; padding: 0; list-style: none; counter-reset: dcyipstep; }
 .dcy-ip-steps li { position: relative; flex: 1; margin: 0; padding: 8px 10px 8px 36px; border: 1px solid #bcd9ef; background: #fff; color: #333; font-size: 12px; line-height: 1.5; counter-increment: dcyipstep; }
-.dcy-ip-steps li::before { content: counter(dcyipstep); position: absolute; left: 9px; top: 9px; width: 20px; height: 20px; border-radius: 50%; background: #c2410c; color: #fff; font-size: 12px; font-weight: bold; line-height: 20px; text-align: center; }
-.dcy-ip-steps li:last-child::before { background: #1f3a5f; }
+.dcy-ip-steps li::before { content: counter(dcyipstep); position: absolute; left: 9px; top: 9px; width: 20px; height: 20px; border-radius: 50%; background: #17774a; color: #fff; font-size: 12px; font-weight: bold; line-height: 20px; text-align: center; }
+.dcy-ip-steps li:nth-child(2)::before { background: #c2410c; }
+.dcy-ip-steps li:nth-child(3)::before { background: #1f3a5f; }
 .dcy-ip-steps li b { display: block; color: #1f3a5f; font-size: 13px; }
 .dcy-ip-steps .dcy-ip-step-now { border: 2px solid #17774a; background: #f1f8f4; }
-.dcy-ip-steps .dcy-ip-step-now::before { background: #17774a; }
+.dcy-ip-steps .dcy-ip-step-now:nth-child(2) { border-color: #c2410c; background: #fff4ee; }
+.dcy-ip-steps .dcy-ip-step-now:nth-child(3) { border-color: #1f3a5f; background: #eef3f8; }
 .dcy-ip-trial-note a { margin-left: 6px; color: #1f6fb2; }

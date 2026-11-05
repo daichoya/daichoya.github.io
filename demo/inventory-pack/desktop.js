@@ -547,7 +547,7 @@
   // 点検台帳の記録に、これまでの点検の件数を残す（前回の点検台帳を選んで作るたびに1行ずつ増える）
 
   var HISTORY_MAX = 24;
-  var VERSION = '1.6.1'; // manifest.json の version と同じにする（テストで確かめる）
+  var VERSION = '1.6.2'; // manifest.json の version と同じにする（テストで確かめる）
 
   // 判定の基準（点検台帳の「判定の基準」シートと、報告書の別紙1に載せる）。[区分, 重要度, 判定, 基準・出典]
   var CRITERIA = [
@@ -1432,6 +1432,14 @@
   }
 
   // lic：ライセンスの確認の結果。試用が終わった環境には、試用ではなくご契約の案内を出す（試用は環境ごとに1回）
+  // 使い始めてからご契約までの3つの段階（サイトの流れの図と同じ番号と色）。now：いまの段階（0・1・2）
+  function flowSteps(now) {
+    var items = [['無料の点検', '件数と例。いつでも無料'], ['30日間の無料試用', 'すべての機能。資料には「試用版」と入ります'], ['ご契約（年額）', '社内に出す正式な点検台帳と報告書']];
+    return el('ol', { class: P + '-steps', 'aria-label': '使い始めてから、ご契約までの流れ' }, items.map(function (x, i) {
+      return el('li', i === now ? { class: P + '-step-now', 'aria-current': 'step' } : {}, [el('b', { text: x[0] }), (i === now ? 'いまの段階。' : '') + x[1]]);
+    }));
+  }
+
   function renderFree(box, sum, domain, lic) {
     var p = lic && lic.payload;
     var trialEnded = !!(p && p.t === 'trial' && !lic.ok);
@@ -1452,6 +1460,16 @@
       el('td', { text: 'ほかのアプリから使われている ' + sum.fields.other + '個（うち削除できないもの ' + sum.fields.blocked + '個）、設定では使われていない ' + sum.fields.unused + '個' })]));
     box.appendChild(table);
     if (sum.unreadable) box.appendChild(el('p', { class: P + '-note', text: '権限がなく、設定の一部を読み取れなかったアプリが' + sum.unreadable + '個あります。kintoneシステム管理者か、そのアプリの管理権限を持つ人が点検すると、読み取れます。' }));
+    // 試用中・ご契約中：試用の申し込みではなく、「点検台帳を作成」を案内する
+    if (lic && lic.ok) {
+      var inTrial = !!(p && p.t === 'trial');
+      box.appendChild(el('div', { class: P + '-cta' }, [
+        flowSteps(inTrial ? 1 : 2),
+        el('p', { text: (inTrial ? 'いまは30日間の無料試用中です（あと' + Math.max(0, lic.daysLeft || 0) + '日）。' : 'ご契約中です。') + 'すべての一覧と、どのアプリのどの設定かは、上の「点検台帳を作成」で点検台帳（Excel）と報告書にまとめられます。' }),
+        inTrial ? el('p', { class: P + '-note' }, ['試用中に作る点検台帳と報告書には「試用版」と入ります。続けてお使いいただく場合は、', el('a', { href: PRICE_URL, target: '_blank', rel: 'noopener', text: 'ご契約の申し込み' }), 'へ。']) : el('p', { class: P + '-note', text: planText(sum.apps) })
+      ]));
+      return;
+    }
     if (trialEnded || paidEnded) {
       box.appendChild(el('div', { class: P + '-cta' }, [
         el('p', { text: (trialEnded ? '無料試用は終わっています（試用は、kintoneの環境ごとに1回です）。' : 'ご契約の期限が切れています。') +
@@ -1465,12 +1483,7 @@
       return;
     }
     box.appendChild(el('div', { class: P + '-cta' }, [
-      // 使い始めてからご契約までの3つの段階（サイトの流れの図と同じ番号と色）。いまの段階に印を付ける
-      el('ol', { class: P + '-steps', 'aria-label': '使い始めてから、ご契約までの流れ' }, [
-        el('li', { class: P + '-step-now', 'aria-current': 'step' }, [el('b', { text: '無料の点検' }), 'いまの段階（件数と例）']),
-        el('li', {}, [el('b', { text: '30日間の無料試用' }), 'すべての機能。資料には「試用版」と入ります']),
-        el('li', {}, [el('b', { text: 'ご契約（年額）' }), '社内に出す正式な点検台帳と報告書'])
-      ]),
+      flowSteps(0),
       el('p', { text: 'ご契約（30日間は無料で試せます）で、すべての一覧と、どのアプリのどの設定かをExcelの点検台帳にまとめ、上司への報告に使える報告書（判定の基準と、要確認の項目のすべての別紙つき）も作ります。次回からは、前回の点検から変わったところと、件数の推移も分かります。' }),
       el('p', { class: P + '-note', text: planText(sum.apps) }),
       el('div', { class: P + '-controls' }, [
