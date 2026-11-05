@@ -324,7 +324,28 @@
     return s || 'app';
   }
 
-  var Core = { SETTINGS: SETTINGS, normalize: normalize, compare: compare, summaryLines: summaryLines, buildCsv: buildCsv, buildExcel: buildExcel, safeFileName: safeFileName, errorText: errorText, fieldText: fieldText };
+  // 比べる相手の候補：「（検証）」「コピー」「テスト」「旧」などを除くと同じ名前のアプリを、はじめから選んでおく
+  var COPY_WORD = '検証|テスト|test|コピー|copy|複製|旧|新|本番|開発|dev|stg|ステージング|sandbox|サンドボックス|バックアップ|backup|bk';
+  var BRACKET = /[（(【\[［〔]([^）)】\]］〕]*)[）)】\]］〕]/g;
+  var BRACKET_WORD = new RegExp('(' + COPY_WORD + '|\\d)', 'i');
+  var HEAD = new RegExp('^(' + COPY_WORD + ')[_\\-－ー・:：]+', 'i');
+  var TAIL = new RegExp('([_\\-－・:：]+(' + COPY_WORD + '|v?\\d+(\\.\\d+)*)|のコピー|コピー|copy)$', 'i');
+  function baseName(name) {
+    var s = String(name || '');
+    if (s.normalize) s = s.normalize('NFKC');
+    s = s.trim().replace(/\s+/g, '_');
+    s = s.replace(BRACKET, function (all, inner) { return BRACKET_WORD.test(inner) ? '' : all; });
+    for (var i = 0; i < 3; i++) s = s.replace(HEAD, '').replace(TAIL, '');
+    return s.replace(/_/g, '').toLowerCase();
+  }
+  function suggestOther(thisName, others) {
+    var base = baseName(thisName);
+    if (!base) return null;
+    var hit = (others || []).filter(function (app) { return String(app.name) !== String(thisName) && baseName(app.name) === base; })[0];
+    return hit ? String(hit.appId) : null;
+  }
+
+  var Core = { SETTINGS: SETTINGS, normalize: normalize, compare: compare, summaryLines: summaryLines, buildCsv: buildCsv, buildExcel: buildExcel, safeFileName: safeFileName, errorText: errorText, fieldText: fieldText, baseName: baseName, suggestOther: suggestOther };
 
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = Core;
@@ -526,7 +547,13 @@
       if (!others.length) { status.textContent = '比べられるアプリがありません。'; return; }
       appSelect.removeAttribute('disabled');
       runBtn.removeAttribute('disabled');
-      status.textContent = '比べるアプリを選んで「比べる」を押してください。';
+      var suggested = suggestOther(names[thisApp], others);
+      if (suggested) {
+        appSelect.value = suggested;
+        status.textContent = '名前の似ている「' + names[suggested] + '」を選んであります。「比べる」を押してください（ほかのアプリとも比べられます）。';
+      } else {
+        status.textContent = '比べるアプリを選んで「比べる」を押してください。';
+      }
     }).catch(function (error) {
       status.textContent = 'アプリの一覧を取得できませんでした（' + errorText(error) + '）。';
     });

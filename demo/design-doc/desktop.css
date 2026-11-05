@@ -8,16 +8,16 @@
   vertical-align: top;
   font-family: inherit;
   background: #f7f9fa;
-  color: #3498db;
+  color: #1f77b4;
   font-size: 14px;
   cursor: pointer;
 }
 .dcy-dd-btn:hover { background: #eef3f6; }
 .dcy-dd-btn[disabled] { color: #a8a8a8; cursor: not-allowed; }
-.dcy-dd-btn:focus-visible, .dcy-dd-close:focus-visible, .dcy-dd-select:focus-visible { outline: 2px solid #3498db; outline-offset: 1px; }
-.dcy-dd-primary { background: #3498db; border-color: #3498db; color: #fff; }
+.dcy-dd-btn:focus-visible, .dcy-dd-close:focus-visible, .dcy-dd-select:focus-visible { outline: 2px solid #1f77b4; outline-offset: 1px; }
+.dcy-dd-primary { background: #1f77b4; border-color: #1f77b4; color: #fff; }
 .dcy-dd-primary[disabled] { background: #a8cbe8; border-color: #a8cbe8; color: #fff; }
-.dcy-dd-primary:hover { background: #217dbb; }
+.dcy-dd-primary:hover { background: #18609a; }
 
 .dcy-dd-overlay {
   position: fixed;
@@ -60,4 +60,4 @@
 .dcy-dd-lead { margin-top: 16px; margin-bottom: 0; color: #555; font-size: 14px; }
 .dcy-dd-dialog { max-width: 720px; }
 .dcy-dd-more { margin: 24px 0 0; padding-top: 12px; border-top: 1px solid #e3e7e8; color: #666; font-size: 13px; }
-.dcy-dd-more a { color: #3498db; }
+.dcy-dd-more a { color: #1f77b4; }

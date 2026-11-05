@@ -234,5 +234,19 @@
     }
   };
   kintone.api.url = function (path) { return path; };
+  // カスタマイズのファイルの中身（見本）。フィールド影響チェッカーが、中に書かれたフィールドコードを探す
+  var files = {
+    demo1: "(function () {\n  'use strict';\n  // 金額が0円の案件は保存しない（見本）\n  kintone.events.on(['app.record.create.submit', 'app.record.edit.submit'], function (event) {\n    var record = event.record;\n    if (Number(record['金額'].value) <= 0) record['金額'].error = '金額を入力してください';\n    return event;\n  });\n})();\n",
+    demo2: '.recordlist-cell-gaia { font-size: 13px; }\n'
+  };
+  var realFetch = window.fetch;
+  window.fetch = function (url) {
+    var m = String(url).match(/^\/k\/v1\/file(?:\.json)?\?fileKey=([^&]+)/);
+    if (m) {
+      var body = files[decodeURIComponent(m[1])];
+      return Promise.resolve(new Response(body || '', { status: body ? 200 : 404, headers: { 'Content-Type': 'text/plain; charset=utf-8' } }));
+    }
+    return realFetch.apply(this, arguments);
+  };
   window.__fire = function () { (handlers['app.record.index.show'] || []).forEach(function (fn) { fn({}); }); };
 })();

@@ -64,6 +64,8 @@ code { overflow-wrap: anywhere; word-break: normal; }
 h1 { font-size: clamp(26px, 3.4vw, 34px); margin: 0 0 12px; letter-spacing: .02em; }
 h2 { font-size: clamp(22px, 2.6vw, 27px); margin: 0 0 22px; letter-spacing: .02em; }
 h2::after { content: ""; display: block; width: 40px; height: 4px; margin-top: 10px; border-radius: 2px; background: var(--ai); }
+/* デモの中のプラグインの画面には、サイトの見出しの線を付けない（実際のkintoneと同じ見え方に） */
+[class*="dcy-"] h2::after, [class*="dcy-"] h3::after { display: none; }
 h3 { font-size: 18px; margin: 28px 0 8px; }
 p { margin: 0 0 1em; }
 ul, ol { padding-left: 1.4em; margin: 0 0 1em; }
@@ -106,6 +108,8 @@ section { padding: 64px 0; }
 .tab-trial { background: var(--kaki); }
 .tabbed { position: relative; margin-top: 32px; border: 2px solid var(--rule); border-radius: 0 var(--r-l) var(--r-l) var(--r-l); background: var(--paper); }
 .tabbed > .tab { position: absolute; left: -2px; bottom: 100%; }
+/* 見出しのすぐ下に札の付いた箱を置くときは、札が見出しの線に重ならないように空ける */
+h2 + .tabbed, .section-lead + .tabbed { margin-top: 56px; }
 .tabbed.is-free { border-color: var(--take); }
 .tabbed.is-paid { border-color: var(--ai); }
 .tabbed.is-trial { border-color: var(--kaki-line); background: var(--kaki-tint); }
@@ -146,7 +150,7 @@ section { padding: 64px 0; }
 .api { margin: 0; padding: 0; list-style: none; }
 .api li { margin: 0; }
 .mark-yes { color: var(--take); font-weight: 700; }
-.mark-no { color: #8a96a2; }
+.mark-no { color: #66727e; }
 
 /* ============ トップページ ============ */
 
@@ -225,6 +229,7 @@ section { padding: 64px 0; }
 .feature-card .rule-actions { padding-top: 16px; }
 
 .relation-head { margin: 56px 0 6px; font-size: 20px; }
+.relation-block + .group { margin-top: 64px; }
 .relation thead th, .price-summary thead th { white-space: nowrap; }
 
 /* 料金：無料と有料を2つの箱で */
@@ -314,7 +319,12 @@ section { padding: 64px 0; }
 .page .lead { margin-bottom: 6px; }
 .page .steps { margin-top: 8px; }
 .page .steps li { background: var(--ledger); border-color: transparent; }
-.history summary { cursor: pointer; color: var(--link); margin-top: 4px; }
+/* 使い始めてからご契約までの3つの段階の見出し（流れの図と同じ番号と色） */
+.step-no { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; margin-right: 12px; border-radius: 50%; color: #fff; font-size: 17px; vertical-align: 3px; }
+.step-free { background: var(--take); }
+.step-trial { background: var(--kaki); }
+.step-paid { background: var(--ai); }
+.history summary { cursor: pointer; color: var(--link); margin-top: 4px; padding: 8px 0; }
 .history ul { margin-top: 8px; }
 .page-toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 26px 0 0; padding: 0; font-size: 14px; }
 .page-toc a { padding: 5px 14px; border-radius: 999px; background: var(--ledger); color: var(--ink); text-decoration: none; white-space: nowrap; }
@@ -340,7 +350,7 @@ section { padding: 64px 0; }
 .pro-visual .tab { position: absolute; left: 0; top: 8px; height: 32px; }
 .pro-visual img { width: 100%; border: 1px solid var(--rule); border-radius: 0 var(--r-m) var(--r-m) var(--r-m); box-shadow: var(--lift); }
 .pro-visual figcaption { margin-top: 10px; font-size: 13px; color: var(--ink-2); }
-.trial-box { max-width: 52em; margin: 40px 0 24px; padding: 22px 24px 24px; }
+.trial-box { max-width: 52em; margin: 56px 0 24px; padding: 22px 24px 24px; }
 .trial-box .trial-lead { margin: 0 0 10px; font-size: 16px; }
 .trial-box .checks { margin: 0 0 4px; }
 .trial-box .actions { margin-top: 16px; }
@@ -457,7 +467,10 @@ section { padding: 64px 0; }
   .relation thead th, .price-summary thead th { white-space: normal; }
   .site-head .wrap { min-height: 56px; padding-top: 8px; }
   .head-cta { display: inline-flex; align-items: center; min-height: 38px; padding: 0 16px; border-radius: 999px; background: var(--kaki); color: #fff; font-size: 14px; font-weight: 700; text-decoration: none; }
-  .site-nav { flex-basis: 100%; gap: 2px 18px; padding-bottom: 10px; font-size: 14px; }
+  /* スマートフォンでは、メニューを1行にして横に送れるようにし、押しやすい高さにする */
+  .site-nav { flex-basis: calc(100% + 32px); flex-wrap: nowrap; gap: 0; margin: 0 -16px; padding: 0 30px 4px 8px; overflow-x: auto; scrollbar-width: none; font-size: 14px; -webkit-mask-image: linear-gradient(90deg, #000 88%, transparent); mask-image: linear-gradient(90deg, #000 88%, transparent); }
+  .site-nav::-webkit-scrollbar { display: none; }
+  .site-nav a:not(.nav-cta) { display: inline-flex; flex: none; align-items: center; min-height: 42px; padding: 0 9px; white-space: nowrap; }
   .site-nav .nav-cta { display: none; }
   .badge { font-size: 13px; padding: 3px 12px; }
   .brand-sub { display: none; }

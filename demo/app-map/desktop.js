@@ -188,7 +188,7 @@
   }
 
   var COLORS = {
-    center: { fill: '#3498db', stroke: '#217dbb', text: '#ffffff' },
+    center: { fill: '#1f77b4', stroke: '#18609a', text: '#ffffff' },
     incoming: { fill: '#ffffff', stroke: '#8fa3ad', text: '#333333' },
     outgoing: { fill: '#ffffff', stroke: '#8fa3ad', text: '#333333' }
   };

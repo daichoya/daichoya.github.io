@@ -8,16 +8,16 @@
   vertical-align: top;
   font-family: inherit;
   background: #f7f9fa;
-  color: #3498db;
+  color: #1f77b4;
   font-size: 14px;
   cursor: pointer;
 }
 .dcy-am-btn:hover { background: #eef3f6; }
 .dcy-am-btn[disabled] { color: #a8a8a8; cursor: not-allowed; }
-.dcy-am-btn:focus-visible, .dcy-am-close:focus-visible, .dcy-am-select:focus-visible { outline: 2px solid #3498db; outline-offset: 1px; }
-.dcy-am-primary { background: #3498db; border-color: #3498db; color: #fff; }
+.dcy-am-btn:focus-visible, .dcy-am-close:focus-visible, .dcy-am-select:focus-visible { outline: 2px solid #1f77b4; outline-offset: 1px; }
+.dcy-am-primary { background: #1f77b4; border-color: #1f77b4; color: #fff; }
 .dcy-am-primary[disabled] { background: #a8cbe8; border-color: #a8cbe8; color: #fff; }
-.dcy-am-primary:hover { background: #217dbb; }
+.dcy-am-primary:hover { background: #18609a; }
 
 .dcy-am-overlay {
   position: fixed;
@@ -55,7 +55,7 @@
 .dcy-am-map svg { display: block; width: 100%; height: auto; min-width: 640px; }
 .dcy-am-clickable { cursor: pointer; }
 .dcy-am-clickable:hover rect,
-.dcy-am-clickable:focus rect { stroke: #3498db; stroke-width: 2.5; }
+.dcy-am-clickable:focus rect { stroke: #1f77b4; stroke-width: 2.5; }
 .dcy-am-clickable:focus { outline: none; }
 .dcy-am-list h3 { margin: 24px 0 8px; padding: 0; border: none; font-size: 16px; font-weight: bold; line-height: 1.4; color: #333; }
 .dcy-am-table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -64,4 +64,4 @@
 .dcy-am-table th { background: #f5f5f5; font-weight: bold; white-space: nowrap; }
 .dcy-am-empty { color: #888; text-align: center !important; }
 .dcy-am-more { margin: 24px 0 0; padding-top: 12px; border-top: 1px solid #e3e7e8; color: #666; font-size: 13px; }
-.dcy-am-more a { color: #3498db; }
+.dcy-am-more a { color: #1f77b4; }

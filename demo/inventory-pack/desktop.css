@@ -8,16 +8,16 @@
   vertical-align: top;
   font-family: inherit;
   background: #f7f9fa;
-  color: #3498db;
+  color: #1f77b4;
   font-size: 14px;
   cursor: pointer;
 }
 .dcy-ip-btn:hover { background: #eef3f6; }
 .dcy-ip-btn[disabled] { color: #a8a8a8; cursor: not-allowed; }
-.dcy-ip-btn:focus-visible, .dcy-ip-close:focus-visible, .dcy-ip-select:focus-visible { outline: 2px solid #3498db; outline-offset: 1px; }
-.dcy-ip-primary { background: #3498db; border-color: #3498db; color: #fff; }
+.dcy-ip-btn:focus-visible, .dcy-ip-close:focus-visible, .dcy-ip-select:focus-visible { outline: 2px solid #1f77b4; outline-offset: 1px; }
+.dcy-ip-primary { background: #1f77b4; border-color: #1f77b4; color: #fff; }
 .dcy-ip-primary[disabled] { background: #a8cbe8; border-color: #a8cbe8; color: #fff; }
-.dcy-ip-primary:hover { background: #217dbb; }
+.dcy-ip-primary:hover { background: #18609a; }
 
 .dcy-ip-overlay {
   position: fixed;
@@ -62,7 +62,7 @@
 .dcy-ip-license { margin-top: 16px; margin-bottom: 0; padding: 8px 12px; border-left: 4px solid #a8a8a8; background: #f7f9fa; font-size: 14px; }
 .dcy-ip-license-valid { border-left-color: #27ae60; }
 .dcy-ip-license-grace { border-left-color: #e67e22; background: #fff8e6; }
-.dcy-ip-license-none { border-left-color: #3498db; background: #f3f8fc; }
+.dcy-ip-license-none { border-left-color: #1f77b4; background: #f3f8fc; }
 .dcy-ip-license-invalid, .dcy-ip-license-domain, .dcy-ip-license-expired { border-left-color: #e74c3c; background: #fdf0ef; }
 .dcy-ip-prev { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 16px; font-size: 14px; }
 .dcy-ip-prev label { font-weight: bold; }
@@ -85,5 +85,12 @@
 /* 有料版の点検の結果：要確認の項目 */
 .dcy-ip-items { margin: 4px 0 8px; padding-left: 20px; font-size: 13px; }
 .dcy-ip-items li { margin: 2px 0; }
-.dcy-ip-flow { margin: 0 0 8px !important; color: #1f3a5f; font-weight: bold; font-size: 13px; }
+/* 使い始めてからご契約までの3つの段階（無料＝緑、試用＝橙、ご契約＝紺。サイトの流れの図と同じ） */
+.dcy-ip-steps { display: flex; gap: 6px; margin: 0 0 14px; padding: 0; list-style: none; counter-reset: dcyipstep; }
+.dcy-ip-steps li { position: relative; flex: 1; margin: 0; padding: 8px 10px 8px 36px; border: 1px solid #bcd9ef; background: #fff; color: #333; font-size: 12px; line-height: 1.5; counter-increment: dcyipstep; }
+.dcy-ip-steps li::before { content: counter(dcyipstep); position: absolute; left: 9px; top: 9px; width: 20px; height: 20px; border-radius: 50%; background: #c2410c; color: #fff; font-size: 12px; font-weight: bold; line-height: 20px; text-align: center; }
+.dcy-ip-steps li:last-child::before { background: #1f3a5f; }
+.dcy-ip-steps li b { display: block; color: #1f3a5f; font-size: 13px; }
+.dcy-ip-steps .dcy-ip-step-now { border: 2px solid #17774a; background: #f1f8f4; }
+.dcy-ip-steps .dcy-ip-step-now::before { background: #17774a; }
 .dcy-ip-trial-note a { margin-left: 6px; color: #1f6fb2; }

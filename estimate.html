@@ -16,7 +16,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="google-site-verification" content="J1TnZ6bD5c5EjVGtQBBk2eRmLsDje0VapbpwCEnbA6M">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="assets/style.css?v=9277cf69ca">
+<link rel="stylesheet" href="assets/style.css?v=c8ac4fb73e">
 </head>
 <body>
 <header class="site-head">
@@ -44,6 +44,11 @@
   .est-notes { margin-top: 16px; font-size: 13px; }
   .est-notes li { margin: 2px 0; }
   .est-notes, .est-from { overflow-wrap: anywhere; }
+  /* 広い画面では、左に入力、右に見積書を並べて、入力しながら仕上がりを確かめられるようにする */
+  @media (min-width: 1000px) {
+    .est-layout { display: grid; grid-template-columns: minmax(0, 360px) minmax(0, 1fr); gap: 40px; align-items: start; }
+    .est-layout .est-paper { margin-top: 10px; }
+  }
   @media (max-width: 640px) {
     .est-paper { padding: 20px 14px; font-size: 13px; }
     .est-to { min-width: 0; }
@@ -55,12 +60,14 @@
   @media print {
     .site-head, .site-foot, .breadcrumb, .est-screen { display: none !important; }
     .page, .wrap { margin: 0 !important; padding: 0 !important; max-width: none !important; }
+    .est-layout { display: block !important; }
     .est-paper { border: none; padding: 0; max-width: none; }
   }
 </style>
 <div class="page">
   <div class="wrap">
     <p class="breadcrumb"><a href="index.html">台帳屋</a> ／ <a href="pro.html">棚卸し・変更監視パック</a> ／ 見積書の作成</p>
+    <div class="est-layout">
     <div class="est-screen">
       <h1>見積書の作成</h1>
       <div class="lead prose">
@@ -110,6 +117,7 @@
         <div>https://daichoya.github.io/</div>
         <div>daichoya.plugins@gmail.com</div>
       </div>
+    </div>
     </div>
   </div>
 </div>

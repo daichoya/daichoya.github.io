@@ -8,16 +8,16 @@
   vertical-align: top;
   font-family: inherit;
   background: #f7f9fa;
-  color: #3498db;
+  color: #1f77b4;
   font-size: 14px;
   cursor: pointer;
 }
 .dcy-fi-btn:hover { background: #eef3f6; }
 .dcy-fi-btn[disabled] { color: #a8a8a8; cursor: not-allowed; }
-.dcy-fi-btn:focus-visible, .dcy-fi-close:focus-visible, .dcy-fi-select:focus-visible { outline: 2px solid #3498db; outline-offset: 1px; }
-.dcy-fi-primary { background: #3498db; border-color: #3498db; color: #fff; }
+.dcy-fi-btn:focus-visible, .dcy-fi-close:focus-visible, .dcy-fi-select:focus-visible { outline: 2px solid #1f77b4; outline-offset: 1px; }
+.dcy-fi-primary { background: #1f77b4; border-color: #1f77b4; color: #fff; }
 .dcy-fi-primary[disabled] { background: #a8cbe8; border-color: #a8cbe8; color: #fff; }
-.dcy-fi-primary:hover { background: #217dbb; }
+.dcy-fi-primary:hover { background: #18609a; }
 
 .dcy-fi-overlay {
   position: fixed;
@@ -58,11 +58,11 @@
 .dcy-fi-no { color: #b0b0b0; text-align: center !important; }
 .dcy-fi-empty { color: #888; text-align: center !important; }
 .dcy-fi-more { margin: 24px 0 0; padding-top: 12px; border-top: 1px solid #e3e7e8; color: #666; font-size: 13px; }
-.dcy-fi-more a { color: #3498db; }
+.dcy-fi-more a { color: #1f77b4; }
 .dcy-fi-lead { margin-top: 16px; font-size: 14px; line-height: 1.7; }
 .dcy-fi-filter { height: 40px; min-width: 280px; max-width: 100%; padding: 0 12px; border: 1px solid #e3e7e8; border-radius: 0; font-size: 14px; font-family: inherit; box-sizing: border-box; }
-.dcy-fi-filter:focus-visible { outline: 2px solid #3498db; outline-offset: 1px; }
-.dcy-fi-summary { margin: 16px 0 8px; padding: 12px 16px; background: #f7f9fa; border-left: 4px solid #3498db; font-size: 14px; line-height: 1.7; }
+.dcy-fi-filter:focus-visible { outline: 2px solid #1f77b4; outline-offset: 1px; }
+.dcy-fi-summary { margin: 16px 0 8px; padding: 12px 16px; background: #f7f9fa; border-left: 4px solid #1f77b4; font-size: 14px; line-height: 1.7; }
 .dcy-fi-summary p { margin: 0; }
 .dcy-fi-summary .dcy-fi-alert { color: #c0392b; font-weight: bold; }
 .dcy-fi-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 16px 0 8px; }
