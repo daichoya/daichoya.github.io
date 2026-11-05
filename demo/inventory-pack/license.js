@@ -7,7 +7,8 @@
   'use strict';
 
   var PUBLIC_KEY = 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAq9XleCkCAyUymAhcuM6N8yyQRCPBc0AnY9aSTzg1PIyF60mDplUXvLhOxydeNNXdeL5FE2SK8vaLs+ODRWnozWyfR8JHuWFEvPTnu47BDwOr4231VUdLVYKQr+yrHkHMY4rlOYOw7Ws8zPaO5LG8j9Y3cLyldEFvjFysL32uaUKPdpiNc8ht4lsbZ+N3Zw8yb5k3eVrEmZyYfn++ES4jxaJTTThoyE93CJZ5Xtg8Ads/55ihk5cTnA+QqyS3t3lWo6Yw1OCaQyNvJWbaQpXu6BV5iCfxharM8eo7PCxAz9gDacsFWBRXR+dq6Q1PjGYy5f2P9M3yCGTh0bVhCpCRkwIDAQAB';
-  var PRODUCT = 'inventory';
+  var DEFAULT_PRODUCT = 'inventory';
+  var ALL_PRODUCTS = 'all';  // すべての有料機能が使えるキー（今後のまとめ買いのプラン用）
   var GRACE_DAYS = 7;   // 期限が過ぎても、この日数は使える（月額の更新が少し遅れても止まらないように）
   var KIND_LABELS = { trial: '無料試用', month: '月額', year: '年額', demo: 'デモ' };
 
@@ -63,12 +64,14 @@
   }
 
   // 結果：{ ok, state: 'valid'|'grace'|'expired'|'domain'|'invalid'|'none', message, payload, daysLeft }
-  function check(key, host, now) {
+  // product：確かめる製品。キーの製品がそれと同じか、すべての製品用（all）なら使える
+  function check(key, host, now, product) {
+    var want = product || DEFAULT_PRODUCT;
     if (!key || !String(key).trim()) {
       return Promise.resolve({ ok: false, state: 'none', message: 'ライセンスキーが設定されていません。' });
     }
     var parsed = parse(key);
-    if (!parsed || parsed.payload.p !== PRODUCT) {
+    if (!parsed || (parsed.payload.p !== want && parsed.payload.p !== ALL_PRODUCTS)) {
       return Promise.resolve({ ok: false, state: 'invalid', message: 'ライセンスキーの形が正しくありません。メールに記載のキーを、そのまま貼り付けてください。' });
     }
     return publicKey().then(function (k) {
