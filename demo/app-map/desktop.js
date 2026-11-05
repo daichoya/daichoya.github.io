@@ -308,11 +308,20 @@
   }
 
   // info: { app: アプリ名, host: kintoneの環境, at: 作成日時 }
+  // Excelの先頭に入れる、結果のまとめの1文
+  function excelLead(rows) {
+    if (!rows.length) return 'ルックアップ・関連レコード一覧・アクションでつながっているアプリはありません。';
+    var out = rows.filter(function (r) { return r[0] === '参照している先'; }).length;
+    var apps = {};
+    rows.forEach(function (r) { apps[r[3] || r[2]] = true; });
+    return 'つながっているアプリは' + Object.keys(apps).length + '個です（このアプリが参照している先 ' + out + '件、このアプリを参照している元 ' + (rows.length - out) + '件）。';
+  }
+
   function buildExcel(rows, info) {
     return Xlsx.listBook({
-      title: 'アプリのつながり', target: info.app, sub: excelSub(info, 'アプリ相関マップ'), sheet: 'つながり',
+      title: 'アプリのつながり', target: info.app, sub: excelSub(info, 'アプリ相関マップ'), sheet: 'つながり', lead: excelLead(rows),
       header: ROW_HEADER, rows: rows, widths: [14, 18, 26, 12, 30, 50], ids: [3], creator: '台帳屋 アプリ相関マップ',
-      note: rows.length ? 'ルックアップ・関連レコード一覧・アクションでつながるアプリです。図は「図を画像で保存」で保存できます。' : 'つながっているアプリはありません。'
+      note: rows.length ? 'ルックアップ・関連レコード一覧・アクションでつながるアプリです。図は「画像で保存（PNG）」で保存できます。' : 'つながっているアプリはありません。'
     });
   }
 

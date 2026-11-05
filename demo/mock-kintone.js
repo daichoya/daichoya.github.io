@@ -112,6 +112,7 @@
       { id: 'gnncoaohinigebkngpnpekmpapfnebfn', name: '台帳屋 権限チェッカー', enabled: true },
       { id: 'oengaljieegejcfdbmbkijobeodheoah', name: '台帳屋 アプリ相関マップ', enabled: true }
     ] } },
+    '/k/v1/app/adminNotes.json': { 12: { content: '<div>営業部の案件を管理するアプリです。2025年4月に、紙の案件台帳から移しました。</div><div>見直し：毎年4月（情報システム課）</div>', includeInTemplateAndDuplicates: true } },
     '/k/v1/app/customize.json': { 12: { scope: 'ALL', desktop: {
       js: [{ type: 'FILE', file: { name: '金額の入力チェック.js', fileKey: 'demo1', contentType: 'text/javascript', size: '2048' } }],
       css: [{ type: 'FILE', file: { name: '一覧の見た目.css', fileKey: 'demo2', contentType: 'text/css', size: '512' } }]
@@ -153,6 +154,14 @@
     organizations: [{ code: '営業部', name: '営業部' }, { code: '経理課', name: '経理課' }, { code: '情報システム課', name: '情報システム課' }],
     groups: [{ code: 'Administrators', name: 'Administrators' }, { code: 'everyone', name: 'Everyone' }]
   };
+  var installed = [
+    { id: 'demo', name: '台帳屋 棚卸し・変更監視パック', version: '1', isMarketPlugin: false },
+    { id: 'pnihnmdhjnomgnnfhibjgpkefifmpbbi', name: '台帳屋 設計書ジェネレーター', version: '1', isMarketPlugin: false },
+    { id: 'gnncoaohinigebkngpnpekmpapfnebfn', name: '台帳屋 権限チェッカー', version: '1', isMarketPlugin: false },
+    { id: 'oengaljieegejcfdbmbkijobeodheoah', name: '台帳屋 アプリ相関マップ', version: '1', isMarketPlugin: false },
+    { id: 'demounusedcalendarplugin00000001', name: '日程表プラグイン（試用）', version: '2', isMarketPlugin: false },
+    { id: 'demounusedinputcheckplugin000002', name: '入力チェック（旧版）', version: '1', isMarketPlugin: false }
+  ];
   // 見本データのないアプリには、設定が空の応答を返す
   function emptyFor(path, appId) {
     var app = apps.filter(function (a) { return a.appId === String(appId); })[0] || { appId: String(appId), name: 'アプリ' };
@@ -174,6 +183,7 @@
       case '/k/v1/app/settings.json': return { name: app.name, titleField: { selectionMode: 'AUTO' } };
       case '/k/v1/records.json': return null;
       case '/k/v1/app/customize.json': return { scope: 'ALL', desktop: { js: [], css: [] }, mobile: { js: [], css: [] } };
+      case '/k/v1/app/adminNotes.json': return { content: '', includeInTemplateAndDuplicates: false };
       default: return null;
     }
   }
@@ -191,6 +201,8 @@
       return new Promise(function (resolve, reject) {
         setTimeout(function () {
           if (path === '/k/v1/apps.json') { resolve({ apps: apps }); return; }
+          // kintoneに読み込んであるプラグイン（どのアプリにも追加されていないものを2つ含む）
+          if (path === '/k/v1/plugins.json') { resolve({ plugins: (params.offset ? [] : installed).map(function (x) { return Object.assign({}, x); }) }); return; }
           if (/^\/v1\//.test(path)) {
             var key = path.replace('/v1/', '').replace('.json', '');
             var out = {};

@@ -155,10 +155,19 @@
   }
 
   // info: { app: アプリ名, host: kintoneの環境, at: 作成日時 }
+  // Excelの先頭に入れる、結果のまとめの1文
+  function excelLead(rows) {
+    var count = function (area) { return rows.filter(function (r) { return r[0] === area; }).length; };
+    var text = 'アクセス権の設定は、アプリ ' + count('アプリ') + '件・レコード ' + count('レコード') + '件・フィールド ' + count('フィールド') + '件です。';
+    var everyone = rows.some(function (r) { return r[0] === 'アプリ' && /^everyone$/i.test(String(r[5])) && r[7] === '○'; });
+    return text + (everyone ? 'Everyoneに「アプリ管理」の権限があります（だれでもアプリの設定を変えられます）。' : '');
+  }
+
   function buildExcel(data, info) {
+    var rows = permissionLines(data);
     return Xlsx.listBook({
-      title: '権限一覧', target: info.app, sub: excelSub(info, '権限チェッカー'), sheet: '権限一覧',
-      header: CSV_HEADER, rows: permissionLines(data), widths: [10, 8, 26, 16, 10, 22, 9, 8, 6, 6, 6, 6, 9, 9, 12],
+      title: '権限一覧', target: info.app, sub: excelSub(info, '権限チェッカー'), sheet: '権限一覧', lead: excelLead(rows),
+      header: CSV_HEADER, rows: rows, widths: [10, 8, 26, 16, 10, 22, 9, 8, 6, 6, 6, 6, 9, 9, 12],
       numbers: [1], centers: [6, 7, 8, 9, 10, 11, 12, 13], creator: '台帳屋 権限チェッカー',
       note: '○：権限あり　－：権限なし。アプリとレコードのアクセス権は、優先順位の数の小さい行が優先されます。'
     });

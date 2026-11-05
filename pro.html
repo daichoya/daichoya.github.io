@@ -38,8 +38,8 @@
     <ul class="chips"><li class="free">点検は無料・申し込み不要</li><li>有料版 月額3,300円から（30日間無料）</li><li>データは外部に送信しません</li></ul>
     <div class="actions"><a class="btn btn-primary" href="#free">無料で点検する</a><a class="btn" href="demo.html">デモで試す（登録不要）</a></div>
     <nav class="page-toc" aria-label="このページの内容"><a href="#compare">無料と有料版の違い</a><a href="#free">無料で点検する手順</a><a href="#items">点検する項目</a><a href="#why">有料版を選ぶ理由</a><a href="#report">報告書と点検台帳</a><a href="#price">料金</a><a href="#trial">30日間の無料試用</a></nav>
-    <figure class="shot">
-      <a href="images/inventory-free.webp" title="画像を大きく表示"><img src="images/inventory-free.webp" width="1040" height="1194" alt="無料の点検の結果。7個のアプリを点検し、権限・ユーザーの指定・使われていないアプリ・健康診断の件数と例が表に出ている"></a>
+    <figure class="shot shot-narrow">
+      <a href="images/inventory-free.webp" title="画像を大きく表示"><img src="images/inventory-free.webp" width="760" height="1576" alt="無料の点検の結果。7個のアプリを点検し、権限・ユーザーの指定・使われていないアプリ・健康診断の件数と例が表に出ている。下に30日間の無料試用の案内がある"></a>
       <figcaption>見本のアプリで「無料で点検する」を押した例</figcaption>
     </figure>
 
@@ -69,31 +69,34 @@
       <li>そのアプリの一覧画面の上にある「棚卸し」ボタンを押し、「無料で点検する」を押します。申し込みやライセンスキーは要りません。</li>
     </ol>
     <div class="download" id="download">
-      <a class="btn btn-primary" href="downloads/daichoya-inventory-pack-1.4.0.zip" download>ダウンロード（v1.4.0・zip・55KB）</a><p class="note hash">ファイルの確認用（SHA-256）：<code>f69d3382f2fe08e0ac99c186fb032ecff01caf839a973071ae4e10acc4fc622b</code></p>
+      <a class="btn btn-primary" href="downloads/daichoya-inventory-pack-1.5.0.zip" download>ダウンロード（v1.5.0・zip・57KB）</a><p class="note hash">ファイルの確認用（SHA-256）：<code>6c33fef42b027ff6a2686f06663428e611586c5a7654a7bf7b2ae645bff4a154</code></p>
       <p class="note">ご利用の前に<a href="terms.html">利用規約</a>をお読みください。無料の点検も、有料版も、同じファイルです。</p>
     </div>
     <p class="note prose">点検するのは、操作した人が見られるアプリです。すべてのアプリを点検するには、kintoneシステム管理者が操作してください。読み取るのは設定と、レコードの件数・最終更新日時だけです。結果は台帳屋のサーバーには送られません。</p>
 
     <h2 id="items">点検する項目</h2>
+    <div class="prose"><p>サイボウズの「<a href="https://kintone.cybozu.co.jp/kintone-signpost/assets/pdf/operation_rules_advanced.pdf" rel="noopener">運用ルール（応用編）</a>」では、プラグインやカスタマイズの棚卸しを半年に1回行うことがすすめられています。棚卸し・変更監視パックは、その点検を全アプリまとめて行います。</p></div>
     <div class="table-scroll">
       <table class="facts">
         <tbody>
           <tr><th scope="row">権限</th><td>Everyoneに「アプリ管理」「削除」「書き出し」の権限がある、ユーザー個人を指定している、アプリ管理の権限が1人だけに付いている</td></tr>
           <tr><th scope="row">退職・異動した人の指定</th><td>もういないユーザー・組織・グループや、利用停止中のユーザーが、アクセス権・プロセス管理・通知・一覧の条件などに残っている</td></tr>
           <tr><th scope="row">使われていないアプリ</th><td>レコードが1件もない、または180日以上更新されていない（ほかのアプリから参照されているマスタは、その旨を表示）</td></tr>
-          <tr><th scope="row">健康診断</th><td>kintoneガバナンスガイドラインの点検項目など、下の表の6項目</td></tr>
+          <tr><th scope="row">健康診断</th><td>kintoneガバナンスガイドラインと運用ルールの点検項目など、下の表の8項目</td></tr>
         </tbody>
       </table>
     </div>
     <h3>健康診断の項目</h3>
-    <div class="prose"><p>サイボウズの「<a href="https://kintone.cybozu.co.jp/material/pdf/kintone_governance_guideline.pdf" rel="noopener">kintoneガバナンスガイドライン</a>」の点検項目と、引き継ぎや保守をしやすくするための項目です。</p></div>
+    <div class="prose"><p>サイボウズの「<a href="https://kintone.cybozu.co.jp/material/pdf/kintone_governance_guideline.pdf" rel="noopener">kintoneガバナンスガイドライン</a>」と「運用ルール（応用編）」の点検項目と、引き継ぎや保守をしやすくするための項目です。</p></div>
     <div class="table-scroll">
       <table class="facts">
         <tbody>
           <tr><th scope="row">スペースに入っていないアプリ</th><td>ガイドラインで、スペースに所属しないアプリを作らない運用が例に挙げられています</td></tr>
           <tr><th scope="row">初期の管理者アカウント</th><td>最初からある「Administrator」が使える状態か（業務で使わないなら停止がすすめられています）</td></tr>
           <tr><th scope="row">外部のURLから読み込むJavaScript・CSS</th><td>読み込み先が変わると、アプリの動きも変わります</td></tr>
-          <tr><th scope="row">アプリの説明</th><td>説明が空のアプリ</td></tr>
+          <tr><th scope="row">使われていないプラグイン</th><td>kintoneに読み込んであるのに、どのアプリにも追加されていないプラグイン（運用ルールの棚卸しの項目）</td></tr>
+          <tr><th scope="row">よく似た名前のアプリ</th><td>「（旧）」「コピー」「検証」などを除くと同じ名前のアプリ。新旧のアプリが並んでいると、利用者が古いほうを使ってしまうことがあります</td></tr>
+          <tr><th scope="row">アプリの説明・管理者用メモ</th><td>説明も、アプリ管理者用メモもないアプリ（運用ルールでは、機能を足した背景や要件をアプリ管理者用メモに残すことがすすめられています）</td></tr>
           <tr><th scope="row">初期のままのフィールドコード</th><td>「数値_0」のように、作ったときのままのコード</td></tr>
           <tr><th scope="row">許可していないプラグイン</th><td>設定画面で選んだ「許可するプラグイン」以外が入っているアプリ（選んだときだけ点検します）</td></tr>
         </tbody>
@@ -123,6 +126,7 @@
     <p class="note prose">アプリが少なく、気になるアプリを1つずつ調べれば足りる場合は、無料の点検と、1つのアプリを詳しく調べる<a href="index.html#plugins">6本の無料のプラグイン</a>だけで、ずっとお使いいただけます。有料版の試用が終わっても、無料の点検はそのまま使えます。</p>
 
     <h2 id="report">有料版で作れる資料</h2>
+    <div class="prose"><p>点検台帳を作ると、画面にも結果のまとめ（種類ごとの件数・前回からの増減・要確認の項目）が出ます。そのうえで、次の2つを作れます。</p></div>
     <h3>点検の報告書（印刷・PDF）</h3>
     <div class="prose">
       <p>点検台帳を作ったあと「点検の報告書を開く」を押すと、上司や監査に出せる1枚の報告書が新しいタブに開きます。印刷の画面で「PDFに保存」を選べば、PDFになります。</p>
@@ -141,7 +145,7 @@
     <h3>点検台帳（Excel）</h3>
     <div class="prose"><p>1枚目は表紙（点検の概要・点検の推移・目次）です。各シートは紺の見出し行で、見出し行の固定とフィルターが付き、A4で印刷すると幅が1ページに収まり、見出し行が毎ページに出ます（ページ番号つき）。要確認の行は赤で示します。</p></div>
     <figure class="shot">
-      <a href="images/inventory-ledger.webp" title="画像を大きく表示"><img src="images/inventory-ledger.webp" width="746" height="694" alt="点検台帳の表紙。点検の概要、点検の推移、各シートへのリンクの目次が並ぶ" loading="lazy"></a>
+      <a href="images/inventory-ledger.webp" title="画像を大きく表示"><img src="images/inventory-ledger.webp" width="750" height="682" alt="点検台帳の表紙。点検の概要、点検の推移、各シートへのリンクの目次が並ぶ" loading="lazy"></a>
       <figcaption>点検台帳の表紙（見本のデータで作成し、A4で印刷したときの見た目）</figcaption>
     </figure>
     <div class="table-scroll">
@@ -151,7 +155,7 @@
           <tr><th scope="row">点検報告</th><td>点検したアプリの数、注意点の数、前回からの変更の数と、これまでの点検の推移</td></tr>
           <tr><th scope="row">アプリ一覧</th><td>全アプリの作成者・設定の最終更新・フィールド数・プラグイン数、レコードの件数と最終更新</td></tr>
           <tr><th scope="row">変更点</th><td>前回の点検台帳と比べて、追加・削除・変更されたフィールド・権限・プラグイン・カスタマイズ</td></tr>
-          <tr><th scope="row">注意点</th><td>上の「点検する項目」で見つかったものを、どのアプリのどの設定かまで</td></tr>
+          <tr><th scope="row">注意点</th><td>上の「点検する項目」で見つかったものを、どのアプリのどの設定かまで（要確認の行は赤）</td></tr>
           <tr><th scope="row">権限一覧</th><td>全アプリのアプリ・レコード・フィールドのアクセス権を1つの表に</td></tr>
           <tr><th scope="row">ユーザーの指定</th><td>全アプリの設定に出てくるユーザー・組織・グループ。もういない人や利用停止中の人の指定を先頭に</td></tr>
           <tr><th scope="row">プラグイン</th><td>どのアプリに、どのプラグインが入っているか。許可していないプラグインに印</td></tr>
@@ -181,7 +185,7 @@
       <li>お支払いはクレジットカードです。お申し込みの画面で、お使いのkintoneの環境（○○.cybozu.com）と会社名を入力すると、その環境で使えるライセンスキーが15分ほどでメールで届きます。</li>
       <li>月額・年額とも自動で更新します。解約は、<a href="https://billing.stripe.com/p/login/8x27sNfFG60Z0E21FL9EI00" rel="noopener">ご契約の管理ページ（カードの変更・解約・領収書）</a>から、またはメールでいつでもお手続きいただけます。プランの変更は、メールでお知らせください。</li>
       <li>請求書（領収書）は、お支払いのたびにメールで届きます。ご契約の管理ページからもダウンロードできます。</li>
-      <li>社内の稟議に使う<a href="estimate.html">見積書は、こちらから作れます</a>。くわしくは、<a href="terms.html">利用規約</a>の9と<a href="tokushoho.html">特定商取引法に基づく表記</a>をご覧ください。</li>
+      <li>社内の稟議に使う<a href="estimate.html">見積書は、こちらから作れます</a>。情報システム部門の導入審査には、印刷できる<a href="security.html">導入前の確認事項</a>をお使いください。くわしくは、<a href="terms.html">利用規約</a>の9と<a href="tokushoho.html">特定商取引法に基づく表記</a>をご覧ください。</li>
     </ul>
 
     <h2 id="trial">30日間の無料試用</h2>
@@ -197,10 +201,11 @@
     <p class="note prose">試用のあとに申し込む場合は、届いた新しいキーを、プラグインの設定に貼り直してください。点検台帳や設定はそのまま使えます。</p>
 
     <h2>更新履歴</h2>
-    <p class="prose">1.4.0（2026年11月5日）：点検台帳と報告書の見た目を、上司や監査に出しやすい形に整えました。点検台帳は表紙（概要・推移・目次）、紺の見出し行、見出し行の固定とフィルター、A4の印刷設定（幅に合わせる・見出し行を毎ページ・ページ番号）、要確認の行は赤。報告書は冒頭に総評、提出先と報告者の欄、点検の範囲と方法を加えました。</p>
+    <p class="prose">1.5.0（2026年11月6日）：サイボウズの運用ルール（応用編）の棚卸しの項目に合わせ、健康診断に「使われていないプラグイン」「よく似た名前のアプリ」を足し、「アプリの説明」はアプリ管理者用メモも見るようにしました。点検台帳を作ったあと、画面にも結果のまとめ（件数・前回からの増減・要確認の項目）を出します。点検台帳の各シートに見出しを付け、横に広いシートを詰めて、印刷したときに読みやすくしました。無料で使っているときの表示を、エラーに見えない色にしました。</p>
     <details class="history prose">
       <summary>以前の更新</summary>
       <ul>
+        <li>1.4.0（2026年11月5日）：点検台帳と報告書の見た目を、上司や監査に出しやすい形に整えました。点検台帳は表紙（概要・推移・目次）、紺の見出し行、見出し行の固定とフィルター、A4の印刷設定（幅に合わせる・見出し行を毎ページ・ページ番号）、要確認の行は赤。報告書は冒頭に総評、提出先と報告者の欄、点検の範囲と方法を加えました。</li>
         <li>1.3.0（2026年11月5日）：上司や監査に出せる1枚の「点検の報告書」（印刷・PDF）を追加しました。点検台帳に点検ごとの件数を残し、報告書と「点検報告」のシートに推移を出します。健康診断に「許可していないプラグイン」を足しました（設定画面で、許可するプラグインを選びます）。</li>
         <li>1.2.1（2026年11月5日）：料金をアプリの数で3つのプランにしたのに合わせ、無料の点検の結果に、この環境に合うプランを表示するようにしました。</li>
         <li>1.2.0（2026年11月5日）：ライセンスキーがなくても全アプリを点検し、件数と例を表示する「無料で点検する」を追加しました。注意点に健康診断の項目（スペースに入っていないアプリ、初期の管理者アカウント、外部のURLから読み込むJavaScript・CSS、アプリの説明、初期のままのフィールドコード）を足しました。</li>

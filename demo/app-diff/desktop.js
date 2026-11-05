@@ -311,6 +311,7 @@
   function buildExcel(rows, nameA, nameB, info) {
     return Xlsx.listBook({
       title: 'アプリ設定の比較', target: nameA + ' と ' + nameB, sub: excelSub(info, 'アプリ設定の比較'), sheet: '設定の違い',
+      lead: summaryLines(rows, { errors: [] })[0].text,
       header: ['種類', '項目', '違い', 'このアプリ（' + nameA + '）', '比べるアプリ（' + nameB + '）'],
       rows: rows.map(function (r) { return [r.group, r.item, r.kind, r.a, r.b]; }),
       widths: [14, 26, 16, 50, 50], creator: '台帳屋 アプリ設定の比較',

@@ -62,10 +62,12 @@
     return prop.lookup ? 'ルックアップ（' + base + '）' : base;
   }
 
-  function fieldDetail(prop) {
+  // names：アプリIDからアプリ名（参照先を名前で書く。分からないときはIDだけ）
+  var appLabel = function (id, names) { return names && names[id] ? '「' + names[id] + '」（アプリID ' + id + '）' : 'アプリID ' + id; };
+  function fieldDetail(prop, names) {
     var parts = [];
     if (prop.lookup) {
-      parts.push('参照先：アプリID ' + prop.lookup.relatedApp.app + ' の「' + prop.lookup.relatedKeyField + '」');
+      parts.push('参照先：' + appLabel(prop.lookup.relatedApp.app, names) + ' の「' + prop.lookup.relatedKeyField + '」');
       var maps = (prop.lookup.fieldMappings || []).map(function (m) { return m.relatedField + '→' + m.field; });
       if (maps.length) parts.push('コピー：' + maps.join('、'));
     }
@@ -73,7 +75,7 @@
     if (prop.expression) parts.push('計算式：' + prop.expression);
     if (prop.referenceTable) {
       var ref = prop.referenceTable;
-      parts.push('参照先：アプリID ' + ref.relatedApp.app);
+      parts.push('参照先：' + appLabel(ref.relatedApp.app, names));
       if (ref.condition) parts.push('条件：' + ref.condition.field + ' ＝ 参照先の' + ref.condition.relatedField);
       if (ref.filterCond) parts.push('絞り込み：' + ref.filterCond);
     }
@@ -94,7 +96,7 @@
   }
 
   // フォームの配置順にフィールドを並べ、配置にないもの（システム項目など）を最後に付ける
-  function fieldRows(properties, layout) {
+  function fieldRows(properties, layout, names) {
     var order = [];
     function walk(items, container) {
       (items || []).forEach(function (item) {
@@ -117,7 +119,7 @@
       seen[prop.code] = true;
       rows.push([
         rows.length + 1, prop.label || '', prop.code, fieldTypeLabel(prop),
-        mark(prop.required), mark(prop.unique), defaultText(prop), fieldDetail(prop), container
+        mark(prop.required), mark(prop.unique), defaultText(prop), fieldDetail(prop, names), container
       ]);
     }
     order.forEach(function (o) {
@@ -256,14 +258,35 @@
   }
 
   // results: 各APIの結果 { ok: true, value } か { ok: false, error }
-  function buildSheets(results, generatedAt) {
+  // このアプリが参照しているアプリ（ルックアップ・関連レコード一覧・アクションの作成先）。names：アプリIDからアプリ名
+  function relatedRows(properties, actions, names) {
+    var rows = [];
+    var name = function (id) { return id ? ((names && names[id]) || 'アプリID ' + id) : '見られないアプリ'; };
+    function walk(props, table) {
+      Object.keys(props || {}).forEach(function (code) {
+        var p = props[code];
+        var place = (p.label || code) + (table ? '（テーブル「' + table + '」内）' : '');
+        if (p.lookup && p.lookup.relatedApp) rows.push([name(p.lookup.relatedApp.app), 'ルックアップ：' + place]);
+        if (p.referenceTable && p.referenceTable.relatedApp) rows.push([name(p.referenceTable.relatedApp.app), '関連レコード一覧：' + place]);
+        if (p.type === 'SUBTABLE') walk(p.fields, p.label || code);
+      });
+    }
+    walk(properties, null);
+    var list = (actions && actions.actions) || {};
+    Object.keys(list).map(function (k) { return list[k]; }).sort(function (a, b) { return Number(a.index) - Number(b.index); }).forEach(function (a) {
+      rows.push([name(a.destApp && a.destApp.app), 'アクション（レコードの作成先）：' + (a.name || '')]);
+    });
+    return rows;
+  }
+
+  function buildSheets(results, generatedAt, names) {
     function val(key) { return results[key] && results[key].ok ? results[key].value : null; }
     function err(key) { return results[key] && !results[key].ok ? sectionError(results[key].error) : null; }
     var app = val('app') || {};
     var fields = val('fields');
     var properties = (fields && fields.properties) || {};
     var labels = labelMap(properties);
-    var fieldList = fields ? fieldRows(properties, val('layout')) : [];
+    var fieldList = fields ? fieldRows(properties, val('layout'), names) : [];
     var views = viewRows(val('views'), labels);
     var plugins = ((val('plugins') && val('plugins').plugins) || []).map(function (p) {
       return [p.name, p.id, p.enabled === false ? '無効' : '有効'];
@@ -273,6 +296,7 @@
       ['アプリ名', app.name || ''],
       ['アプリID', app.appId || ''],
       ['説明', stripHtml(app.description)],
+      ['アプリ管理者用メモ', val('adminNotes') ? (stripHtml(val('adminNotes').content) || '（なし）') : '（読み取れませんでした）'],
       ['作成者', app.creator ? (app.creator.name || app.creator.code) : ''],
       ['作成日時', dateText(app.createdAt)],
       ['最終更新者', app.modifier ? (app.modifier.name || app.modifier.code) : ''],
@@ -297,6 +321,10 @@
       if (err(key)) notify[i] = { title: notify[i].title, header: [], rows: [], note: err(key) };
     });
 
+    var related = relatedRows(properties, val('actions'), names);
+    var subText = 'アプリ設計書：' + (app.name || '') + '（アプリID ' + (app.appId || '') + '）　／　作成日時：' + generatedAt;
+    var head = function (title) { return { title: title, sub: subText }; };
+
     return [
       { name: '概要', widths: [20, 12, 46, 18], orientation: 'portrait', tabColor: 'FF1F3A5F', docTitle: 'アプリ設計書：' + (app.name || ''),
         heading: { title: 'アプリ設計書', sub: (app.name || '') + '（アプリID ' + (app.appId || '') + '）　／　作成日時：' + generatedAt + '　／　作成：台帳屋 設計書ジェネレーター' },
@@ -312,15 +340,20 @@
             ['アクセス権', 'アプリ・レコード・フィールドのアクセス権'],
             ['プラグイン', '追加しているプラグインと、有効・無効'],
             ['カスタマイズ', 'JavaScript・CSSのファイルと、適用するユーザー']
-          ]), { span: 3 })
+          ]), { span: 3 }),
+          // 2ページ目：運用の情報（手で書く欄）と、関係するアプリ。表紙の1ページ目は概要・改訂履歴・目次に収める
+          { title: '運用の情報', header: ['項目', '内容'], rows: [['目的・使い方', ''], ['利用する部署・人', ''], ['アプリの担当者', ''], ['見直しの時期', '']], labels: true, span: 3, pageBreak: true,
+            note: 'kintoneの設定にはない情報です。引き継ぎや監査の前に書き足してください。' },
+          { title: '関係するアプリ（このアプリが参照している先）', header: ['相手のアプリ', 'つながりの種類と、設定のある場所'], rows: related, span: 3,
+            note: related.length ? 'このアプリを参照しているアプリは、アプリ相関マップで確かめられます。' : 'ルックアップ・関連レコード一覧・アクションで参照しているアプリはありません。' }
         ] },
-      { name: 'フィールド', list: true, widths: [6, 22, 22, 20, 7, 9, 16, 50, 22], blocks: withError([{ title: null, ids: [0], centers: [4, 5], header: ['順', 'フィールド名', 'フィールドコード', '種類', '必須', '重複禁止', '初期値', '詳細（選択肢・計算式・参照先など）', '配置'], rows: fieldList }], 'fields') },
-      { name: '一覧', list: true, widths: [6, 22, 14, 40, 30, 50], blocks: withError([{ title: null, ids: [0], header: ['順', '一覧名', '種類', '絞り込み条件', '並び順', '表示するフィールド'], rows: views }], 'views') },
-      { name: 'プロセス管理', widths: [6, 24, 28, 40, 40], blocks: withError(processBlocks(val('status')), 'status') },
-      { name: '通知', widths: [30, 30, 30, 30, 16], blocks: notify },
-      { name: 'アクセス権', widths: [22, 30, 20, 16, 10, 10, 10, 10, 10, 10], blocks: permission },
-      { name: 'プラグイン', list: true, widths: [40, 36, 10], blocks: withError([{ title: null, header: ['プラグイン名', 'プラグインID', '状態'], rows: plugins }], 'plugins') },
-      { name: 'カスタマイズ', widths: [30, 14, 6, 10, 70], blocks: err('customize') ? [{ title: null, header: [], rows: [], note: err('customize') }] : customizeBlocks(val('customize')) }
+      { name: 'フィールド', list: true, heading: head('フィールド'), widths: [6, 22, 22, 20, 7, 9, 16, 50, 22], blocks: withError([{ title: null, ids: [0], centers: [4, 5], header: ['順', 'フィールド名', 'フィールドコード', '種類', '必須', '重複禁止', '初期値', '詳細（選択肢・計算式・参照先など）', '配置'], rows: fieldList }], 'fields') },
+      { name: '一覧', list: true, heading: head('一覧'), widths: [6, 22, 14, 40, 30, 50], blocks: withError([{ title: null, ids: [0], header: ['順', '一覧名', '種類', '絞り込み条件', '並び順', '表示するフィールド'], rows: views }], 'views') },
+      { name: 'プロセス管理', heading: head('プロセス管理'), widths: [6, 24, 28, 40, 40], blocks: withError(processBlocks(val('status')), 'status') },
+      { name: '通知', heading: head('通知'), widths: [30, 30, 30, 30, 16], blocks: notify },
+      { name: 'アクセス権', heading: head('アクセス権'), widths: [22, 30, 20, 16, 10, 10, 10, 10, 10, 10], blocks: permission },
+      { name: 'プラグイン', list: true, heading: head('プラグイン'), widths: [40, 36, 10], blocks: withError([{ title: null, header: ['プラグイン名', 'プラグインID', '状態'], rows: plugins }], 'plugins') },
+      { name: 'カスタマイズ', heading: head('カスタマイズ'), widths: [30, 14, 6, 10, 70], blocks: err('customize') ? [{ title: null, header: [], rows: [], note: err('customize') }] : customizeBlocks(val('customize')) }
     ];
   }
 
@@ -431,7 +464,9 @@
       recordAcl: api('/k/v1/record/acl.json', { app: appId }),
       fieldAcl: api('/k/v1/field/acl.json', { app: appId }),
       plugins: api('/k/v1/app/plugins.json', { app: appId }),
-      customize: api('/k/v1/app/customize.json', { app: appId })
+      customize: api('/k/v1/app/customize.json', { app: appId }),
+      adminNotes: api('/k/v1/app/adminNotes.json', { app: appId }),
+      actions: api('/k/v1/app/actions.json', { app: appId })
     };
     var keys = Object.keys(requests);
     return Promise.all(keys.map(function (k) { return settle(requests[k]); })).then(function (list) {
@@ -497,7 +532,7 @@
       runBtn.disabled = true;
       status.textContent = '設定を読み込み中…';
       collect(appId).then(function (results) {
-        var sheets = buildSheets(results, nowText());
+        var sheets = buildSheets(results, nowText(), appNames);
         var stamp = nowText().slice(0, 10).replace(/-/g, '');
         download(buildXlsx(sheets), '設計書_' + safeFileName(appNames[appId] || ('app' + appId)) + '_' + stamp + '.xlsx');
         status.textContent = summaryText(sheets);

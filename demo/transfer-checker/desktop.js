@@ -96,9 +96,21 @@
   }
 
   // info: { app: アプリ名, host: kintoneの環境, at: 作成日時 }
+  // Excelの先頭に入れる、結果のまとめの1文
+  function excelLead(list) {
+    if (!list.length) return 'ユーザー・組織・グループを指定している設定はありません。';
+    var missing = list.filter(function (r) { return r.state === '見つかりません'; }).length;
+    var stopped = list.filter(function (r) { return r.state === '利用停止中'; }).length;
+    var parts = [];
+    if (missing) parts.push('見つからない指定が' + missing + '件');
+    if (stopped) parts.push('利用停止中のユーザーの指定が' + stopped + '件');
+    return '設定に出てくるユーザー・組織・グループは全' + list.length + 'か所です。' +
+      (parts.length ? parts.join('、') + 'あります。' : '見つからない指定や、利用停止中のユーザーの指定はありません。');
+  }
+
   function buildExcel(list, info) {
     return Xlsx.listBook({
-      title: 'ユーザー・組織・グループの指定', target: info.app, sub: excelSub(info, '異動・退職チェッカー'), sheet: 'ユーザーの指定',
+      title: 'ユーザー・組織・グループの指定', target: info.app, sub: excelSub(info, '異動・退職チェッカー'), sheet: 'ユーザーの指定', lead: excelLead(list),
       header: CSV_HEADER, rows: list.map(function (r) { return [r.state, r.typeLabel, r.name, r.code, r.place, r.detail]; }),
       styles: list.map(function (r) { return r.state === '見つかりません' ? Xlsx.STYLE.important : r.state === '利用停止中' ? Xlsx.STYLE.warn : Xlsx.STYLE.body; }),
       widths: [15, 10, 18, 22, 30, 60], creator: '台帳屋 異動・退職チェッカー',

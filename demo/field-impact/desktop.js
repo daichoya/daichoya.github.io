@@ -98,9 +98,22 @@
   }
 
   // info: { field: フィールド名, host: kintoneの環境, at: 作成日時 }
+  // Excelの先頭に入れる、結果のまとめの1文
+  function excelLead(list) {
+    if (!list.length) return '使われている場所は見つかりませんでした。';
+    var here = list.filter(function (r) { return r.scope === 'このアプリ'; }).length;
+    var apps = {};
+    list.forEach(function (r) { if (r.scope !== 'このアプリ') apps[r.appId] = true; });
+    var parts = [];
+    if (here) parts.push('このアプリの' + here + 'か所');
+    if (list.length - here) parts.push('ほかのアプリ（' + Object.keys(apps).length + '個）の' + (list.length - here) + 'か所');
+    var blocks = list.filter(function (r) { return r.blocks; }).length;
+    return parts.join('と、') + 'で使われています。' + (blocks ? 'kintoneが削除を止める設定が' + blocks + '件あります（黄の行）。' : '');
+  }
+
   function buildExcel(list, info) {
     return Xlsx.listBook({
-      title: 'フィールドが使われている場所', target: info.field, sub: excelSub(info, 'フィールド影響チェッカー'), sheet: 'フィールドの影響',
+      title: 'フィールドが使われている場所', target: info.field, sub: excelSub(info, 'フィールド影響チェッカー'), sheet: 'フィールドの影響', lead: excelLead(list),
       header: CSV_HEADER, rows: list.map(function (r) { return [r.scope, r.appId, r.appName, r.place, r.detail, r.blocks ? '○' : '']; }),
       styles: list.map(function (r) { return r.blocks ? Xlsx.STYLE.warn : Xlsx.STYLE.body; }),
       widths: [12, 8, 22, 30, 60, 12], ids: [1], centers: [5], creator: '台帳屋 フィールド影響チェッカー',

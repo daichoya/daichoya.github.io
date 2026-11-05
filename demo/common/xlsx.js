@@ -9,10 +9,11 @@
  *
  * sheets: [{
  *   name, widths: [列幅], hidden, orientation: 'landscape'|'portrait', list: true（固定行とフィルター）,
- *   heading: { title, sub },         // シートの先頭に大きな見出し
+ *   heading: { title, sub, lead },   // シートの先頭に大きな見出し。lead は結果のまとめの1文（太字、省略可）
  *   blocks: [{ title, header: [], rows: [[]], note, styles: [行ごとのスタイル], labels: true（1列目を項目名の色に）, numbers: [数にする列（桁区切り）], ids: [IDの列（数・桁区切りなし）], centers: [中央にそろえる列] }]
  * }]
  * span：その表の最後の列を、右へ何列分つなげるか（例：項目名と内容の2列の表を4列の幅に）。
+ * pageBreak：true のとき、その表の前で印刷のページを改める（表紙を1ページに収めたいときなど）。
  * セルの値は文字・数のほか { text, link: 'シート名' }（そのシートへのリンク）も使える。
  */
 (function (root) {
@@ -202,6 +203,7 @@
     var listHeader = 0;
     var listEnd = 0;
     var listCols = 0;
+    var breaks = [];
     // span：最後のセルを右へ何列分つなげるか（項目名と内容の表を、下の広い表と同じ幅にそろえる）
     function addRow(values, style, numbers, labels, height, ids, span, centers) {
       if (span > 1) {
@@ -229,10 +231,13 @@
     if (sheet.heading) {
       addRow([sheet.heading.title || ''], STYLE.docTitle, null, false, 30);
       if (sheet.heading.sub) addRow([sheet.heading.sub], STYLE.sub);
+      if (sheet.heading.lead) addRow([sheet.heading.lead], STYLE.title, null, false, 20);
       r += 1;
     }
     sheet.blocks.forEach(function (block, i) {
-      if (i > 0) r += 1; // 表と表の間を1行あける
+      var noteOnly = !block.title && !(block.header && block.header.length) && !(block.rows && block.rows.length);
+      if (i > 0 && !noteOnly) r += 1; // 表と表の間を1行あける（注記だけのブロックは、前の注記の続きとして詰める）
+      if (block.pageBreak && i > 0) breaks.push(r - 1);
       if (block.title) addRow([block.title], STYLE.title, null, false, 20);
       var hasHeader = block.header && block.header.length;
       if (hasHeader) {
@@ -268,6 +273,7 @@
       '<pageSetup paperSize="9" orientation="' + (sheet.orientation === 'portrait' ? 'portrait' : 'landscape') + '" fitToWidth="1" fitToHeight="0"/>' +
       '<headerFooter><oddHeader>' + xmlEscape('&L&9' + head + '&R&9&A') + '</oddHeader>' +
       '<oddFooter>' + xmlEscape('&L&9' + foot + '&C&9&P / &N&R&9&D') + '</oddFooter></headerFooter>' +
+      (breaks.length ? '<rowBreaks count="' + breaks.length + '" manualBreakCount="' + breaks.length + '">' + breaks.map(function (b) { return '<brk id="' + b + '" max="16383" man="1"/>'; }).join('') + '</rowBreaks>' : '') +
       '</worksheet>';
     return { xml: xml, printTitle: frozen ? listHeader : 0, filter: filter };
   }
@@ -335,7 +341,7 @@
   // o: { title, target, sub, sheet, header, rows, widths, styles, ids, numbers, centers, note, creator, orientation }
   function listBook(o) {
     return build([{ name: o.sheet || '一覧', list: true, widths: o.widths, orientation: o.orientation, tabColor: 'FF1F3A5F',
-      heading: { title: o.title + (o.target ? '：' + o.target : ''), sub: o.sub },
+      heading: { title: o.title + (o.target ? '：' + o.target : ''), sub: o.sub, lead: o.lead },
       blocks: [{ title: null, header: o.header, rows: o.rows, styles: o.styles, ids: o.ids, numbers: o.numbers, centers: o.centers, note: o.note }] }],
     { title: o.title + (o.target ? '：' + o.target : ''), creator: o.creator, footer: o.creator });
   }

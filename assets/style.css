@@ -345,3 +345,19 @@ code { overflow-wrap: anywhere; word-break: normal; }
 .assure span::before, .assure span + span::before { content: "✓"; margin: 0 4px 0 0; color: #1a7f37; font-weight: 700; }
 @media (max-width: 720px) { .assure span { display: block; } }
 .download + .note { margin-top: 12px; }
+
+/* 印刷（導入前の確認事項などを、導入審査の資料として出せるように） */
+.print-only { display: none; }
+@media print {
+  @page { size: A4; margin: 14mm 12mm; }
+  body { font-size: 10pt; line-height: 1.6; }
+  .site-head, .site-foot nav, .breadcrumb, .no-print, .btn { display: none !important; }
+  .print-only { display: block; font-size: 9pt; color: #444; }
+  .wrap { max-width: none; padding: 0; }
+  .page h2 { margin-top: 18px; break-after: avoid; }
+  .facts th, .facts td { padding: 4px 8px; }
+  tr, li { break-inside: avoid; }
+  a { color: inherit; text-decoration: none; }
+  .table-scroll { overflow: visible; }
+}
+.shot-narrow { max-width: 762px; }
