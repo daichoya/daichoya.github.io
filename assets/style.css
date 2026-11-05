@@ -383,3 +383,25 @@ code { overflow-wrap: anywhere; word-break: normal; }
 @media (max-width: 860px) { .tiers-2 { grid-template-columns: 1fr; } }
 .chips .paid { border-color: #1f3a5f; background: #1f3a5f; color: #fff; font-weight: 700; }
 .page-head { flex-wrap: wrap; row-gap: 6px; }
+
+/* 最初の画面：無料と有料のルールを2つの箱で */
+.hero-rule { font-size: 18px; margin: 0 0 18px; }
+.rule { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 0 0 20px; }
+.rule-box { display: flex; flex-direction: column; padding: 18px 20px; border: 2px solid; color: var(--text); text-decoration: none; background: var(--bg); }
+.rule-free { border-color: #1a7f37; }
+.rule-paid { border-color: #1f3a5f; }
+.rule-box:hover .rule-more { text-decoration: underline; }
+.rule-head { display: flex; align-items: center; font-size: 19px; font-weight: 700; line-height: 1.5; }
+.rule-price { margin: 6px 0 8px; font-size: 14px; color: var(--muted); }
+.rule-price strong { font-size: 22px; color: var(--text); }
+.rule-text { font-size: 15px; line-height: 1.7; }
+.rule-try { margin-top: 10px; padding: 8px 10px; background: var(--band); font-size: 14px; }
+.rule-more { margin-top: auto; padding-top: 12px; font-size: 14px; font-weight: 700; color: var(--link); }
+.relation-head { margin: 32px 0 6px; font-size: 18px; }
+.relation th .plan, .price-summary th .plan { margin-right: 6px; }
+.relation thead th, .price-summary thead th { white-space: nowrap; }
+.price-summary td { width: 40%; }
+@media (max-width: 720px) {
+  .rule { grid-template-columns: 1fr; }
+  .relation thead th, .price-summary thead th { white-space: normal; }
+}

@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>台帳屋｜kintoneの全アプリを無料で点検・権限一覧・設計書を自動で作成するプラグイン</title>
-<meta name="description" content="kintoneの全アプリを無料で点検し、権限の注意点・退職者の指定・使われていないアプリ・ガバナンスガイドラインの点検項目を件数で表示。権限の一覧表・設計書・関係図・フィールドの影響調査・設定の比較も無料。データは外部に送信しません。">
+<title>台帳屋｜kintoneの権限一覧・設計書は無料、全アプリの点検は月額3,300円から</title>
+<meta name="description" content="kintone管理者向けプラグイン。1つのアプリずつ調べる6本は無料（権限の一覧・設計書・つながりの図・退職した人の指定・フィールドの使われ方・設定の比較）。全アプリをまとめて点検し、点検台帳と報告書を作る1本は月額3,300円から（件数だけなら無料、30日間すべて無料で試せます）。データは外部に送信しません。">
 <link rel="canonical" href="https://daichoya.github.io/">
-<meta property="og:title" content="台帳屋｜kintoneの全アプリを無料で点検・権限一覧・設計書を自動で作成するプラグイン">
-<meta property="og:description" content="kintoneの全アプリを無料で点検し、権限の注意点・退職者の指定・使われていないアプリ・ガバナンスガイドラインの点検項目を件数で表示。権限の一覧表・設計書・関係図・フィールドの影響調査・設定の比較も無料。データは外部に送信しません。">
+<meta property="og:title" content="台帳屋｜kintoneの権限一覧・設計書は無料、全アプリの点検は月額3,300円から">
+<meta property="og:description" content="kintone管理者向けプラグイン。1つのアプリずつ調べる6本は無料（権限の一覧・設計書・つながりの図・退職した人の指定・フィールドの使われ方・設定の比較）。全アプリをまとめて点検し、点検台帳と報告書を作る1本は月額3,300円から（件数だけなら無料、30日間すべて無料で試せます）。データは外部に送信しません。">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://daichoya.github.io/">
 <meta property="og:site_name" content="台帳屋">
@@ -27,43 +27,38 @@
 </header>
 <main>
 <section class="hero">
-  <div class="wrap hero-grid">
-    <div>
-      <p class="badge">kintone管理者のための点検・資料づくりプラグイン</p>
-      <h1><span class="phrase">kintoneの全アプリを、</span><span class="phrase">無料で点検</span></h1>
-      <div class="lead">
-        <p>ボタン1つで、全アプリの権限の注意点・退職した人が残っている設定・使われていないアプリを、件数と例で表示します。権限の一覧表や設計書を作る6つのプラグインも無料です。</p>
-        <p class="hero-paid">有料は、全アプリの一覧・点検台帳・報告書を作る<a href="pro.html">棚卸し・変更監視パック</a>の1本だけです（月額3,300円から・30日間無料）。</p>
-      </div>
-      <div class="actions">
-        <a class="btn btn-primary btn-large" href="pro.html#free">無料で点検する</a>
-        <a class="btn btn-large" href="demo.html">デモを試す（登録不要）</a>
-      </div>
-      <p class="assure"><span>申し込み不要</span><span>データは外部に送信しません</span><span>設定やレコードを変更しません</span></p>
+  <div class="wrap">
+    <p class="badge">kintone管理者のための点検・資料づくりプラグイン</p>
+    <h1><span class="phrase">kintoneの点検と資料づくりを、</span><span class="phrase">ボタン1つで</span></h1>
+    <p class="lead hero-rule">1つのアプリずつ調べるなら<strong>無料</strong>、全アプリをまとめて点検するなら<strong>有料</strong>です。</p>
+    <div class="rule">
+      <a class="rule-box rule-free" href="#free-plugins">
+        <span class="rule-head"><span class="plan plan-free">無料</span>1つのアプリずつ調べる</span>
+        <span class="rule-price"><strong>0円</strong>　6本・ずっと無料</span>
+        <span class="rule-text">権限の一覧、設計書、つながりの図、退職した人の指定、フィールドの使われ方、2つのアプリの違い</span>
+        <span class="rule-more">6本のプラグインを見る</span>
+      </a>
+      <a class="rule-box rule-paid" href="#paid-plugin">
+        <span class="rule-head"><span class="plan plan-paid">有料</span>全アプリをまとめて点検する</span>
+        <span class="rule-price"><strong>月額3,300円から</strong>　1本</span>
+        <span class="rule-text">全アプリの注意点の一覧、点検台帳（Excel）、上司や監査に出せる報告書（PDF）、前回からの変更点</span>
+        <span class="rule-try">件数だけなら無料で見られます。30日間はすべて無料で試せます。</span>
+        <span class="rule-more">有料のプラグインを見る</span>
+      </a>
     </div>
-    <figure class="hero-shot"><a href="pro.html"><img src="images/inventory-free-thumb.webp" alt="無料の点検の結果。見直したほうがよい設定の件数と、権限・ユーザーの指定の例が表に並んでいる" width="760" height="393"></a><figcaption>「無料で点検する」を押したときの画面（見本のデータ）</figcaption></figure>
+    <div class="actions">
+      <a class="btn btn-primary btn-large" href="demo.html">デモを試す（登録不要）</a>
+      <a class="btn btn-large" href="#plugins">プラグイン一覧</a>
+    </div>
+    <p class="assure"><span>データは外部に送信しません</span><span>設定やレコードを変更しません</span><span>APIトークンやパスワードは不要</span></p>
   </div>
 </section>
 
 <section id="plugins" class="band">
   <div class="wrap">
     <h2>プラグイン一覧</h2>
-    <p class="section-lead">有料は1本だけです。ほかの6本は、ずっと無料です。</p>
 
-    <h3 class="group-head"><span class="plan plan-paid">有料</span>全アプリをまとめて点検する（1本）</h3>
-    <a class="feature-card" href="pro.html">
-      <span class="fc-body">
-        <span class="card-name"><span class="plan plan-paid">有料</span>棚卸し・変更監視パック</span>
-        <span class="card-tag">全アプリを、まとめて点検</span>
-        <span class="card-price"><strong>月額3,300円から</strong>（税込）・30日間無料で試せます</span>
-        <span class="card-desc">全アプリの権限・退職した人の指定・使われていないアプリ・ガイドラインの点検項目を、すべて一覧にしてExcelの点検台帳にまとめます。上司や監査に出せる1枚の報告書と、前回の点検からの変更点も作ります。</span>
-        <span class="card-meta"><span>買う前に、件数と例の点検は無料（申し込み不要）</span><span>Excel・報告書（PDF）</span></span>
-        <span class="card-more">詳しく見る</span>
-      </span>
-      <span class="fc-shot"><img src="images/card-inventory.webp" alt="有料版で作れる点検の報告書。総評と点検の結果の表が並ぶ" width="1040" height="650" loading="lazy"></span>
-    </a>
-
-    <h3 class="group-head"><span class="plan plan-free">無料</span>1つのアプリを詳しく調べる（6本・ずっと無料）</h3>
+    <h3 id="free-plugins" class="group-head"><span class="plan plan-free">無料</span>1つのアプリずつ調べる（6本・ずっと無料）</h3>
     <ul class="cards">
       <li><a class="card" href="plugins/permission-checker.html">
         <span class="card-thumb"><img src="images/card-permission-checker.webp" alt="" width="800" height="500" loading="lazy"></span>
@@ -120,49 +115,55 @@
         </span>
       </a></li>
     </ul>
+
+    <h3 id="paid-plugin" class="group-head"><span class="plan plan-paid">有料</span>全アプリをまとめて点検する（1本・月額3,300円から）</h3>
+    <a class="feature-card" href="pro.html">
+      <span class="fc-body">
+        <span class="card-name"><span class="plan plan-paid">有料</span>棚卸し・変更監視パック</span>
+        <span class="card-tag">全アプリを、まとめて点検</span>
+        <span class="card-price"><strong>月額3,300円から</strong>（税込）</span>
+        <span class="card-desc">無料の6本で1つずつ調べることを、全アプリまとめて行います。注意点をすべて一覧にした点検台帳（Excel）と、上司や監査に出せる1枚の報告書、前回の点検からの変更点を作ります。</span>
+        <span class="card-meta"><span>件数だけなら無料</span><span>30日間すべて無料で試せる</span><span>Excel・報告書（PDF）</span></span>
+        <span class="card-more">詳しく見る</span>
+      </span>
+      <span class="fc-shot"><img src="images/card-inventory.webp" alt="有料のプラグインで作れる点検の報告書。総評と点検の結果の表が並ぶ" width="1040" height="650" loading="lazy"></span>
+    </a>
+
+    <h3 class="relation-head">無料の6本と、有料の1本の関係</h3>
+    <p class="prose">有料のプラグインは、無料の6本で1つずつ調べることを、全アプリまとめて行い、1つの点検台帳と報告書にします。</p>
+    <div class="table-scroll">
+      <table class="facts relation">
+        <thead><tr><th scope="col">調べること</th><th scope="col"><span class="plan plan-free">無料</span>1つのアプリずつ</th><th scope="col"><span class="plan plan-paid">有料</span>全アプリまとめて</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">権限</th><td><a href="plugins/permission-checker.html">権限チェッカー</a></td><td>全アプリの権限の一覧と注意点</td></tr>
+          <tr><th scope="row">退職・異動した人</th><td><a href="plugins/transfer-checker.html">異動・退職チェッカー</a></td><td>全アプリに残っている指定</td></tr>
+          <tr><th scope="row">フィールドの使われ方</th><td><a href="plugins/field-impact.html">フィールド影響チェッカー</a></td><td>全アプリのフィールドの使われ方</td></tr>
+          <tr><th scope="row">アプリのつながり</th><td><a href="plugins/app-map.html">アプリ相関マップ</a></td><td>全アプリのつながりの一覧</td></tr>
+          <tr><th scope="row">設定の変わったところ</th><td><a href="plugins/app-diff.html">アプリ設定の比較</a>（2つのアプリを比べる）</td><td>前回の点検から変わったところ</td></tr>
+          <tr><th scope="row">資料</th><td><a href="plugins/design-doc.html">設計書ジェネレーター</a>（1つのアプリの設計書）</td><td>点検台帳（Excel）と報告書（PDF）</td></tr>
+        </tbody>
+      </table>
+    </div>
     <p class="note">サイボウズの「<a href="https://kintone.cybozu.co.jp/material/pdf/kintone_governance_guideline.pdf" rel="noopener">kintoneガバナンスガイドライン</a>」や「<a href="https://kintone.cybozu.co.jp/kintone-signpost/assets/pdf/operation_rules_advanced.pdf" rel="noopener">運用ルール（応用編）</a>」でも、アプリやプラグインの定期的な棚卸し（半年に1回など）や、重要なアプリの設計資料の作成がすすめられています。</p>
   </div>
 </section>
 
 <section id="price">
   <div class="wrap">
-    <h2>無料と有料</h2>
-    <p class="section-lead">無料は6本、有料は「棚卸し・変更監視パック」の1本です。</p>
-    <div class="tiers tiers-2">
-      <div class="tier tier-free">
-        <p class="tier-name"><span class="plan plan-free">無料</span>無料のプラグイン（6本）</p>
-        <p class="tier-price"><strong>0円</strong>　ずっと無料・利用人数の制限なし</p>
-        <p class="tier-lead">1つのアプリを詳しく調べて、資料にします。</p>
-        <ul class="checks">
-          <li>アプリの権限を1つの表に（Excel・CSV）</li>
-          <li>表紙を含む8シートの設計書（Excel）</li>
-          <li>つながっているアプリを図で表示</li>
-          <li>設定に出てくる人の一覧（退職した人に印）</li>
-          <li>フィールドが使われている場所の一覧</li>
-          <li>2つのアプリの設定の違いの一覧</li>
-        </ul>
-        <p class="tier-link"><a href="#plugins">6本のプラグインを見る</a></p>
-      </div>
-      <div class="tier tier-paid">
-        <p class="tier-name"><span class="plan plan-paid">有料</span>棚卸し・変更監視パック（1本）</p>
-        <p class="tier-price"><strong>月額3,300円から</strong>（税込）　30日間無料</p>
-        <p class="tier-lead">全アプリをまとめて点検し、<strong>すべての一覧</strong>を<strong>Excelの点検台帳</strong>と<strong>報告書</strong>にまとめます。</p>
-        <ul class="checks">
-          <li>注意点を、どのアプリのどの設定かまで一覧に</li>
-          <li>全アプリの権限・人の指定・プラグイン・つながりを、10シートのExcelに</li>
-          <li>前回の点検から変わったところだけを一覧に</li>
-          <li>上司や監査に出せる1枚の点検の報告書（印刷・PDF）</li>
-        </ul>
-        <div class="tier-try">
-          <p><strong>買う前に、無料で試せます</strong></p>
-          <p>申し込みなしで、全アプリの注意点の<strong>件数と例</strong>だけを表示する「無料の点検」が使えます。30日間の無料試用では、すべての機能を使えます。</p>
-        </div>
-        <p class="tier-link"><a href="pro.html">有料のプラグインの詳しい内容と料金</a></p>
-      </div>
+    <h2>料金</h2>
+    <div class="table-scroll">
+      <table class="facts price-summary">
+        <thead><tr><th scope="col"></th><th scope="col"><span class="plan plan-free">無料</span>無料のプラグイン（6本）</th><th scope="col"><span class="plan plan-paid">有料</span>有料のプラグイン（1本）</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">料金（税込）</th><td><strong>0円</strong>（ずっと無料）</td><td><strong>月額3,300円から</strong>（アプリの数で3つのプラン）</td></tr>
+          <tr><th scope="row">調べる範囲</th><td>1つのアプリずつ</td><td>全アプリまとめて</td></tr>
+          <tr><th scope="row">試し方</th><td>そのまま使えます</td><td>件数だけなら、申し込みなしで無料。30日間はすべて無料で試せます</td></tr>
+          <tr><th scope="row">利用人数</th><td colspan="2">どちらも制限なし（人数で料金は増えません）</td></tr>
+        </tbody>
+      </table>
     </div>
-    <p class="price-line">有料のプラグインの料金はkintoneの環境ごとで、利用人数では増えません。アプリ100個までは<strong>月額3,300円</strong>（年額33,000円）、500個までは月額9,900円、上限なしは月額19,800円です（税込）。</p>
-    <p class="note">アプリが少なく、気になるアプリを1つずつ調べれば足りる場合は、無料のプラグインと無料の点検だけで、ずっとお使いいただけます。どれも、kintoneのスタンダードコース・ワイドコースで使えます（ライトコースはプラグインに対応していません）。</p>
-    <div class="actions"><a class="btn btn-primary" href="pro.html#free">無料で点検する（申し込み不要）</a><a class="btn" href="pro.html#price">有料のプラグインの料金と見積書</a></div>
+    <p class="price-line">有料のプラグインは、kintoneの環境ごとの料金です。アプリ100個までは<strong>月額3,300円</strong>（年額33,000円）、500個までは月額9,900円、上限なしは月額19,800円です。どれも、kintoneのスタンダードコース・ワイドコースで使えます（ライトコースはプラグインに対応していません）。</p>
+    <div class="actions"><a class="btn btn-primary" href="pro.html#free">全アプリを無料で点検する（件数だけ）</a><a class="btn" href="pro.html#price">有料のプラグインの料金と見積書</a></div>
   </div>
 </section>
 
@@ -199,12 +200,10 @@
   <div class="wrap">
     <h2>よくあるご質問</h2>
     <dl class="qa prose">
-      <dt>有料なのは、どれですか？</dt>
-      <dd>「棚卸し・変更監視パック」の1本だけです（月額3,300円から、30日間無料）。ほかの6本のプラグインは、ずっと無料です。棚卸し・変更監視パックも、全アプリの注意点の件数と例を表示する「無料の点検」までは、申し込みなしで無料で使えます。</dd>
-      <dt>本当に無料ですか？</dt>
-      <dd>はい。6つのプラグインと、棚卸し・変更監視パックの「無料で点検する」（全アプリの件数と例）は、期間の制限なく無料で使えます。すべての一覧とExcelの点検台帳、報告書、前回からの変更点は有料版です。</dd>
+      <dt>何が無料で、何が有料ですか？</dt>
+      <dd>1つのアプリずつ調べる6本のプラグインは、ずっと無料です。全アプリをまとめて点検する「棚卸し・変更監視パック」の1本だけが有料です（月額3,300円から）。この有料のプラグインも、件数だけなら申し込みなしで無料で見られ、30日間はすべての機能を無料で試せます。</dd>
       <dt>利用人数やアプリ数に制限はありますか？</dt>
-      <dd>無料版は、利用人数やアプリ数の制限はありません。有料版は、アプリの数で3つのプラン（100個まで・500個まで・上限なし）があり、利用人数による追加料金はありません。</dd>
+      <dd>無料のプラグインは、利用人数やアプリ数の制限はありません。有料のプラグインは、アプリの数で3つのプラン（100個まで・500個まで・上限なし）があり、利用人数による追加料金はありません。</dd>
       <dt>アプリの管理者でなくても使えますか？</dt>
       <dd>設定の読み取りには、そのアプリの管理権限が必要です。権限が足りない項目は、その旨を画面に表示します。</dd>
       <dt>使えない画面やアプリはありますか？</dt>
@@ -236,11 +235,11 @@
 
 <section class="final band">
   <div class="wrap">
-    <h2>まずは、お使いのkintoneを無料で点検してください</h2>
-    <p class="prose">申し込みは不要です。kintoneに入れる前に、デモですべてのプラグインを試すこともできます。</p>
+    <h2>まずは、無料で試してください</h2>
+    <p class="prose">1つのアプリずつ調べる6本は、ずっと無料です。全アプリの点検も、件数だけなら申し込みなしで無料で見られます。kintoneに入れる前に、デモですべてのプラグインを試すこともできます。</p>
     <div class="actions">
-      <a class="btn btn-primary btn-large" href="pro.html#free">無料で点検する</a>
-      <a class="btn btn-large" href="demo.html">デモを試す</a>
+      <a class="btn btn-primary btn-large" href="demo.html">デモを試す（登録不要）</a>
+      <a class="btn btn-large" href="pro.html#free">全アプリを無料で点検する（件数だけ）</a>
     </div>
     <p class="note">台帳屋は個人で開発・運営しています。不具合の修正やkintoneの仕様変更への対応は、各プラグインのページの更新履歴でお知らせします。</p>
   </div>

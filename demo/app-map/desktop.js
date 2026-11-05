@@ -489,13 +489,13 @@
   // 有料版のご案内（画面の下に小さく1行）。アプリの一覧を読んだら、この環境のアプリの数を入れる
   var moreText = null;
   function moreLink() {
-    moreText = document.createTextNode('すべてのアプリを、まとめて無料で点検できます：');
+    moreText = document.createTextNode('すべてのアプリをまとめて点検するなら：');
     return el('p', { class: P + '-more' }, [
       moreText,
-      el('a', { href: 'https://daichoya.github.io/pro.html#free', target: '_blank', rel: 'noopener', text: '棚卸し・変更監視パック（件数の点検は無料。一覧とExcelは30日間無料で試せます）' })
+      el('a', { href: 'https://daichoya.github.io/pro.html', target: '_blank', rel: 'noopener', text: '有料の「棚卸し・変更監視パック」（月額3,300円から。件数だけなら無料、30日間すべて無料で試せます）' })
     ]);
   }
-  function moreCount(n) { if (moreText && n > 1) moreText.textContent = 'この環境の' + n + '個のアプリを、まとめて無料で点検できます：'; }
+  function moreCount(n) { if (moreText && n > 1) moreText.textContent = 'この環境の' + n + '個のアプリをまとめて点検するなら：'; }
 
   function openModal() {
     if (document.getElementById(P + '-overlay')) return;

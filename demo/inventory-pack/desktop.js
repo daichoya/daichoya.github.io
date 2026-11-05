@@ -1254,7 +1254,7 @@
     box.appendChild(el('h3', { text: '無料の点検の結果' }));
     box.appendChild(el('p', { class: P + '-lead', text: sum.apps + '個のアプリを点検し、見直したほうがよい設定が' + sum.total + '件見つかりました（うち要確認 ' + sum.important + '件）。' }));
     var table = el('table', { class: P + '-table' });
-    table.appendChild(el('tr', {}, [el('th', { text: '種類' }), el('th', { text: '件数' }), el('th', { text: '例（すべての一覧は有料版で）' })]));
+    table.appendChild(el('tr', {}, [el('th', { text: '種類' }), el('th', { text: '件数' }), el('th', { text: '例（すべての一覧はご契約で）' })]));
     sum.groups.forEach(function (g) {
       var ex = el('td', {});
       if (!g.examples.length) ex.appendChild(document.createTextNode('－'));
@@ -1267,7 +1267,7 @@
     box.appendChild(table);
     if (sum.unreadable) box.appendChild(el('p', { class: P + '-note', text: '権限がなく、設定の一部を読み取れなかったアプリが' + sum.unreadable + '個あります。kintoneシステム管理者が点検すると、すべて読み取れます。' }));
     box.appendChild(el('div', { class: P + '-cta' }, [
-      el('p', { text: '有料版では、すべての一覧と、どのアプリのどの設定かをExcelの点検台帳にまとめ、上司や監査に出せる1枚の報告書も作ります。次回からは、前回の点検から変わったところと、件数の推移も分かります。' }),
+      el('p', { text: 'ご契約（30日間は無料で試せます）で、すべての一覧と、どのアプリのどの設定かをExcelの点検台帳にまとめ、上司や監査に出せる1枚の報告書も作ります。次回からは、前回の点検から変わったところと、件数の推移も分かります。' }),
       el('p', { class: P + '-note', text: planText(sum.apps) }),
       el('div', { class: P + '-controls' }, [
         el('a', { class: P + '-btn ' + P + '-primary ' + P + '-link', href: trialUrl(domain), target: '_blank', rel: 'noopener', text: '30日間無料で、すべてを見る' }),
@@ -1322,7 +1322,7 @@
     var dialog = el('div', { class: P + '-dialog', role: 'dialog', 'aria-modal': 'true', 'aria-label': '棚卸し・変更監視パック' }, [
       el('div', { class: P + '-head' }, [el('h2', { text: '棚卸し・変更監視パック' }), closeBtn]),
       licenseLine,
-      el('p', { class: P + '-lead', text: 'すべてのアプリの設定を読み取って点検します。件数の点検は無料です。有料版（30日間の無料試用あり）は、点検台帳（Excel）と点検の報告書を作り、前回の点検台帳を選ぶと、変わったところと点検の推移も分かります。' }),
+      el('p', { class: P + '-lead', text: '全アプリをまとめて点検します。件数だけの点検は無料です。ご契約（30日間の無料試用あり）で、すべての一覧を点検台帳（Excel）と報告書にまとめ、前回の点検台帳を選ぶと、変わったところと点検の推移も分かります。' }),
       last ? el('p', { class: P + '-note', text: '前回の点検：' + last + '（このブラウザで点検した日）' }) : el('span', {}),
       prevBlock,
       el('div', { class: P + '-option' }, [recordsBox, el('label', { for: P + '-records', text: '使われていないアプリも調べる（レコードの件数と最終更新日時だけを見ます。中身は読みません）' })]),
