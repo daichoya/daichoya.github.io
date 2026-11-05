@@ -1,5 +1,5 @@
 /*
- * 台帳屋 アプリ相関マップ for kintone（試作 v0.1.0）
+ * 台帳屋 アプリ相関マップ for kintone
  * 一覧画面に「相関マップ」ボタンを追加し、選んだアプリとつながっているアプリ
  * （ルックアップ・関連レコード一覧・アクション）を図で表示する。図は画像（PNG）、
  * つながりの一覧はCSVで保存できる。データはすべてお客様のkintoneの中で処理し、外部には送らない。
@@ -441,6 +441,14 @@
     return el('table', { class: P + '-table' }, [thead, tbody]);
   }
 
+  // 有料版のご案内（画面の下に小さく1行）
+  function moreLink() {
+    return el('p', { class: P + '-more' }, [
+      'すべてのアプリをまとめて点検するなら：',
+      el('a', { href: 'https://daichoya.github.io/pro.html', target: '_blank', rel: 'noopener', text: '棚卸し・変更監視パック（有料版・30日間の無料試用あり）' })
+    ]);
+  }
+
   function openModal() {
     if (document.getElementById(P + '-overlay')) return;
     var names = {};
@@ -458,7 +466,8 @@
       el('div', { class: P + '-head' }, [el('h2', { text: 'アプリ相関マップ' }), closeBtn]),
       el('p', { class: P + '-lead', text: 'ルックアップ・関連レコード一覧・アクションでつながっているアプリを図にします。図のアプリを押すと、そのアプリを中心に切り替えます。' }),
       el('div', { class: P + '-controls' }, [select, runBtn, pngBtn, csvBtn]),
-      status, mapBox, tableBox
+      status, mapBox, tableBox,
+      moreLink()
     ]);
     var overlay = el('div', { id: P + '-overlay', class: P + '-overlay' }, [dialog]);
 

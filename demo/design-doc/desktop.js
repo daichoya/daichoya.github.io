@@ -1,5 +1,5 @@
 /*
- * 台帳屋 設計書ジェネレーター for kintone（試作 v0.1.0）
+ * 台帳屋 設計書ジェネレーター for kintone
  * 一覧画面に「設計書を作成」ボタンを追加し、選んだアプリの設定を
  * 人が読める設計書（Excel形式 .xlsx）として出力する。
  * Excelファイルは外部ライブラリを使わずブラウザ内で組み立て、データは外部に送らない。
@@ -625,6 +625,14 @@
     setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
   }
 
+  // 有料版のご案内（画面の下に小さく1行）
+  function moreLink() {
+    return el('p', { class: P + '-more' }, [
+      'すべてのアプリをまとめて点検するなら：',
+      el('a', { href: 'https://daichoya.github.io/pro.html', target: '_blank', rel: 'noopener', text: '棚卸し・変更監視パック（有料版・30日間の無料試用あり）' })
+    ]);
+  }
+
   function openModal() {
     if (document.getElementById(P + '-overlay')) return;
     var appNames = {};
@@ -636,7 +644,8 @@
       el('div', { class: P + '-head' }, [el('h2', { text: '設計書ジェネレーター' }), closeBtn]),
       el('p', { class: P + '-lead', text: 'フィールド・一覧・プロセス管理・通知・アクセス権・プラグイン・カスタマイズを、1つのExcelファイルにまとめます。' }),
       el('div', { class: P + '-controls' }, [select, runBtn]),
-      status
+      status,
+      moreLink()
     ]);
     var overlay = el('div', { id: P + '-overlay', class: P + '-overlay' }, [dialog]);
 

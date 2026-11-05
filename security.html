@@ -32,7 +32,7 @@
     <h1>導入前の確認事項</h1>
     <div class="lead prose">
       <p>社内のkintoneにプラグインを導入する前の確認にお使いください。</p>
-      <p>3つのプラグイン（権限チェッカー・設計書ジェネレーター・アプリ相関マップ）は、同じ仕組みで動作します。</p>
+      <p>無料の3つのプラグイン（権限チェッカー・設計書ジェネレーター・アプリ相関マップ）は、同じ仕組みで動作します。<br>有料版（棚卸し・変更監視パック）の違いは、<a href="#pro">ページの下</a>にまとめています。</p>
     </div>
 
     <h2>動作の仕組み</h2>
@@ -58,6 +58,25 @@
           <tr><th scope="row">権限チェッカー</th><td><ul class="api"><li><code>/k/v1/apps.json</code></li><li><code>/k/v1/app/form/fields.json</code></li><li><code>/k/v1/app/acl.json</code>・<code>/k/v1/record/acl.json</code>・<code>/k/v1/field/acl.json</code></li></ul></td></tr>
           <tr><th scope="row">設計書ジェネレーター</th><td><ul class="api"><li><code>/k/v1/apps.json</code>・<code>/k/v1/app.json</code></li><li><code>/k/v1/app/form/fields.json</code>・<code>/k/v1/app/form/layout.json</code>・<code>/k/v1/app/views.json</code>・<code>/k/v1/app/status.json</code></li><li><code>/k/v1/app/notifications/general.json</code>・<code>perRecord.json</code>・<code>reminder.json</code></li><li><code>/k/v1/app/acl.json</code>・<code>/k/v1/record/acl.json</code>・<code>/k/v1/field/acl.json</code></li><li><code>/k/v1/app/plugins.json</code>・<code>/k/v1/app/customize.json</code></li></ul></td></tr>
           <tr><th scope="row">アプリ相関マップ</th><td><ul class="api"><li><code>/k/v1/apps.json</code></li><li><code>/k/v1/app/form/fields.json</code>・<code>/k/v1/app/actions.json</code></li></ul></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h2 id="pro">有料版（棚卸し・変更監視パック）</h2>
+    <p class="prose">通信先・書き込みがないこと・ソースコードを確認できることは、無料版と同じです。違いは次のとおりです。</p>
+    <div class="table-scroll">
+      <table class="facts">
+        <tbody>
+          <tr><th scope="row">レコードの件数と最終更新日時</th><td>「使われていないアプリも調べる」にチェックを入れたときだけ、アプリごとに<code>/k/v1/records.json</code>で、レコードの件数と、いちばん新しい更新日時を1件だけ取得します。<br>レコードの中身（入力された値）は読み取らず、点検台帳にも書きません。</td></tr>
+          <tr><th scope="row">ライセンスキー</th><td>プラグインの設定画面で、ライセンスキーを貼り付けて保存します。<br>キーの確認はブラウザの中で行い、台帳屋のサーバーには問い合わせません。キーには、使えるkintone環境名・種類・有効期限だけが入っています。</td></tr>
+          <tr><th scope="row">点検台帳（Excel）</th><td>点検した人のパソコンに保存されます。前回との比較に使う記録（アプリの設定の要約）は、同じファイルの見えないシートに入ります。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table-scroll">
+      <table class="facts">
+        <thead><tr><th scope="col">プラグイン</th><th scope="col">kintone REST API（すべて読み取り専用のGET）</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">棚卸し・変更監視パック</th><td><ul class="api"><li><code>/k/v1/apps.json</code></li><li><code>/k/v1/app/form/fields.json</code>・<code>/k/v1/app/actions.json</code></li><li><code>/k/v1/app/acl.json</code>・<code>/k/v1/record/acl.json</code>・<code>/k/v1/field/acl.json</code></li><li><code>/k/v1/app/plugins.json</code>・<code>/k/v1/app/customize.json</code></li><li><code>/k/v1/records.json</code>（件数と最終更新日時のみ。チェックを外すと使いません）</li></ul></td></tr>
         </tbody>
       </table>
     </div>

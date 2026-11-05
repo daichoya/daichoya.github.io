@@ -15,6 +15,8 @@
     レコード番号: { type: 'RECORD_NUMBER', code: 'レコード番号', label: 'レコード番号' },
     作成者: { type: 'CREATOR', code: '作成者', label: '作成者' },
     作成日時: { type: 'CREATED_TIME', code: '作成日時', label: '作成日時' },
+    更新者: { type: 'MODIFIER', code: '更新者', label: '更新者' },
+    更新日時: { type: 'UPDATED_TIME', code: '更新日時', label: '更新日時' },
     案件名: { type: 'SINGLE_LINE_TEXT', code: '案件名', label: '案件名', required: true, unique: false, defaultValue: '', maxLength: '100', minLength: '' },
     顧客ID: { type: 'SINGLE_LINE_TEXT', code: '顧客ID', label: '顧客ID', required: true, lookup: lookup('11', '顧客ID', [{ field: '顧客名', relatedField: '会社名' }, { field: '業種', relatedField: '業種' }]) },
     顧客名: { type: 'SINGLE_LINE_TEXT', code: '顧客名', label: '顧客名' },
@@ -112,12 +114,17 @@
       css: [{ type: 'FILE', file: { name: '一覧の見た目.css', fileKey: 'demo2', contentType: 'text/css', size: '512' } }]
     }, mobile: { js: [], css: [] }, revision: '5' } }
   };
+  // kintoneのアプリには、更新日時のフィールドが必ずある
+  Object.keys(data['/k/v1/app/form/fields.json']).forEach(function (id) {
+    var props = data['/k/v1/app/form/fields.json'][id].properties;
+    if (!props.更新日時) props.更新日時 = { type: 'UPDATED_TIME', code: '更新日時', label: '更新日時' };
+  });
   // 見本データのないアプリには、設定が空の応答を返す
   function emptyFor(path, appId) {
     var app = apps.filter(function (a) { return a.appId === String(appId); })[0] || { appId: String(appId), name: 'アプリ' };
     switch (path) {
       case '/k/v1/app.json': return { appId: app.appId, name: app.name, description: '', createdAt: '2025-04-01T00:30:00Z', creator: { code: 'kanri', name: '情報システム課' }, modifiedAt: '2026-10-01T00:00:00Z', modifier: { code: 'kanri', name: '情報システム課' } };
-      case '/k/v1/app/form/fields.json': return { properties: {} };
+      case '/k/v1/app/form/fields.json': return { properties: { 更新日時: { type: 'UPDATED_TIME', code: '更新日時', label: '更新日時' } } };
       case '/k/v1/app/form/layout.json': return { layout: [] };
       case '/k/v1/app/views.json': return { views: {} };
       case '/k/v1/app/status.json': return { enable: false, states: {}, actions: [] };
@@ -129,6 +136,7 @@
       case '/k/v1/field/acl.json': return { rights: [] };
       case '/k/v1/app/plugins.json': return { plugins: [] };
       case '/k/v1/app/actions.json': return { actions: {} };
+      case '/k/v1/records.json': return null;
       case '/k/v1/app/customize.json': return { scope: 'ALL', desktop: { js: [], css: [] }, mobile: { js: [], css: [] } };
       default: return null;
     }
@@ -147,6 +155,13 @@
       return new Promise(function (resolve, reject) {
         setTimeout(function () {
           if (path === '/k/v1/apps.json') { resolve({ apps: apps }); return; }
+          if (path === '/k/v1/records.json') {
+            var activity = { 11: ['2026-11-02T09:00:00Z', 318], 12: ['2026-11-04T08:30:00Z', 105], 13: ['2026-11-04T05:10:00Z', 1240], 14: ['2025-12-18T02:00:00Z', 57], 15: ['2026-10-31T07:00:00Z', 96], 16: ['2026-01-20T00:00:00Z', 24] }[String(params.app)];
+            var rec = {};
+            if (activity) rec[(params.fields || ['更新日時'])[0]] = { type: 'UPDATED_TIME', value: activity[0] };
+            resolve({ records: activity ? [rec] : [], totalCount: String(activity ? activity[1] : 0) });
+            return;
+          }
           var byApp = data[path];
           var appId = String(params.app || params.id);   // app.json だけは id で指定する
           var value = (byApp && byApp[appId]) || emptyFor(path, appId);

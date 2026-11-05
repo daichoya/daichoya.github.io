@@ -32,25 +32,43 @@
     <h1>棚卸し・変更監視パック（有料版・準備中）</h1>
     <div class="lead prose">
       <p>すべてのアプリをまとめて点検できる有料版です。</p>
-      <p>全アプリの権限や設計書をまとめて出力し、前回の点検からの変更点も検出します。</p>
+      <p>全アプリの権限・プラグイン・つながりを1つのExcel（点検台帳）にまとめ、前回の点検からの変更点と、使われていないアプリを見つけます。</p>
     </div>
     <p class="prose">試作版を、デモのページで見本データを使って試せます。デモの画面の「棚卸し」ボタンから、点検台帳（Excel）を作ってみてください。</p>
     <div class="actions"><a class="btn btn-primary" href="demo.html">デモで試す（登録不要）</a><a class="btn" href="#register">先行登録</a></div>
 
-    <h2>無料版との違い（予定）</h2>
+    <h2>点検台帳（Excel）の中身</h2>
+    <div class="table-scroll">
+      <table class="facts">
+        <thead><tr><th scope="col">シート</th><th scope="col">内容</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">点検報告</th><td>点検したアプリの数、注意点の数、前回からの変更の数</td></tr>
+          <tr><th scope="row">アプリ一覧</th><td>全アプリの作成者・設定の最終更新・フィールド数・プラグイン数、レコードの件数と最終更新</td></tr>
+          <tr><th scope="row">変更点</th><td>前回の点検台帳と比べて、追加・削除・変更されたフィールド・権限・プラグイン・カスタマイズ</td></tr>
+          <tr><th scope="row">注意点</th><td>Everyoneに「アプリ管理」や「書き出し」がある、ユーザー個人を指定している、長いあいだレコードが更新されていない、など</td></tr>
+          <tr><th scope="row">権限一覧</th><td>全アプリのアプリ・レコード・フィールドのアクセス権を1つの表に</td></tr>
+          <tr><th scope="row">プラグイン・カスタマイズ</th><td>どのアプリに、どのプラグインやJavaScript・CSSが入っているか</td></tr>
+          <tr><th scope="row">つながり</th><td>ルックアップ・関連レコード一覧・アクションでつながるアプリの組み合わせ</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note prose">前回の点検台帳を選んで作ると、変わったところだけを「変更点」のシートにまとめます。<br>点検台帳は台帳屋のサーバーには送られず、点検した人のパソコンに保存されます。</p>
+
+    <h2>無料版との違い</h2>
     <div class="table-scroll">
       <table class="facts">
         <thead><tr><th scope="col">機能</th><th scope="col">無料版</th><th scope="col">有料版</th></tr></thead>
         <tbody>
-          <tr><th scope="row">権限の一覧</th><td>アプリごと</td><td>全アプリを1つの表に</td></tr>
-          <tr><th scope="row">設計書</th><td>アプリごと</td><td>全アプリをまとめて出力</td></tr>
-          <tr><th scope="row">アプリの関係図</th><td>選んだアプリの周辺</td><td>組織全体</td></tr>
-          <tr><th scope="row">変更点の検出</th><td class="center">－</td><td>前回の点検から変わったフィールド・権限・プラグイン</td></tr>
-          <tr><th scope="row">点検報告書</th><td class="center">－</td><td>点検結果をExcelの報告書に出力</td></tr>
+          <tr><th scope="row">点検の範囲</th><td>開いているアプリ（1つずつ）</td><td>見られるすべてのアプリをまとめて</td></tr>
+          <tr><th scope="row">権限の一覧</th><td>アプリごとに画面で確認</td><td>全アプリを1つの表に</td></tr>
+          <tr><th scope="row">アプリのつながり</th><td>選んだアプリの周辺を図で表示</td><td>全アプリの組み合わせを表に</td></tr>
+          <tr><th scope="row">変更点の検出</th><td class="center">－</td><td>前回の点検から変わったフィールド・権限・プラグイン・カスタマイズ</td></tr>
+          <tr><th scope="row">使われていないアプリ</th><td class="center">－</td><td>レコードが180日以上更新されていないアプリ、1件もないアプリ</td></tr>
+          <tr><th scope="row">点検報告</th><td class="center">－</td><td>点検結果をExcelの点検台帳に</td></tr>
         </tbody>
       </table>
     </div>
-    <p class="note prose">機能の内容は、開発の過程で変わる場合があります。<br>先行登録でいただいたご意見は、優先する機能を決める参考にします。</p>
+    <p class="note prose">1つのアプリの詳しい設計書は、無料の<a href="plugins/design-doc.html">設計書ジェネレーター</a>で作れます。</p>
 
     <h2>価格（予定）</h2>
     <div class="prose">
@@ -74,7 +92,7 @@
     </ol>
     <div class="actions"><span class="btn" aria-disabled="true">無料試用の受付は準備中です</span></div>
     <div class="download">
-      <a class="btn btn-primary" href="downloads/daichoya-inventory-pack-0.9.0.zip" download>ダウンロード（v0.9.0・zip・25KB）</a><p class="note hash">ファイルの確認用（SHA-256）：<code>82eb52c8db16c6a45730da6df98a9f0d54aa515742d50db2138cf78abff6dd98</code></p>
+      <a class="btn btn-primary" href="downloads/daichoya-inventory-pack-0.9.1.zip" download>ダウンロード（v0.9.1・zip・26KB）</a><p class="note hash">ファイルの確認用（SHA-256）：<code>79bdc8d57fe41e87cb9804fd03f9b1065347f7cc3999ea3c5d9b25c0c52984f8</code></p>
       <p class="note">ご利用の前に<a href="terms.html">利用規約</a>をお読みください。先行版のため、画面や機能は変わる場合があります。</p>
     </div>
 

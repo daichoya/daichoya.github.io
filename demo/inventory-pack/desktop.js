@@ -440,9 +440,46 @@
       plugins: val('plugins') ? (val('plugins').plugins || []).map(function (p) { return { id: p.id, name: p.name, enabled: p.enabled !== false }; }) : null,
       customize: val('customize') ? { scope: val('customize').scope, files: customizeFiles(val('customize')) } : null,
       links: properties ? extractLinks(app.appId, properties, val('actions')) : [],
+      records: recordActivity(val('records')),
       warnings: warningsFor(val('appAcl'), val('recordAcl'), val('fieldAcl'), labels),
       errors: errors
     };
+  }
+
+  // レコードの件数と、最後に更新された日時（レコードの中身は記録しない）
+  function recordActivity(value) {
+    if (!value) return null;
+    var last = '';
+    var rec = (value.records || [])[0] || {};
+    Object.keys(rec).forEach(function (k) { if (rec[k] && rec[k].type === 'UPDATED_TIME') last = rec[k].value; });
+    return { count: Number(value.totalCount || 0), lastUpdated: last };
+  }
+
+  var DORMANT_DAYS = 180;
+
+  // referencedBy: ほかのアプリからルックアップや関連レコード一覧で参照されているアプリ（マスタなど）
+  function usageWarnings(a, now, referencedBy) {
+    var r = a.records;
+    if (!r) return [];
+    var refs = (referencedBy && referencedBy[a.id]) || [];
+    var note = refs.length ? '（ただし、ほかの' + refs.length + '個のアプリから参照されています。マスタとして使われている場合は問題ありません）' : '';
+    var item = function (text) { return [{ level: '確認', kind: '利用状況', order: '', target: '', text: text + note }]; };
+    if (r.count === 0) return item('レコードが1件もありません。使われていないアプリかもしれません。');
+    var days = Number(daysSince(r.lastUpdated, now));
+    if (r.lastUpdated && days >= DORMANT_DAYS) return item('レコードが' + days + '日間更新されていません。使われていないアプリかもしれません。');
+    return [];
+  }
+
+  function referencedApps(apps) {
+    var out = {};
+    apps.forEach(function (a) {
+      (a.links || []).forEach(function (l) {
+        if (l.kind === 'アクション' || l.to === a.id) return;
+        out[l.to] = out[l.to] || [];
+        if (out[l.to].indexOf(a.id) < 0) out[l.to].push(a.id);
+      });
+    });
+    return out;
   }
 
   function errorText(error) {
@@ -573,7 +610,8 @@
     var names = {};
     apps.forEach(function (a) { names[a.id] = a.name; });
     var warnings = [];
-    apps.forEach(function (a) { a.warnings.forEach(function (w) { warnings.push([w.level, a.id, a.name, w.kind, String(w.order), w.target, w.text]); }); });
+    var referencedBy = referencedApps(apps);
+    apps.forEach(function (a) { a.warnings.concat(usageWarnings(a, now, referencedBy)).forEach(function (w) { warnings.push([w.level, a.id, a.name, w.kind, String(w.order), w.target, w.text]); }); });
     var diff = prev ? diffSnapshots(prev, snapshot) : null;
     var withErrors = apps.filter(function (a) { return Object.keys(a.errors).length; });
 
@@ -582,7 +620,7 @@
       ['kintone環境', snapshot.host],
       ['点検したアプリ', apps.length + '個'],
       ['読み取れなかった項目があるアプリ', withErrors.length + '個' + (withErrors.length ? '（「アプリ一覧」シートの右端の列を参照）' : '')],
-      ['権限の注意点', warnings.length + '件'],
+      ['注意点（権限・利用状況）', warnings.length + '件'],
       ['前回の点検', prev ? dateText(prev.takenAt) + '（' + (prev.host || '') + '）' : '比較していません'],
       ['前回からの変更', diff ? diff.length + '件' : '－'],
       ['ライセンス', licenseText || '']
@@ -590,7 +628,8 @@
     var appRows = apps.map(function (a) {
       return [a.id, a.name, a.spaceId, a.creator, dateText(a.createdAt), a.modifier, dateText(a.modifiedAt), daysSince(a.modifiedAt, now),
         a.fields ? String(Object.keys(a.fields).length) : '', a.plugins ? String(a.plugins.length) : '', a.customize ? String(a.customize.files.length) : '',
-        String(a.warnings.length), Object.keys(a.errors).map(function (k) { return ERROR_KEYS[k] + '（' + a.errors[k] + '）'; }).join('、')];
+        a.records ? String(a.records.count) : '', a.records ? dateText(a.records.lastUpdated) : '', a.records ? daysSince(a.records.lastUpdated, now) : '',
+        String(a.warnings.length + usageWarnings(a, now, referencedBy).length), Object.keys(a.errors).map(function (k) { return ERROR_KEYS[k] + '（' + a.errors[k] + '）'; }).join('、')];
     });
     var aclRows = [];
     apps.forEach(function (a) {
@@ -621,9 +660,9 @@
       : { title: null, header: [], rows: [], note: '前回の点検台帳を選ばずに作成したため、比較していません。次回の点検で、このファイルを選ぶと変更点が分かります。' };
     return [
       { name: '点検報告', widths: [32, 70], blocks: [{ title: 'kintoneアプリの点検報告', header: ['項目', '内容'], rows: cover }] },
-      { name: 'アプリ一覧', widths: [8, 30, 10, 16, 18, 16, 18, 12, 10, 12, 14, 12, 40], blocks: [{ title: null, header: ['アプリID', 'アプリ名', 'スペースID', '作成者', '作成日時', '最終更新者', '設定の最終更新', '更新からの日数', 'フィールド数', 'プラグイン数', 'カスタマイズ数', '権限の注意点', '読み取れなかった項目'], rows: appRows }] },
+      { name: 'アプリ一覧', widths: [8, 30, 10, 16, 18, 16, 18, 12, 10, 12, 14, 12, 18, 12, 10, 40], blocks: [{ title: null, header: ['アプリID', 'アプリ名', 'スペースID', '作成者', '作成日時', '設定の最終更新者', '設定の最終更新', '設定の更新からの日数', 'フィールド数', 'プラグイン数', 'カスタマイズ数', 'レコード数', 'レコードの最終更新', 'レコードの更新からの日数', '注意点', '読み取れなかった項目'], rows: appRows }] },
       { name: '変更点', widths: [8, 8, 24, 18, 36, 40, 40], blocks: [diffBlock] },
-      { name: '権限の注意点', widths: [8, 8, 24, 10, 6, 24, 60], blocks: [{ title: null, header: ['重要度', 'アプリID', 'アプリ名', '種類', '順', '対象', '内容'], rows: warnings, styles: warnings.map(function (w) { return w[0] === '要確認' ? STYLE.warn : STYLE.body; }), note: warnings.length ? null : '注意点は見つかりませんでした。' }] },
+      { name: '注意点', widths: [8, 8, 24, 10, 6, 24, 60], blocks: [{ title: null, header: ['重要度', 'アプリID', 'アプリ名', '種類', '順', '対象', '内容'], rows: warnings, styles: warnings.map(function (w) { return w[0] === '要確認' ? STYLE.warn : STYLE.body; }), note: warnings.length ? null : '注意点は見つかりませんでした。' }] },
       { name: '権限一覧', widths: [8, 24, 10, 6, 30, 28, 40], blocks: [{ title: null, header: ['アプリID', 'アプリ名', '種類', '順', '条件・フィールド', '対象', '権限'], rows: aclRows }] },
       { name: 'プラグイン', widths: [8, 24, 36, 36, 8], blocks: [{ title: null, header: ['アプリID', 'アプリ名', 'プラグイン名', 'プラグインID', '状態'], rows: pluginRows, note: pluginRows.length ? null : 'プラグインを追加しているアプリはありません。' }] },
       { name: 'カスタマイズ', widths: [8, 24, 18, 10, 12, 6, 8, 60], blocks: [{ title: null, header: ['アプリID', 'アプリ名', '適用するユーザー', '画面', '種類', '順', '形式', 'ファイル名・URL'], rows: customRows, note: customRows.length ? null : 'JavaScript・CSSによるカスタマイズはありません。' }] },
@@ -632,13 +671,13 @@
     ];
   }
 
-  var ERROR_KEYS = { fields: 'フィールド', appAcl: 'アプリのアクセス権', recordAcl: 'レコードのアクセス権', fieldAcl: 'フィールドのアクセス権', plugins: 'プラグイン', customize: 'カスタマイズ', actions: 'アクション' };
+  var ERROR_KEYS = { records: 'レコードの件数', fields: 'フィールド', appAcl: 'アプリのアクセス権', recordAcl: 'レコードのアクセス権', fieldAcl: 'フィールドのアクセス権', plugins: 'プラグイン', customize: 'カスタマイズ', actions: 'アクション' };
 
   function summaryText(snapshot, sheets, compared) {
     var count = Object.keys(snapshot.apps).length;
     var warn = sheets[3].blocks[0].rows.length;
     var diff = sheets[2].blocks[0].rows.length;
-    return count + '個のアプリを点検しました。権限の注意点は' + warn + '件' + (compared ? '、前回からの変更は' + diff + '件' : '') + 'です。';
+    return count + '個のアプリを点検しました。注意点は' + warn + '件' + (compared ? '、前回からの変更は' + diff + '件' : '') + 'です。';
   }
 
   var Core = {
@@ -680,7 +719,15 @@
     return next(0);
   }
 
-  function collect(appId) {
+  // レコードの中身は読まない。更新日時のフィールドだけを1件取り、件数と合わせて確かめる
+  function recordRequest(appId, fieldsResult) {
+    var props = (fieldsResult.ok && fieldsResult.value.properties) || {};
+    var code = Object.keys(props).filter(function (k) { return props[k].type === 'UPDATED_TIME'; })[0];
+    if (!code) return Promise.resolve(null);
+    return settle(api('/k/v1/records.json', { app: appId, fields: [code], query: 'order by ' + code + ' desc limit 1', totalCount: true }));
+  }
+
+  function collect(appId, withRecords) {
     var requests = {
       fields: api('/k/v1/app/form/fields.json', { app: appId }),
       appAcl: api('/k/v1/app/acl.json', { app: appId }),
@@ -694,19 +741,20 @@
     return Promise.all(keys.map(function (k) { return settle(requests[k]); })).then(function (list) {
       var results = {};
       keys.forEach(function (k, i) { results[k] = list[i]; });
-      return results;
+      if (!withRecords) return results;
+      return recordRequest(appId, results.fields).then(function (r) { if (r) results.records = r; return results; });
     });
   }
 
   // 同時に調べるアプリは3つまでにして、kintoneに負担をかけない
-  function scanAll(apps, onProgress) {
+  function scanAll(apps, withRecords, onProgress) {
     var snapshots = {};
     var index = 0;
     var done = 0;
     function worker() {
       if (index >= apps.length) return Promise.resolve();
       var app = apps[index++];
-      return collect(app.appId).then(function (results) {
+      return collect(app.appId, withRecords).then(function (results) {
         snapshots[app.appId] = appSnapshot(app, results);
         done += 1;
         onProgress(done, apps.length);
@@ -747,12 +795,14 @@
     var licenseLine = el('p', { class: P + '-license', text: 'ライセンスを確認しています…' });
     var fileInput = el('input', { type: 'file', accept: '.xlsx', class: P + '-file', id: P + '-prev' });
     var runBtn = el('button', { type: 'button', class: P + '-btn ' + P + '-primary', text: '点検台帳を作成', disabled: 'disabled' });
+    var recordsBox = el('input', { type: 'checkbox', id: P + '-records', checked: 'checked' });
     var status = el('p', { class: P + '-status', role: 'status' });
     var dialog = el('div', { class: P + '-dialog', role: 'dialog', 'aria-modal': 'true', 'aria-label': '棚卸し・変更監視パック' }, [
       el('div', { class: P + '-head' }, [el('h2', { text: '棚卸し・変更監視パック' }), closeBtn]),
       licenseLine,
       el('p', { class: P + '-lead', text: 'すべてのアプリの設定を読み取り、点検台帳（Excel）を作ります。前回の点検台帳を選ぶと、変わったところも一覧にします。' }),
       el('div', { class: P + '-prev' }, [el('label', { for: P + '-prev', text: '前回の点検台帳（任意）' }), fileInput]),
+      el('div', { class: P + '-option' }, [recordsBox, el('label', { for: P + '-records', text: '使われていないアプリも調べる（レコードの件数と最終更新日時だけを見ます。中身は読みません）' })]),
       el('div', { class: P + '-controls' }, [runBtn]),
       status
     ]);
@@ -794,7 +844,7 @@
         status.textContent = 'アプリの一覧を読み込み中…';
         return getAllApps();
       }).then(function (apps) {
-        return scanAll(apps, function (done, total) { status.textContent = 'アプリの設定を読み込み中…（' + done + ' / ' + total + '）'; });
+        return scanAll(apps, recordsBox.checked, function (done, total) { status.textContent = 'アプリの設定を読み込み中…（' + done + ' / ' + total + '）'; });
       }).then(function (apps) {
         var now = new Date();
         var snapshot = { v: 1, host: window.DaichoyaLicense.normalizeDomain(location.hostname), takenAt: now.toISOString(), apps: apps };

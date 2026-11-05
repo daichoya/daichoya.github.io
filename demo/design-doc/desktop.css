@@ -59,3 +59,5 @@
 .dcy-dd-empty { color: #888; text-align: center !important; }
 .dcy-dd-lead { margin-top: 16px; margin-bottom: 0; color: #555; font-size: 14px; }
 .dcy-dd-dialog { max-width: 720px; }
+.dcy-dd-more { margin: 24px 0 0; padding-top: 12px; border-top: 1px solid #e3e7e8; color: #666; font-size: 13px; }
+.dcy-dd-more a { color: #3498db; }

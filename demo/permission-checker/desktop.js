@@ -1,5 +1,5 @@
 /*
- * 台帳屋 権限チェッカー for kintone（試作 v0.1.0）
+ * 台帳屋 権限チェッカー for kintone
  * 一覧画面に「権限チェッカー」ボタンを追加し、選んだアプリの
  * アプリ・レコード・フィールドのアクセス権を1つの画面に表示して、CSVで書き出す。
  * データはすべてお客様のkintoneの中で処理し、外部には送らない。
@@ -270,6 +270,14 @@
     setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
   }
 
+  // 有料版のご案内（画面の下に小さく1行）
+  function moreLink() {
+    return el('p', { class: P + '-more' }, [
+      'すべてのアプリをまとめて点検するなら：',
+      el('a', { href: 'https://daichoya.github.io/pro.html', target: '_blank', rel: 'noopener', text: '棚卸し・変更監視パック（有料版・30日間の無料試用あり）' })
+    ]);
+  }
+
   function openModal() {
     if (document.getElementById(P + '-overlay')) return;
     var appNames = {};
@@ -283,7 +291,8 @@
       el('div', { class: P + '-head' }, [el('h2', { text: '権限チェッカー' }), closeBtn]),
       el('div', { class: P + '-controls' }, [select, runBtn, csvBtn]),
       status,
-      result
+      result,
+      moreLink()
     ]);
     var overlay = el('div', { id: P + '-overlay', class: P + '-overlay' }, [dialog]);
 
