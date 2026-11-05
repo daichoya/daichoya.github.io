@@ -16,7 +16,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="google-site-verification" content="J1TnZ6bD5c5EjVGtQBBk2eRmLsDje0VapbpwCEnbA6M">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="assets/style.css?v=a6f69e27aa">
+<link rel="stylesheet" href="assets/style.css?v=9277cf69ca">
 </head>
 <body>
 <header class="site-head">
@@ -75,6 +75,7 @@
           <tr><th scope="row">レコードの件数と最終更新日時</th><td>「使われていないアプリも調べる」にチェックを入れたときだけ、アプリごとに<code>/k/v1/records.json</code>で、レコードの件数と、いちばん新しい更新日時を1件だけ取得します。<br>レコードの中身（入力された値）は読み取らず、点検台帳にも書きません。</td></tr>
           <tr><th scope="row">ライセンスキー</th><td>プラグインの設定画面で、ライセンスキーを貼り付けて保存します。<br>キーの確認はブラウザの中で行い、台帳屋のサーバーには問い合わせません。キーには、使えるkintone環境名・種類・有効期限だけが入っています。</td></tr>
           <tr><th scope="row">点検台帳（Excel）</th><td>点検した人のパソコンに保存されます。前回との比較に使う記録（アプリの設定の要約）は、同じファイルの見えないシートに入ります。</td></tr>
+          <tr><th scope="row">点検台帳の照合</th><td>報告書には、同じときに作った点検台帳の照合用の値（SHA-256）が入ります。受け取った点検台帳が、報告書を作ったときのものと同じかは、Windowsのコマンドプロンプトで <code>certutil -hashfile ファイル名 SHA256</code> を実行し、出てきた値が報告書の値と同じかで確かめられます。値はブラウザの中で計算し、どこにも送りません。30日間の無料試用で作った資料には「試用版」と入り、照合用の値は付きません。</td></tr>
         </tbody>
       </table>
     </div>
@@ -82,7 +83,7 @@
       <table class="facts">
         <thead><tr><th scope="col">プラグイン</th><th scope="col">kintone REST API（すべて読み取り専用のGET）</th></tr></thead>
         <tbody>
-          <tr><th scope="row">棚卸し・変更監視パック</th><td><ul class="api"><li><code>/k/v1/apps.json</code></li><li><code>/k/v1/app/form/fields.json</code>・<code>/k/v1/app/actions.json</code></li><li><code>/k/v1/app/acl.json</code>・<code>/k/v1/record/acl.json</code>・<code>/k/v1/field/acl.json</code></li><li><code>/k/v1/app/plugins.json</code>・<code>/k/v1/app/customize.json</code></li><li><code>/k/v1/app/status.json</code>・<code>/k/v1/app/views.json</code>・<code>/k/v1/app/reports.json</code>・<code>/k/v1/app/settings.json</code>・<code>/k/v1/app/adminNotes.json</code></li><li><code>/k/v1/app/notifications/general.json</code>・<code>perRecord.json</code>・<code>reminder.json</code></li><li><code>/k/v1/records.json</code>（件数と最終更新日時のみ。チェックを外すと使いません）</li><li>cybozu.comのUser API：<code>/v1/users.json</code>・<code>/v1/organizations.json</code>・<code>/v1/groups.json</code></li><li><code>/k/v1/plugins.json</code>（kintoneに読み込んであるプラグインの名前の一覧。使われていないプラグインを見つけるためと、設定画面で許可するプラグインを選ぶため）</li></ul></td></tr>
+          <tr><th scope="row">棚卸し・変更監視パック</th><td><ul class="api"><li><code>/k/v1/apps.json</code></li><li><code>/k/v1/app/form/fields.json</code>・<code>/k/v1/app/actions.json</code></li><li><code>/k/v1/app/acl.json</code>・<code>/k/v1/record/acl.json</code>・<code>/k/v1/field/acl.json</code></li><li><code>/k/v1/app/plugins.json</code>・<code>/k/v1/app/customize.json</code></li><li><code>/k/v1/app/status.json</code>・<code>/k/v1/app/views.json</code>・<code>/k/v1/app/reports.json</code>・<code>/k/v1/app/settings.json</code>・<code>/k/v1/app/adminNotes.json</code></li><li><code>/k/v1/app/notifications/general.json</code>・<code>perRecord.json</code>・<code>reminder.json</code></li><li><code>/k/v1/records.json</code>（件数と最終更新日時のみ。チェックを外すと使いません）</li><li>cybozu.comのUser API：<code>/v1/users.json</code>・<code>/v1/organizations.json</code>・<code>/v1/groups.json</code></li><li><code>/k/v1/plugins.json</code>（kintoneに読み込んであるプラグインの名前の一覧。使われていないプラグインを見つけるためと、設定画面で許可するプラグインを選ぶため）</li><li><code>/k/v1/app/acl.json</code> をアプリIDの順に（アプリの一覧に出ないアプリがないかを確かめるため。点検した人に閲覧の権限がないアプリは一覧に出ないので、あるかどうかだけを確かめます。1回の点検で最大2,000回）</li><li>JavaScript API <code>kintone.system.getPermissions()</code>（点検した人がkintoneシステム管理者かどうかを、点検台帳と報告書に書くため）</li></ul></td></tr>
         </tbody>
       </table>
     </div>

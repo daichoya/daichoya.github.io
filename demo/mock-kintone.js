@@ -193,7 +193,9 @@
   window.kintone = {
     events: { on: function (name, fn) { (handlers[name] = handlers[name] || []).push(fn); } },
     app: { getId: function () { return 12; }, getHeaderMenuSpaceElement: function () { return space; } },
-    getLoginUser: function () { return { code: 'kanri' }; },
+    getLoginUser: function () { return { code: 'kanri', name: '管理者' }; },
+    // 点検した人がkintoneシステム管理者か（有料版の報告書に書く）
+    system: { getPermissions: function () { return Promise.resolve({ administration: true }); } },
     // 有料版（棚卸し・変更監視パック）のデモ用：プラグインの設定（ライセンスキー）を返す
     $PLUGIN_ID: 'demo',
     plugin: { app: { getConfig: function () { return window.__dcyConfig || {}; } } },
@@ -219,6 +221,11 @@
           }
           var byApp = data[path];
           var appId = String(params.app || params.id);   // app.json だけは id で指定する
+          // 見本の環境にないアプリID：9 は「あるが、点検した人に閲覧の権限がない（一覧に出ない）」アプリ、そのほかは「ない」
+          if (/^\/k\/v1\/(app|record|field)\//.test(path) && !apps.some(function (a) { return a.appId === appId; })) {
+            reject(appId === '9' ? { code: 'CB_NO02', message: '権限がありません。' } : { code: 'GAIA_AP01', message: '指定したアプリが見つかりません。' });
+            return;
+          }
           var value = (byApp && byApp[appId]) || emptyFor(path, appId);
           if (value) resolve(JSON.parse(JSON.stringify(value)));
           else reject({ code: 'GAIA_NO01', message: 'not found' });

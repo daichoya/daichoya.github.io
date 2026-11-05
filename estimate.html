@@ -16,7 +16,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="google-site-verification" content="J1TnZ6bD5c5EjVGtQBBk2eRmLsDje0VapbpwCEnbA6M">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="assets/style.css?v=a6f69e27aa">
+<link rel="stylesheet" href="assets/style.css?v=9277cf69ca">
 </head>
 <body>
 <header class="site-head">
@@ -74,10 +74,6 @@
           <option value="500">アプリ500個まで</option>
           <option value="0">アプリの数の上限なし</option>
         </select></label>
-        <label>お支払い<select id="est-plan">
-          <option value="year">年額（1年分）</option>
-          <option value="month">月額（12か月分）</option>
-        </select></label>
         <label>kintoneの環境の数<input id="est-count" type="number" min="1" max="50" value="1"></label>
       </form>
       <div class="actions"><button class="btn btn-primary" type="button" onclick="window.print()">印刷・PDFで保存</button></div>
@@ -106,7 +102,7 @@
       <ul class="est-notes">
         <li>kintoneの環境（〇〇.cybozu.com）ごとのライセンスです。利用人数による追加料金はありません。</li>
         <li>お支払いはクレジットカード（Stripe）です。お支払いの確認後、ライセンスキーをメールでお送りします。</li>
-        <li>月額・年額とも自動で更新し、いつでも解約できます。くわしくは利用規約（https://daichoya.github.io/terms.html）をご覧ください。</li>
+        <li>1年単位のご契約で、1年ごとに自動で更新します。次回の更新日の前日までに解約できます。くわしくは利用規約（https://daichoya.github.io/terms.html）をご覧ください。</li>
         <li>30日間の無料試用があります（お支払い方法の登録は不要）。</li>
       </ul>
       <div class="est-from">
@@ -122,9 +118,9 @@
   'use strict';
   // 有料版の料金（税込）。pro.html・利用規約・特定商取引法に基づく表記の料金と同じにする
   var TIERS = {
-    100: { name: 'アプリ100個まで', month: 3300, year: 33000 },
-    500: { name: 'アプリ500個まで', month: 9900, year: 99000 },
-    0: { name: 'アプリの数の上限なし', month: 19800, year: 198000 }
+    100: { name: 'アプリ100個まで', year: 33000 },
+    500: { name: 'アプリ500個まで', year: 99000 },
+    0: { name: 'アプリの数の上限なし', year: 198000 }
   };
   var PRODUCT = 'kintoneプラグイン「台帳屋 棚卸し・変更監視パック」';
   function $(id) { return document.getElementById(id); }
@@ -135,8 +131,7 @@
   var no = 'Q' + today.getFullYear() + ('0' + (today.getMonth() + 1)).slice(-2) + ('0' + today.getDate()).slice(-2) + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
   function render() {
     var tier = TIERS[$('est-tier').value];
-    var kind = $('est-plan').value;
-    var plan = { unit: tier[kind], months: kind === 'month' ? 12 : 0, label: kind === 'month' ? '月額' : '年額' };
+    var plan = { unit: tier.year, months: 0, label: '年額' };
     var count = Math.max(1, Math.min(50, parseInt($('est-count').value, 10) || 1));
     var qty = plan.months ? plan.months * count : count;
     var amount = plan.unit * qty;
@@ -151,7 +146,7 @@
     $('out-amount').textContent = yen(amount);
     $('out-total').textContent = yen(amount);
   }
-  ['est-company', 'est-person', 'est-tier', 'est-plan', 'est-count'].forEach(function (id) { $(id).addEventListener('input', render); $(id).addEventListener('change', render); });
+  ['est-company', 'est-person', 'est-tier', 'est-count'].forEach(function (id) { $(id).addEventListener('input', render); $(id).addEventListener('change', render); });
   render();
 })();
 </script>

@@ -85,3 +85,5 @@
 /* 有料版の点検の結果：要確認の項目 */
 .dcy-ip-items { margin: 4px 0 8px; padding-left: 20px; font-size: 13px; }
 .dcy-ip-items li { margin: 2px 0; }
+.dcy-ip-flow { margin: 0 0 8px !important; color: #1f3a5f; font-weight: bold; font-size: 13px; }
+.dcy-ip-trial-note a { margin-left: 6px; color: #1f6fb2; }

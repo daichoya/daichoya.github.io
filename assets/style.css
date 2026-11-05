@@ -492,3 +492,55 @@ section { padding: 64px 0; }
   .plans th { white-space: nowrap; padding-right: 10px; }
   .plans td { white-space: normal; }
 }
+
+/* 有料のプラグインを使い始めてから、ご契約までの流れ（無料の点検 → 30日間の無料試用 → ご契約） */
+.journey { list-style: none; counter-reset: jstep; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; margin: 28px 0 8px; padding: 0; }
+.journey li { position: relative; counter-increment: jstep; margin: 0; padding: 0 0 16px; border-radius: var(--r-m); background: var(--paper); border: 2px solid var(--rule); overflow: visible; }
+.journey li:not(:last-child)::after { content: ""; position: absolute; top: 50%; right: -22px; width: 14px; height: 14px; margin-top: -7px; border-top: 3px solid var(--ai-line); border-right: 3px solid var(--ai-line); transform: rotate(45deg); }
+.journey .j-head { display: flex; align-items: center; gap: 8px; margin: 0; padding: 10px 16px; border-radius: 8px 8px 0 0; color: #fff; font-weight: 700; font-size: 15px; }
+.journey .j-head::before { content: counter(jstep); display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: #fff; font-size: 13px; }
+.journey .j-free { border-color: var(--take); } .journey .j-free .j-head { background: var(--take); } .journey .j-free .j-head::before { color: var(--take); }
+.journey .j-trial { border-color: var(--kaki); } .journey .j-trial .j-head { background: var(--kaki); } .journey .j-trial .j-head::before { color: var(--kaki); }
+.journey .j-paid { border-color: var(--ai); } .journey .j-paid .j-head { background: var(--ai); } .journey .j-paid .j-head::before { color: var(--ai); }
+.journey p { margin: 10px 16px 0; font-size: 14px; line-height: 1.7; }
+.journey .j-sub { font-weight: 700; font-size: 15px; }
+.journey .j-link { margin-top: 12px; }
+.journey .j-link a { font-weight: 700; font-size: 14px; }
+.journey-note { font-size: 14px; color: var(--ink-2); }
+@media (max-width: 860px) {
+  .journey { grid-template-columns: minmax(0, 1fr); gap: 26px; }
+  .journey li:not(:last-child)::after { top: auto; bottom: -21px; right: 50%; margin: 0 -7px 0 0; transform: rotate(135deg); }
+}
+.journey + .price-cards { margin-top: 28px; }
+
+/* 無料の6本と有料の1本の関係：左に無料（1つのアプリずつ）、右に有料（全アプリまとめて）を矢印でつなぐ */
+.relmap { margin: 18px 0 10px; }
+.relmap-head, .relmap-row { display: grid; grid-template-columns: minmax(0, 1fr) 48px minmax(0, 1fr); align-items: stretch; }
+.relmap-head { margin-bottom: 10px; font-size: 15px; font-weight: 700; }
+.relmap-head span { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; }
+.relmap-head .tab { height: 28px; padding: 0 12px; border-radius: 6px; font-size: 13px; }
+.relmap-row { margin: 0 0 10px; }
+.rm-free, .rm-paid { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: var(--r-m); line-height: 1.6; }
+.rm-free { border: 1.5px solid var(--take-line); background: var(--take-tint); color: var(--ink); text-decoration: none; }
+a.rm-free:hover { border-color: var(--take); }
+a.rm-free:hover b { text-decoration: underline; }
+.rm-free img { flex: none; width: 34px; height: 34px; border-radius: 8px; }
+.rm-paid { border: 1.5px solid var(--ai-line); background: var(--ai-tint); }
+.rm-free b, .rm-paid b { display: block; font-size: 15px; }
+.rm-paid b { color: var(--ai); }
+.rm-free small, .rm-paid small { display: block; font-size: 13px; color: var(--ink-2); }
+.rm-none { border: 1.5px dashed var(--rule); background: var(--paper); color: var(--ink-2); font-size: 14px; }
+.rm-arrow { position: relative; }
+.rm-arrow::before { content: ""; position: absolute; top: 50%; left: 8px; right: 12px; border-top: 2px solid var(--ai-line); }
+.rm-arrow::after { content: ""; position: absolute; top: 50%; right: 10px; width: 9px; height: 9px; margin-top: -5px; border-top: 2px solid var(--ai-line); border-right: 2px solid var(--ai-line); transform: rotate(45deg); }
+.relmap-note { font-size: 14px; color: var(--ink-2); }
+@media (max-width: 720px) {
+  .relmap-head { display: none; }
+  .relmap-row { grid-template-columns: minmax(0, 1fr); margin-bottom: 16px; }
+  .rm-arrow { height: 26px; }
+  .rm-arrow::before { top: 4px; bottom: 6px; left: 50%; right: auto; border-top: none; border-left: 2px solid var(--ai-line); }
+  .rm-arrow::after { top: auto; bottom: 6px; right: auto; left: 50%; margin: 0 0 0 -5px; transform: rotate(135deg); }
+  .rm-free::before { content: "無料"; flex: none; order: 3; margin-left: auto; padding: 0 8px; border-radius: 4px; border: 1.5px solid var(--take); color: var(--take); font-size: 12px; font-weight: 700; line-height: 1.6; }
+  .rm-paid::before { content: "有料"; flex: none; order: 3; margin-left: auto; padding: 0 8px; border-radius: 4px; background: var(--ai); color: #fff; font-size: 12px; font-weight: 700; line-height: 1.6; }
+  .rm-paid span, .rm-free span { order: 2; }
+}

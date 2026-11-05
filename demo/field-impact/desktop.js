@@ -268,7 +268,7 @@
     moreText = document.createTextNode('すべてのアプリをまとめて点検するなら：');
     return el('p', { class: P + '-more' }, [
       moreText,
-      el('a', { href: 'https://daichoya.github.io/pro.html', target: '_blank', rel: 'noopener', text: '有料の「棚卸し・変更監視パック」（月額3,300円から。件数だけなら無料、30日間すべて無料で試せます）' })
+      el('a', { href: 'https://daichoya.github.io/pro.html', target: '_blank', rel: 'noopener', text: '有料の「棚卸し・変更監視パック」（年額33,000円から。件数だけなら無料、30日間すべて無料で試せます）' })
     ]);
   }
   function moreCount(n) { if (moreText && n > 1) moreText.textContent = 'この環境の' + n + '個のアプリをまとめて点検するなら：'; }
