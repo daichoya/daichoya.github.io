@@ -1,12 +1,12 @@
 // 製品画像の撮影用：kintoneの代わりに、架空の会社の見本データを返す
 (function () {
   var apps = [
-    { appId: '11', name: '顧客マスタ' },
-    { appId: '12', name: '案件管理' },
-    { appId: '13', name: '対応履歴' },
-    { appId: '14', name: '見積書' },
-    { appId: '15', name: '請求管理' },
-    { appId: '16', name: '商品マスタ' }
+    { appId: '11', name: '顧客マスタ', spaceId: '2', createdAt: '2024-04-01T00:30:00Z', creator: { code: 'kanri', name: '情報システム課' }, modifiedAt: '2026-09-12T02:10:00Z', modifier: { code: 'kanri', name: '情報システム課' } },
+    { appId: '12', name: '案件管理', spaceId: '2', createdAt: '2025-04-01T00:30:00Z', creator: { code: 'kanri', name: '情報システム課' }, modifiedAt: '2026-10-28T06:12:00Z', modifier: { code: 'kanri', name: '情報システム課' } },
+    { appId: '13', name: '対応履歴', spaceId: '2', createdAt: '2025-04-01T00:40:00Z', creator: { code: 'kanri', name: '情報システム課' }, modifiedAt: '2026-06-03T08:00:00Z', modifier: { code: 'sato', name: '佐藤' } },
+    { appId: '14', name: '見積書', spaceId: '3', createdAt: '2023-10-02T01:00:00Z', creator: { code: 'kanri', name: '情報システム課' }, modifiedAt: '2025-02-14T05:30:00Z', modifier: { code: 'suzuki', name: '鈴木' } },
+    { appId: '15', name: '請求管理', spaceId: '3', createdAt: '2023-10-02T01:10:00Z', creator: { code: 'kanri', name: '情報システム課' }, modifiedAt: '2026-08-20T03:00:00Z', modifier: { code: 'keiri', name: '経理課' } },
+    { appId: '16', name: '商品マスタ', spaceId: '', createdAt: '2022-05-10T00:00:00Z', creator: { code: 'kanri', name: '情報システム課' }, modifiedAt: '2024-03-01T00:00:00Z', modifier: { code: 'kanri', name: '情報システム課' } }
   ];
   var lookup = function (app, key, maps) {
     return { relatedApp: { app: app, code: '' }, relatedKeyField: key, fieldMappings: maps || [], lookupPickerFields: [], filterCond: '', sort: '' };
@@ -74,7 +74,16 @@
     '/k/v1/app/notifications/general.json': { 12: { notifications: [{ entity: { type: 'FIELD_ENTITY', code: '担当者' }, includeSubs: false, recordAdded: false, recordEdited: true, commentAdded: true, fileImported: false }], notifyToCommenter: true } },
     '/k/v1/app/notifications/perRecord.json': { 12: { notifications: [{ filterCond: '金額 >= 1000000', title: '100万円以上の案件が登録されました', targets: [{ entity: { type: 'ORGANIZATION', code: '営業部' }, includeSubs: true }] }] } },
     '/k/v1/app/notifications/reminder.json': { 12: { notifications: [{ timing: { code: '受注予定日', daysLater: -3, time: '09:00' }, filterCond: '受注確度 not in ("失注")', title: '受注予定日の3日前です', targets: [{ entity: { type: 'FIELD_ENTITY', code: '担当者' } }] }] } },
-    '/k/v1/app/acl.json': { 12: { rights: [
+    '/k/v1/app/acl.json': {
+      14: { rights: [
+        { entity: { type: 'USER', code: 'suzuki' }, includeSubs: false, appEditable: true, recordViewable: true, recordAddable: true, recordEditable: true, recordDeletable: true, recordImportable: true, recordExportable: true },
+        { entity: { type: 'GROUP', code: 'everyone' }, includeSubs: false, appEditable: true, recordViewable: true, recordAddable: true, recordEditable: true, recordDeletable: false, recordImportable: false, recordExportable: true }
+      ] },
+      15: { rights: [
+        { entity: { type: 'ORGANIZATION', code: '経理課' }, includeSubs: false, appEditable: true, recordViewable: true, recordAddable: true, recordEditable: true, recordDeletable: true, recordImportable: true, recordExportable: true },
+        { entity: { type: 'USER', code: 'tanaka' }, includeSubs: false, appEditable: false, recordViewable: true, recordAddable: false, recordEditable: false, recordDeletable: false, recordImportable: false, recordExportable: false }
+      ] },
+      12: { rights: [
       { entity: { type: 'GROUP', code: 'Administrators' }, includeSubs: false, appEditable: true, recordViewable: true, recordAddable: true, recordEditable: true, recordDeletable: true, recordImportable: true, recordExportable: true },
       { entity: { type: 'ORGANIZATION', code: '営業部' }, includeSubs: true, appEditable: false, recordViewable: true, recordAddable: true, recordEditable: true, recordDeletable: false, recordImportable: false, recordExportable: true },
       { entity: { type: 'CREATOR' }, includeSubs: false, appEditable: false, recordViewable: true, recordAddable: true, recordEditable: true, recordDeletable: true, recordImportable: false, recordExportable: false },
@@ -131,6 +140,9 @@
     events: { on: function (name, fn) { (handlers[name] = handlers[name] || []).push(fn); } },
     app: { getId: function () { return 12; }, getHeaderMenuSpaceElement: function () { return space; } },
     getLoginUser: function () { return { code: 'kanri' }; },
+    // 有料版（棚卸し・変更監視パック）のデモ用：プラグインの設定（ライセンスキー）を返す
+    $PLUGIN_ID: 'demo',
+    plugin: { app: { getConfig: function () { return window.__dcyConfig || {}; } } },
     api: function (path, method, params) {
       return new Promise(function (resolve, reject) {
         setTimeout(function () {

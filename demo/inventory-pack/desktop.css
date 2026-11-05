@@ -1,0 +1,67 @@
+/* 台帳屋 棚卸し・変更監視パック：kintone本体の見た目に干渉しないよう、すべて dcy-ip- で始まるクラス名を使う */
+.dcy-ip-btn {
+  height: 48px;
+  padding: 0 16px;
+  margin-left: 8px;
+  border: 1px solid #e3e7e8;
+  border-radius: 0;
+  vertical-align: top;
+  font-family: inherit;
+  background: #f7f9fa;
+  color: #3498db;
+  font-size: 14px;
+  cursor: pointer;
+}
+.dcy-ip-btn:hover { background: #eef3f6; }
+.dcy-ip-btn[disabled] { color: #a8a8a8; cursor: not-allowed; }
+.dcy-ip-btn:focus-visible, .dcy-ip-close:focus-visible, .dcy-ip-select:focus-visible { outline: 2px solid #3498db; outline-offset: 1px; }
+.dcy-ip-primary { background: #3498db; border-color: #3498db; color: #fff; }
+.dcy-ip-primary[disabled] { background: #a8cbe8; border-color: #a8cbe8; color: #fff; }
+.dcy-ip-primary:hover { background: #217dbb; }
+
+.dcy-ip-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 16px;
+  background: rgba(0, 0, 0, 0.5);
+  overflow-y: auto;
+}
+.dcy-ip-dialog {
+  width: 100%;
+  max-width: 1100px;
+  padding: 0 0 24px;
+  border-radius: 0;
+  background: #fff;
+  color: #333;
+  box-sizing: border-box;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+.dcy-ip-dialog > :not(.dcy-ip-head) { margin-left: 24px; margin-right: 24px; }
+.dcy-ip-head { display: flex; align-items: center; justify-content: space-between; min-height: 64px; padding-left: 24px; border-bottom: 1px solid #e3e7e8; }
+.dcy-ip-head h2 { margin: 0; padding: 0; border: none; font-size: 20px; font-weight: bold; line-height: 1.4; color: #333; }
+.dcy-ip-close { width: 64px; height: 64px; border: none; background: none; font-size: 28px; line-height: 1; cursor: pointer; color: #a8a8a8; }
+.dcy-ip-close:hover { color: #333; }
+.dcy-ip-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 20px; margin-bottom: 8px; }
+.dcy-ip-controls .dcy-ip-btn { margin-left: 0; }
+.dcy-ip-select { height: 48px; min-width: 320px; max-width: 100%; padding: 0 12px; border: 1px solid #e3e7e8; border-radius: 0; background: #fff; color: #333; font-size: 14px; font-family: inherit; }
+.dcy-ip-status { min-height: 20px; margin-top: 8px; margin-bottom: 8px; color: #666; font-size: 14px; }
+.dcy-ip-result h3 { margin: 24px 0 8px; padding: 0; border: none; font-size: 16px; font-weight: bold; line-height: 1.4; color: #333; }
+.dcy-ip-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.dcy-ip-table th,
+.dcy-ip-table td { padding: 6px 8px; border: 1px solid #e3e7e8; text-align: left; vertical-align: top; }
+.dcy-ip-table th { background: #f5f5f5; font-weight: bold; white-space: nowrap; }
+.dcy-ip-yes { color: #1a7f37; text-align: center !important; }
+.dcy-ip-no { color: #b0b0b0; text-align: center !important; }
+.dcy-ip-empty { color: #888; text-align: center !important; }
+.dcy-ip-dialog { max-width: 760px; }
+.dcy-ip-lead { margin-top: 16px; margin-bottom: 0; color: #555; font-size: 14px; }
+.dcy-ip-license { margin-top: 16px; margin-bottom: 0; padding: 8px 12px; border-left: 4px solid #a8a8a8; background: #f7f9fa; font-size: 14px; }
+.dcy-ip-license-valid { border-left-color: #27ae60; }
+.dcy-ip-license-grace { border-left-color: #e67e22; background: #fff8e6; }
+.dcy-ip-license-none, .dcy-ip-license-invalid, .dcy-ip-license-domain, .dcy-ip-license-expired { border-left-color: #e74c3c; background: #fdf0ef; }
+.dcy-ip-prev { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 16px; font-size: 14px; }
+.dcy-ip-prev label { font-weight: bold; }

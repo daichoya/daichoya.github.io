@@ -1,0 +1,821 @@
+/*
+ * 台帳屋 棚卸し・変更監視パック for kintone
+ * 一覧画面に「棚卸し」ボタンを追加し、すべてのアプリの設定を読み取って点検台帳（Excel）を作る。
+ * 前回の点検台帳を選ぶと、変わったところも一覧にする。
+ * 通信するのはkintoneだけで、読み取るのはアプリの設定だけ（レコードは読まない）。
+ */
+(function (PLUGIN_ID) {
+  'use strict';
+
+  // ===== 1. Excel（xlsx）の書き出し =====
+  // xlsxは「XMLファイルをまとめたzip」。無圧縮のzipを自前で作る（設計書ジェネレーターと同じ方式）。
+
+  var CRC_TABLE = (function () {
+    var table = new Uint32Array(256);
+    for (var n = 0; n < 256; n++) {
+      var c = n;
+      for (var k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+      table[n] = c >>> 0;
+    }
+    return table;
+  })();
+
+  function crc32(bytes) {
+    var c = 0xFFFFFFFF;
+    for (var i = 0; i < bytes.length; i++) c = CRC_TABLE[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+    return (c ^ 0xFFFFFFFF) >>> 0;
+  }
+
+  function utf8(text) { return new TextEncoder().encode(text); }
+
+  function concatBytes(chunks) {
+    var total = chunks.reduce(function (sum, c) { return sum + c.length; }, 0);
+    var out = new Uint8Array(total);
+    var pos = 0;
+    chunks.forEach(function (c) { out.set(c, pos); pos += c.length; });
+    return out;
+  }
+
+  function buildZip(files) {
+    var chunks = [];
+    var central = [];
+    var offset = 0;
+    files.forEach(function (file) {
+      var name = utf8(file.name);
+      var data = file.data;
+      var crc = crc32(data);
+      var local = new Uint8Array(30 + name.length);
+      var lv = new DataView(local.buffer);
+      lv.setUint32(0, 0x04034b50, true);
+      lv.setUint16(4, 20, true);
+      lv.setUint16(6, 0x0800, true);
+      lv.setUint16(12, 0x21, true);
+      lv.setUint32(14, crc, true);
+      lv.setUint32(18, data.length, true);
+      lv.setUint32(22, data.length, true);
+      lv.setUint16(26, name.length, true);
+      local.set(name, 30);
+      var entry = new Uint8Array(46 + name.length);
+      var cv = new DataView(entry.buffer);
+      cv.setUint32(0, 0x02014b50, true);
+      cv.setUint16(4, 20, true);
+      cv.setUint16(6, 20, true);
+      cv.setUint16(8, 0x0800, true);
+      cv.setUint16(14, 0x21, true);
+      cv.setUint32(16, crc, true);
+      cv.setUint32(20, data.length, true);
+      cv.setUint32(24, data.length, true);
+      cv.setUint16(28, name.length, true);
+      cv.setUint32(42, offset, true);
+      entry.set(name, 46);
+      chunks.push(local, data);
+      central.push(entry);
+      offset += local.length + data.length;
+    });
+    var centralBytes = concatBytes(central);
+    var end = new Uint8Array(22);
+    var ev = new DataView(end.buffer);
+    ev.setUint32(0, 0x06054b50, true);
+    ev.setUint16(8, files.length, true);
+    ev.setUint16(10, files.length, true);
+    ev.setUint32(12, centralBytes.length, true);
+    ev.setUint32(16, offset, true);
+    return concatBytes(chunks.concat([centralBytes, end]));
+  }
+
+  function xmlEscape(value) {
+    return String(value === undefined || value === null ? '' : value)
+      .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '')
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function columnName(index) {
+    var name = '';
+    var n = index + 1;
+    while (n > 0) {
+      var m = (n - 1) % 26;
+      name = String.fromCharCode(65 + m) + name;
+      n = Math.floor((n - 1) / 26);
+    }
+    return name;
+  }
+
+  function sheetName(name) { return String(name).replace(/[\[\]:*?\/\\]/g, '_').slice(0, 31) || 'Sheet'; }
+
+  var STYLE = { plain: 0, header: 1, body: 2, title: 3, warn: 4 };
+
+  function cell(ref, value, style) {
+    return '<c r="' + ref + '" t="inlineStr" s="' + style + '"><is><t xml:space="preserve">' + xmlEscape(value) + '</t></is></c>';
+  }
+
+  // sheet: { name, widths, hidden, blocks: [{ title, header, rows, note, styles }] }
+  function sheetXml(sheet) {
+    var rowsXml = [];
+    var r = 1;
+    function addRow(values, style) {
+      var cells = values.map(function (v, i) { return cell(columnName(i) + r, v, Array.isArray(style) ? style[i] : style); }).join('');
+      rowsXml.push('<row r="' + r + '">' + cells + '</row>');
+      r += 1;
+    }
+    sheet.blocks.forEach(function (block, i) {
+      if (i > 0) r += 1;
+      if (block.title) addRow([block.title], STYLE.title);
+      if (block.header && block.header.length) addRow(block.header, STYLE.header);
+      (block.rows || []).forEach(function (row, j) { addRow(row, (block.styles && block.styles[j]) || STYLE.body); });
+      if (block.note) addRow([block.note], STYLE.plain);
+    });
+    var cols = (sheet.widths || []).map(function (w, i) {
+      return '<col min="' + (i + 1) + '" max="' + (i + 1) + '" width="' + w + '" customWidth="1"/>';
+    }).join('');
+    return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
+      (cols ? '<cols>' + cols + '</cols>' : '') + '<sheetData>' + rowsXml.join('') + '</sheetData></worksheet>';
+  }
+
+  var STYLES_XML = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
+    '<fonts count="2"><font><sz val="11"/><name val="Yu Gothic"/></font><font><b/><sz val="11"/><name val="Yu Gothic"/></font></fonts>' +
+    '<fills count="4"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill>' +
+    '<fill><patternFill patternType="solid"><fgColor rgb="FFDDEBF7"/><bgColor indexed="64"/></patternFill></fill>' +
+    '<fill><patternFill patternType="solid"><fgColor rgb="FFFFF2CC"/><bgColor indexed="64"/></patternFill></fill></fills>' +
+    '<borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border>' +
+    '<border><left style="thin"><color rgb="FFBFBFBF"/></left><right style="thin"><color rgb="FFBFBFBF"/></right>' +
+    '<top style="thin"><color rgb="FFBFBFBF"/></top><bottom style="thin"><color rgb="FFBFBFBF"/></bottom><diagonal/></border></borders>' +
+    '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>' +
+    '<cellXfs count="5">' +
+    '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>' +
+    '<xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1"/>' +
+    '<xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf>' +
+    '<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/>' +
+    '<xf numFmtId="0" fontId="0" fillId="3" borderId="1" xfId="0" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf>' +
+    '</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
+
+  function buildXlsx(sheets) {
+    var contentTypes = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+      '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+      '<Default Extension="xml" ContentType="application/xml"/>' +
+      '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' +
+      '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' +
+      sheets.map(function (s, i) {
+        return '<Override PartName="/xl/worksheets/sheet' + (i + 1) + '.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>';
+      }).join('') + '</Types>';
+    var rootRels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+      '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>';
+    var workbook = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>' +
+      sheets.map(function (s, i) {
+        return '<sheet name="' + xmlEscape(sheetName(s.name)) + '" sheetId="' + (i + 1) + '"' + (s.hidden ? ' state="hidden"' : '') + ' r:id="rId' + (i + 1) + '"/>';
+      }).join('') + '</sheets></workbook>';
+    var workbookRels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+      sheets.map(function (s, i) {
+        return '<Relationship Id="rId' + (i + 1) + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet' + (i + 1) + '.xml"/>';
+      }).join('') +
+      '<Relationship Id="rId' + (sheets.length + 1) + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>';
+    var files = [
+      { name: '[Content_Types].xml', data: utf8(contentTypes) },
+      { name: '_rels/.rels', data: utf8(rootRels) },
+      { name: 'xl/workbook.xml', data: utf8(workbook) },
+      { name: 'xl/_rels/workbook.xml.rels', data: utf8(workbookRels) },
+      { name: 'xl/styles.xml', data: utf8(STYLES_XML) }
+    ];
+    sheets.forEach(function (s, i) { files.push({ name: 'xl/worksheets/sheet' + (i + 1) + '.xml', data: utf8(sheetXml(s)) }); });
+    return buildZip(files);
+  }
+
+  // ===== 2. 前回の点検台帳の読み込み =====
+  // 点検台帳の「記録」シート（非表示）に入れた設定の記録を取り出す。
+  // Excelで開いて保存し直したファイル（圧縮あり・共有文字列あり）にも対応する。
+
+  function readZip(bytes) {
+    var view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    var end = -1;
+    for (var i = bytes.length - 22; i >= Math.max(0, bytes.length - 65557); i--) {
+      if (view.getUint32(i, true) === 0x06054b50) { end = i; break; }
+    }
+    if (end < 0) throw new Error('zip');
+    var count = view.getUint16(end + 10, true);
+    var pos = view.getUint32(end + 16, true);
+    var entries = {};
+    for (var n = 0; n < count; n++) {
+      if (view.getUint32(pos, true) !== 0x02014b50) throw new Error('zip');
+      var method = view.getUint16(pos + 10, true);
+      var size = view.getUint32(pos + 20, true);
+      var nameLen = view.getUint16(pos + 28, true);
+      var extraLen = view.getUint16(pos + 30, true);
+      var commentLen = view.getUint16(pos + 32, true);
+      var localOffset = view.getUint32(pos + 42, true);
+      var name = new TextDecoder().decode(bytes.subarray(pos + 46, pos + 46 + nameLen));
+      var localNameLen = view.getUint16(localOffset + 26, true);
+      var localExtraLen = view.getUint16(localOffset + 28, true);
+      var start = localOffset + 30 + localNameLen + localExtraLen;
+      entries[name] = { method: method, data: bytes.subarray(start, start + size) };
+      pos += 46 + nameLen + extraLen + commentLen;
+    }
+    return entries;
+  }
+
+  function inflate(entry) {
+    if (entry.method === 0) return Promise.resolve(entry.data);
+    if (entry.method !== 8 || typeof DecompressionStream === 'undefined') return Promise.reject(new Error('compress'));
+    var stream = new Blob([entry.data]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+    return new Response(stream).arrayBuffer().then(function (buf) { return new Uint8Array(buf); });
+  }
+
+  function readText(entries, name) {
+    var entry = entries[name];
+    if (!entry) return Promise.resolve(null);
+    return inflate(entry).then(function (b) { return new TextDecoder().decode(b); });
+  }
+
+  function decodeXml(s) {
+    return s.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&apos;/g, "'")
+      .replace(/&#(\d+);/g, function (_, d) { return String.fromCharCode(Number(d)); })
+      .replace(/&#x([0-9a-fA-F]+);/g, function (_, h) { return String.fromCharCode(parseInt(h, 16)); })
+      .replace(/&amp;/g, '&');
+  }
+
+  function textsOf(xml) {
+    var out = [];
+    var re = /<t(?:\s[^>]*)?>([\s\S]*?)<\/t>|<t(?:\s[^>]*)?\/>/g;
+    var m;
+    while ((m = re.exec(xml))) out.push(decodeXml(m[1] || ''));
+    return out.join('');
+  }
+
+  var RECORD_SHEET = '記録';
+  var RECORD_MARK = '台帳屋 点検記録 v1';
+
+  // A列の文字を上から順につなげる
+  function columnATexts(sheetXmlText, shared) {
+    var out = [];
+    var re = /<c\s([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g;
+    var m;
+    while ((m = re.exec(sheetXmlText))) {
+      var attrs = m[1];
+      var ref = /r="([A-Z]+)(\d+)"/.exec(attrs);
+      if (!ref || ref[1] !== 'A') continue;
+      var body = m[2] || '';
+      var type = (/t="([^"]+)"/.exec(attrs) || [])[1];
+      var value;
+      if (type === 's') value = shared[Number((/<v>(\d+)<\/v>/.exec(body) || [])[1])] || '';
+      else if (type === 'inlineStr') value = textsOf(body);
+      else value = decodeXml((/<v>([\s\S]*?)<\/v>/.exec(body) || [])[1] || '');
+      out.push(value);
+    }
+    return out;
+  }
+
+  function readSnapshot(bytes) {
+    var entries;
+    try { entries = readZip(bytes); } catch (e) { return Promise.reject(new Error('Excelファイルとして読み込めませんでした。')); }
+    return Promise.all([readText(entries, 'xl/workbook.xml'), readText(entries, 'xl/_rels/workbook.xml.rels'), readText(entries, 'xl/sharedStrings.xml')])
+      .then(function (r) {
+        var workbook = r[0], rels = r[1], sst = r[2];
+        if (!workbook || !rels) throw new Error('Excelファイルとして読み込めませんでした。');
+        var sheet = new RegExp('<sheet\\s[^>]*name="' + RECORD_SHEET + '"[^>]*>').exec(workbook);
+        if (!sheet) throw new Error('台帳屋の点検台帳ではないか、記録のシートが削除されています。');
+        var rid = /r:id="([^"]+)"/.exec(sheet[0])[1];
+        var target = new RegExp('<Relationship\\s[^>]*Id="' + rid + '"[^>]*>').exec(rels);
+        var path = /Target="([^"]+)"/.exec(target[0])[1].replace(/^\/?(xl\/)?/, '');
+        var shared = [];
+        if (sst) {
+          var re = /<si>([\s\S]*?)<\/si>/g;
+          var m;
+          while ((m = re.exec(sst))) shared.push(textsOf(m[1]));
+        }
+        return readText(entries, 'xl/' + path).then(function (xml) {
+          var texts = columnATexts(xml || '', shared);
+          if (texts[0] !== RECORD_MARK) throw new Error('台帳屋の点検台帳ではないか、記録のシートが書き換えられています。');
+          return JSON.parse(texts.slice(1).join(''));
+        });
+      });
+  }
+
+  // ===== 3. 設定を「記録」の形にそろえる（純粋な関数。テスト対象） =====
+
+  var ENTITY_LABELS = { USER: 'ユーザー', GROUP: 'グループ', ORGANIZATION: '組織', CREATOR: '作成者', FIELD_ENTITY: 'フィールド', CUSTOM_FIELD: 'フィールド' };
+  var ACCESS_LABELS = { WRITE: '閲覧・編集', READ: '閲覧のみ', NONE: '権限なし' };
+  var APP_RIGHTS = [['appEditable', 'アプリ管理'], ['recordViewable', '閲覧'], ['recordAddable', '追加'], ['recordEditable', '編集'],
+    ['recordDeletable', '削除'], ['recordImportable', '読み込み'], ['recordExportable', '書き出し']];
+  var SCOPE_TEXT = { ALL: 'すべてのユーザー', ADMIN: 'アプリの管理者だけ', NONE: '適用しない' };
+
+  function entityText(entity, includeSubs) {
+    if (!entity) return '';
+    if (entity.type === 'CREATOR') return '作成者';
+    if (entity.type === 'GROUP' && entity.code === 'everyone') return 'Everyone';
+    return (ENTITY_LABELS[entity.type] || entity.type) + '：' + (entity.code || '') + (includeSubs ? '（下位組織を含む）' : '');
+  }
+
+  function isEveryone(entity) { return entity && entity.type === 'GROUP' && entity.code === 'everyone'; }
+
+  function appAclRows(acl) {
+    return ((acl && acl.rights) || []).map(function (r, i) {
+      var granted = APP_RIGHTS.filter(function (x) { return r[x[0]]; }).map(function (x) { return x[1]; });
+      return { order: i + 1, entity: r.entity, target: entityText(r.entity, r.includeSubs), text: granted.length ? granted.join('・') : '権限なし', raw: r };
+    });
+  }
+
+  function recordAclRows(acl) {
+    var rows = [];
+    ((acl && acl.rights) || []).forEach(function (right, i) {
+      (right.entities || []).forEach(function (e) {
+        var granted = [['viewable', '閲覧'], ['editable', '編集'], ['deletable', '削除']].filter(function (x) { return e[x[0]]; }).map(function (x) { return x[1]; });
+        rows.push({ order: i + 1, condition: right.filterCond || '（すべてのレコード）', entity: e.entity, target: entityText(e.entity, e.includeSubs), text: granted.length ? granted.join('・') : '権限なし' });
+      });
+    });
+    return rows;
+  }
+
+  function fieldAclRows(acl, labels) {
+    var rows = [];
+    ((acl && acl.rights) || []).forEach(function (right) {
+      (right.entities || []).forEach(function (e, i) {
+        rows.push({ order: i + 1, field: (labels[right.code] || right.code) + '（' + right.code + '）', entity: e.entity, target: entityText(e.entity, e.includeSubs), text: ACCESS_LABELS[e.accessibility] || e.accessibility });
+      });
+    });
+    return rows;
+  }
+
+  function labelMap(properties) {
+    var map = {};
+    Object.keys(properties || {}).forEach(function (code) {
+      var p = properties[code];
+      map[code] = p.label || code;
+      if (p.type === 'SUBTABLE' && p.fields) Object.keys(p.fields).forEach(function (inner) { map[inner] = p.fields[inner].label || inner; });
+    });
+    return map;
+  }
+
+  // フィールドの設定を、変わったかどうかを比べられる短い文字列にする
+  function fieldSignature(p) {
+    var sig = { t: p.type, l: p.label };
+    if (p.required) sig.r = 1;
+    if (p.unique) sig.u = 1;
+    if (p.options) sig.o = Object.keys(p.options).sort(function (a, b) { return Number(p.options[a].index) - Number(p.options[b].index); });
+    if (p.expression) sig.x = p.expression;
+    if (p.defaultValue !== undefined && p.defaultValue !== '' && !(Array.isArray(p.defaultValue) && !p.defaultValue.length)) sig.d = p.defaultValue;
+    if (p.lookup) {
+      sig.k = { a: p.lookup.relatedApp && p.lookup.relatedApp.app, f: p.lookup.relatedKeyField, m: (p.lookup.fieldMappings || []).map(function (m) { return m.relatedField + '>' + m.field; }) };
+    }
+    if (p.referenceTable) {
+      var rt = p.referenceTable;
+      sig.rt = { a: rt.relatedApp && rt.relatedApp.app, c: rt.condition && (rt.condition.field + '=' + rt.condition.relatedField), q: rt.filterCond || '' };
+    }
+    return JSON.stringify(sig);
+  }
+
+  function flattenFields(properties) {
+    var out = {};
+    Object.keys(properties || {}).forEach(function (code) {
+      var p = properties[code];
+      if (p.type === 'SUBTABLE') {
+        out[code] = fieldSignature({ type: p.type, label: p.label });
+        Object.keys(p.fields || {}).forEach(function (inner) { out[inner] = fieldSignature(p.fields[inner]); });
+      } else {
+        out[code] = fieldSignature(p);
+      }
+    });
+    return out;
+  }
+
+  function relatedId(relatedApp) { return relatedApp && relatedApp.app ? String(relatedApp.app) : null; }
+
+  function extractLinks(appId, properties, actions) {
+    var links = [];
+    function visit(props, tableLabel) {
+      Object.keys(props || {}).forEach(function (code) {
+        var p = props[code];
+        if (p.type === 'SUBTABLE') { visit(p.fields, p.label || code); return; }
+        var place = (p.label || code) + (tableLabel ? '（テーブル「' + tableLabel + '」内）' : '');
+        if (p.lookup && relatedId(p.lookup.relatedApp)) links.push({ from: String(appId), to: relatedId(p.lookup.relatedApp), kind: 'ルックアップ', place: place });
+        if (p.referenceTable && relatedId(p.referenceTable.relatedApp)) links.push({ from: String(appId), to: relatedId(p.referenceTable.relatedApp), kind: '関連レコード一覧', place: place });
+      });
+    }
+    visit(properties, null);
+    Object.keys((actions && actions.actions) || {}).forEach(function (name) {
+      var a = actions.actions[name];
+      if (a && a.destApp && a.destApp.app) links.push({ from: String(appId), to: String(a.destApp.app), kind: 'アクション', place: a.name || name });
+    });
+    return links;
+  }
+
+  function customizeFiles(customize) {
+    var rows = [];
+    var c = customize || {};
+    [['desktop', 'PC'], ['mobile', 'モバイル']].forEach(function (screen) {
+      [['js', 'JavaScript'], ['css', 'CSS']].forEach(function (kind) {
+        (((c[screen[0]] || {})[kind[0]]) || []).forEach(function (item, i) {
+          var isUrl = item.type === 'URL';
+          rows.push({ screen: screen[1], kind: kind[1], order: i + 1, form: isUrl ? 'URL' : 'ファイル', name: isUrl ? (item.url || '') : ((item.file && item.file.name) || '') });
+        });
+      });
+    });
+    return rows;
+  }
+
+  // results: アプリごとの API の結果 { ok, value } / { ok: false, error }
+  function appSnapshot(app, results) {
+    function val(k) { return results[k] && results[k].ok ? results[k].value : null; }
+    var errors = {};
+    Object.keys(results).forEach(function (k) { if (!results[k].ok) errors[k] = errorText(results[k].error); });
+    var properties = (val('fields') && val('fields').properties) || null;
+    var labels = labelMap(properties || {});
+    function rowsText(rows, withCondition) {
+      return rows.map(function (r) { return r.order + '｜' + (withCondition ? (r.condition || r.field) + '｜' : '') + r.target + '｜' + r.text; });
+    }
+    return {
+      id: String(app.appId), name: app.name, spaceId: app.spaceId || '',
+      creator: app.creator ? (app.creator.name || app.creator.code) : '', createdAt: app.createdAt || '',
+      modifier: app.modifier ? (app.modifier.name || app.modifier.code) : '', modifiedAt: app.modifiedAt || '',
+      fields: properties ? flattenFields(properties) : null,
+      labels: properties ? labels : {},
+      acl: {
+        app: val('appAcl') ? rowsText(appAclRows(val('appAcl')), false) : null,
+        record: val('recordAcl') ? rowsText(recordAclRows(val('recordAcl')), true) : null,
+        field: val('fieldAcl') ? rowsText(fieldAclRows(val('fieldAcl'), labels), true) : null
+      },
+      plugins: val('plugins') ? (val('plugins').plugins || []).map(function (p) { return { id: p.id, name: p.name, enabled: p.enabled !== false }; }) : null,
+      customize: val('customize') ? { scope: val('customize').scope, files: customizeFiles(val('customize')) } : null,
+      links: properties ? extractLinks(app.appId, properties, val('actions')) : [],
+      warnings: warningsFor(val('appAcl'), val('recordAcl'), val('fieldAcl'), labels),
+      errors: errors
+    };
+  }
+
+  function errorText(error) {
+    var code = error && error.code;
+    if (code === 'CB_NO02' || code === 'GAIA_NO01') return '権限がありません';
+    return (error && error.message) || '原因不明';
+  }
+
+  // 権限の注意点
+  function warningsFor(appAcl, recordAcl, fieldAcl, labels) {
+    var out = [];
+    appAclRows(appAcl).forEach(function (r) {
+      if (isEveryone(r.entity) && r.raw.appEditable) out.push({ level: '要確認', kind: 'アプリ', order: r.order, target: r.target, text: 'Everyoneに「アプリ管理」の権限があります。だれでもアプリの設定を変えられます。' });
+      if (isEveryone(r.entity) && r.raw.recordDeletable) out.push({ level: '要確認', kind: 'アプリ', order: r.order, target: r.target, text: 'Everyoneに「削除」の権限があります。' });
+      if (isEveryone(r.entity) && r.raw.recordExportable) out.push({ level: '確認', kind: 'アプリ', order: r.order, target: r.target, text: 'Everyoneに「書き出し」の権限があります。だれでもレコードをファイルに書き出せます。' });
+      if (r.entity && r.entity.type === 'USER') out.push({ level: '確認', kind: 'アプリ', order: r.order, target: r.target, text: 'ユーザー個人を指定しています。異動や退職のときに見直しが必要です。' });
+    });
+    recordAclRows(recordAcl).forEach(function (r) {
+      if (r.entity && r.entity.type === 'USER') out.push({ level: '確認', kind: 'レコード', order: r.order, target: r.target, text: 'ユーザー個人を指定しています（条件：' + r.condition + '）。' });
+    });
+    fieldAclRows(fieldAcl, labels || {}).forEach(function (r) {
+      if (r.entity && r.entity.type === 'USER') out.push({ level: '確認', kind: 'フィールド', order: r.order, target: r.target, text: 'ユーザー個人を指定しています（' + r.field + '）。' });
+    });
+    return out;
+  }
+
+  // ===== 4. 前回との比較 =====
+
+  var FIELD_TYPES = {
+    SINGLE_LINE_TEXT: '文字列（1行）', MULTI_LINE_TEXT: '文字列（複数行）', RICH_TEXT: 'リッチエディター',
+    NUMBER: '数値', CALC: '計算', RADIO_BUTTON: 'ラジオボタン', CHECK_BOX: 'チェックボックス',
+    MULTI_SELECT: '複数選択', DROP_DOWN: 'ドロップダウン', DATE: '日付', TIME: '時刻', DATETIME: '日時',
+    LINK: 'リンク', FILE: '添付ファイル', USER_SELECT: 'ユーザー選択', ORGANIZATION_SELECT: '組織選択',
+    GROUP_SELECT: 'グループ選択', REFERENCE_TABLE: '関連レコード一覧', SUBTABLE: 'テーブル', GROUP: 'グループ',
+    RECORD_NUMBER: 'レコード番号', CREATOR: '作成者', CREATED_TIME: '作成日時', MODIFIER: '更新者',
+    UPDATED_TIME: '更新日時', STATUS: 'ステータス', STATUS_ASSIGNEE: '作業者', CATEGORY: 'カテゴリー'
+  };
+
+  function fieldSummary(sig) {
+    try {
+      var s = JSON.parse(sig);
+      var parts = [(FIELD_TYPES[s.t] || s.t) + (s.l ? '「' + s.l + '」' : '')];
+      if (s.r) parts.push('必須');
+      if (s.u) parts.push('重複禁止');
+      if (s.o) parts.push('選択肢：' + s.o.join('、'));
+      if (s.x) parts.push('計算式：' + s.x);
+      if (s.d !== undefined) parts.push('初期値：' + (Array.isArray(s.d) ? s.d.join('、') : s.d));
+      if (s.k) parts.push('ルックアップ：アプリ' + s.k.a + '（キー ' + s.k.f + '）');
+      if (s.rt) parts.push('関連レコード：アプリ' + s.rt.a);
+      return parts.join(' ／ ');
+    } catch (e) { return sig; }
+  }
+
+  function fieldName(snap, code) { return ((snap.labels && snap.labels[code]) || code) + '（' + code + '）'; }
+
+  function diffSnapshots(prev, curr) {
+    var rows = [];
+    function add(kind, app, item, content, before, after) { rows.push([kind, app.id, app.name, item, content, before || '', after || '']); }
+    var prevApps = (prev && prev.apps) || {};
+    var currApps = curr.apps;
+    Object.keys(currApps).forEach(function (id) {
+      var c = currApps[id];
+      var p = prevApps[id];
+      if (!p) { add('追加', c, 'アプリ', '新しく作られたアプリです'); return; }
+      if (p.name !== c.name) add('変更', c, 'アプリ名', 'アプリ名が変わりました', p.name, c.name);
+      if (p.fields && c.fields) {
+        Object.keys(c.fields).forEach(function (code) {
+          if (!(code in p.fields)) add('追加', c, 'フィールド', fieldName(c, code), '', fieldSummary(c.fields[code]));
+          else if (p.fields[code] !== c.fields[code]) add('変更', c, 'フィールド', fieldName(c, code), fieldSummary(p.fields[code]), fieldSummary(c.fields[code]));
+        });
+        Object.keys(p.fields).forEach(function (code) {
+          if (!(code in c.fields)) add('削除', c, 'フィールド', fieldName(p, code), fieldSummary(p.fields[code]), '');
+        });
+      }
+      [['app', 'アプリのアクセス権'], ['record', 'レコードのアクセス権'], ['field', 'フィールドのアクセス権']].forEach(function (pair) {
+        var a = p.acl && p.acl[pair[0]];
+        var b = c.acl && c.acl[pair[0]];
+        if (a && b && a.join('\n') !== b.join('\n')) add('変更', c, pair[1], '設定が変わりました', a.join('\n') || '（設定なし）', b.join('\n') || '（設定なし）');
+      });
+      if (p.plugins && c.plugins) {
+        var pp = {};
+        p.plugins.forEach(function (x) { pp[x.id] = x; });
+        var cp = {};
+        c.plugins.forEach(function (x) { cp[x.id] = x; });
+        c.plugins.forEach(function (x) {
+          if (!pp[x.id]) add('追加', c, 'プラグイン', x.name, '', x.enabled ? '有効' : '無効');
+          else if (pp[x.id].enabled !== x.enabled) add('変更', c, 'プラグイン', x.name, pp[x.id].enabled ? '有効' : '無効', x.enabled ? '有効' : '無効');
+        });
+        p.plugins.forEach(function (x) { if (!cp[x.id]) add('削除', c, 'プラグイン', x.name, pp[x.id].enabled ? '有効' : '無効', ''); });
+      }
+      if (p.customize && c.customize) {
+        if (p.customize.scope !== c.customize.scope) add('変更', c, 'カスタマイズ', '適用するユーザー', SCOPE_TEXT[p.customize.scope] || p.customize.scope, SCOPE_TEXT[c.customize.scope] || c.customize.scope);
+        var key = function (f) { return f.screen + '・' + f.kind + '：' + f.name; };
+        var pf = p.customize.files.map(key);
+        var cf = c.customize.files.map(key);
+        cf.forEach(function (f) { if (pf.indexOf(f) < 0) add('追加', c, 'カスタマイズ', f); });
+        pf.forEach(function (f) { if (cf.indexOf(f) < 0) add('削除', c, 'カスタマイズ', f); });
+      }
+    });
+    Object.keys(prevApps).forEach(function (id) {
+      if (!currApps[id]) add('削除', prevApps[id], 'アプリ', '削除されたか、見られなくなったアプリです');
+    });
+    return rows;
+  }
+
+  // ===== 5. 点検台帳のシート =====
+
+  function daysSince(iso, now) {
+    if (!iso) return '';
+    var t = Date.parse(iso);
+    if (isNaN(t)) return '';
+    return String(Math.floor(((now ? now.getTime() : Date.now()) - t) / 86400000));
+  }
+
+  function dateText(value) {
+    if (!value) return '';
+    var d = value instanceof Date ? value : new Date(value);
+    if (isNaN(d.getTime())) return String(value);
+    var pad = function (n) { return ('0' + n).slice(-2); };
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+
+  var SNAPSHOT_CHUNK = 30000; // Excelの1つのセルに入る文字数（32,767）より少なくする
+
+  function buildSheets(snapshot, prev, now, licenseText) {
+    var apps = Object.keys(snapshot.apps).map(function (id) { return snapshot.apps[id]; })
+      .sort(function (a, b) { return Number(a.id) - Number(b.id); });
+    var names = {};
+    apps.forEach(function (a) { names[a.id] = a.name; });
+    var warnings = [];
+    apps.forEach(function (a) { a.warnings.forEach(function (w) { warnings.push([w.level, a.id, a.name, w.kind, String(w.order), w.target, w.text]); }); });
+    var diff = prev ? diffSnapshots(prev, snapshot) : null;
+    var withErrors = apps.filter(function (a) { return Object.keys(a.errors).length; });
+
+    var cover = [
+      ['点検日時', dateText(now)],
+      ['kintone環境', snapshot.host],
+      ['点検したアプリ', apps.length + '個'],
+      ['読み取れなかった項目があるアプリ', withErrors.length + '個' + (withErrors.length ? '（「アプリ一覧」シートの右端の列を参照）' : '')],
+      ['権限の注意点', warnings.length + '件'],
+      ['前回の点検', prev ? dateText(prev.takenAt) + '（' + (prev.host || '') + '）' : '比較していません'],
+      ['前回からの変更', diff ? diff.length + '件' : '－'],
+      ['ライセンス', licenseText || '']
+    ];
+    var appRows = apps.map(function (a) {
+      return [a.id, a.name, a.spaceId, a.creator, dateText(a.createdAt), a.modifier, dateText(a.modifiedAt), daysSince(a.modifiedAt, now),
+        a.fields ? String(Object.keys(a.fields).length) : '', a.plugins ? String(a.plugins.length) : '', a.customize ? String(a.customize.files.length) : '',
+        String(a.warnings.length), Object.keys(a.errors).map(function (k) { return ERROR_KEYS[k] + '（' + a.errors[k] + '）'; }).join('、')];
+    });
+    var aclRows = [];
+    apps.forEach(function (a) {
+      [['app', 'アプリ'], ['record', 'レコード'], ['field', 'フィールド']].forEach(function (pair) {
+        (a.acl[pair[0]] || []).forEach(function (line) {
+          var parts = line.split('｜');
+          if (pair[0] === 'app') aclRows.push([a.id, a.name, pair[1], parts[0], '', parts[1], parts[2]]);
+          else aclRows.push([a.id, a.name, pair[1], parts[0], parts[1], parts[2], parts[3]]);
+        });
+      });
+    });
+    var pluginRows = [];
+    apps.forEach(function (a) { (a.plugins || []).forEach(function (p) { pluginRows.push([a.id, a.name, p.name, p.id, p.enabled ? '有効' : '無効']); }); });
+    var customRows = [];
+    apps.forEach(function (a) {
+      if (!a.customize) return;
+      a.customize.files.forEach(function (f) { customRows.push([a.id, a.name, SCOPE_TEXT[a.customize.scope] || a.customize.scope, f.screen, f.kind, String(f.order), f.form, f.name]); });
+    });
+    var linkRows = [];
+    apps.forEach(function (a) { a.links.forEach(function (l) { linkRows.push([l.from, names[l.from] || '', l.kind, l.to, names[l.to] || '（見られないアプリ）', l.place]); }); });
+
+    var json = JSON.stringify(snapshot);
+    var chunks = [[RECORD_MARK]];
+    for (var i = 0; i < json.length; i += SNAPSHOT_CHUNK) chunks.push([json.slice(i, i + SNAPSHOT_CHUNK)]);
+
+    var diffBlock = diff
+      ? { title: null, header: ['区分', 'アプリID', 'アプリ名', '項目', '内容', '前回', '今回'], rows: diff, note: diff.length ? null : '前回の点検から、変わったところはありません。' }
+      : { title: null, header: [], rows: [], note: '前回の点検台帳を選ばずに作成したため、比較していません。次回の点検で、このファイルを選ぶと変更点が分かります。' };
+    return [
+      { name: '点検報告', widths: [32, 70], blocks: [{ title: 'kintoneアプリの点検報告', header: ['項目', '内容'], rows: cover }] },
+      { name: 'アプリ一覧', widths: [8, 30, 10, 16, 18, 16, 18, 12, 10, 12, 14, 12, 40], blocks: [{ title: null, header: ['アプリID', 'アプリ名', 'スペースID', '作成者', '作成日時', '最終更新者', '設定の最終更新', '更新からの日数', 'フィールド数', 'プラグイン数', 'カスタマイズ数', '権限の注意点', '読み取れなかった項目'], rows: appRows }] },
+      { name: '変更点', widths: [8, 8, 24, 18, 36, 40, 40], blocks: [diffBlock] },
+      { name: '権限の注意点', widths: [8, 8, 24, 10, 6, 24, 60], blocks: [{ title: null, header: ['重要度', 'アプリID', 'アプリ名', '種類', '順', '対象', '内容'], rows: warnings, styles: warnings.map(function (w) { return w[0] === '要確認' ? STYLE.warn : STYLE.body; }), note: warnings.length ? null : '注意点は見つかりませんでした。' }] },
+      { name: '権限一覧', widths: [8, 24, 10, 6, 30, 28, 40], blocks: [{ title: null, header: ['アプリID', 'アプリ名', '種類', '順', '条件・フィールド', '対象', '権限'], rows: aclRows }] },
+      { name: 'プラグイン', widths: [8, 24, 36, 36, 8], blocks: [{ title: null, header: ['アプリID', 'アプリ名', 'プラグイン名', 'プラグインID', '状態'], rows: pluginRows, note: pluginRows.length ? null : 'プラグインを追加しているアプリはありません。' }] },
+      { name: 'カスタマイズ', widths: [8, 24, 18, 10, 12, 6, 8, 60], blocks: [{ title: null, header: ['アプリID', 'アプリ名', '適用するユーザー', '画面', '種類', '順', '形式', 'ファイル名・URL'], rows: customRows, note: customRows.length ? null : 'JavaScript・CSSによるカスタマイズはありません。' }] },
+      { name: 'つながり', widths: [10, 24, 16, 10, 24, 36], blocks: [{ title: null, header: ['元のアプリID', '元のアプリ', 'つながりの種類', '相手のアプリID', '相手のアプリ', '設定のある場所'], rows: linkRows, note: linkRows.length ? null : 'ルックアップ・関連レコード一覧・アクションでつながっているアプリはありません。' }] },
+      { name: RECORD_SHEET, hidden: true, widths: [20], blocks: [{ title: null, header: [], rows: chunks }] }
+    ];
+  }
+
+  var ERROR_KEYS = { fields: 'フィールド', appAcl: 'アプリのアクセス権', recordAcl: 'レコードのアクセス権', fieldAcl: 'フィールドのアクセス権', plugins: 'プラグイン', customize: 'カスタマイズ', actions: 'アクション' };
+
+  function summaryText(snapshot, sheets, compared) {
+    var count = Object.keys(snapshot.apps).length;
+    var warn = sheets[3].blocks[0].rows.length;
+    var diff = sheets[2].blocks[0].rows.length;
+    return count + '個のアプリを点検しました。権限の注意点は' + warn + '件' + (compared ? '、前回からの変更は' + diff + '件' : '') + 'です。';
+  }
+
+  var Core = {
+    buildXlsx: buildXlsx, readSnapshot: readSnapshot, readZip: readZip,
+    appSnapshot: appSnapshot, diffSnapshots: diffSnapshots, buildSheets: buildSheets, summaryText: summaryText,
+    fieldSignature: fieldSignature, warningsFor: warningsFor, extractLinks: extractLinks, entityText: entityText, dateText: dateText
+  };
+  if (typeof module !== 'undefined' && module.exports) { module.exports = Core; return; }
+  if (typeof kintone === 'undefined') return;
+
+  // ===== 6. 画面（kintone上でだけ動く部分） =====
+
+  var P = 'dcy-ip';
+  var FORM_URL = 'https://daichoya.github.io/pro.html';
+
+  function el(tag, attrs, children) {
+    var node = document.createElement(tag);
+    Object.keys(attrs || {}).forEach(function (key) {
+      if (key === 'text') node.textContent = attrs[key];
+      else node.setAttribute(key, attrs[key]);
+    });
+    (children || []).forEach(function (child) { node.appendChild(typeof child === 'string' ? document.createTextNode(child) : child); });
+    return node;
+  }
+
+  function api(path, params) { return kintone.api(kintone.api.url(path, true), 'GET', params); }
+  function settle(promise) {
+    return promise.then(function (value) { return { ok: true, value: value }; }, function (error) { return { ok: false, error: error }; });
+  }
+
+  function getAllApps() {
+    var apps = [];
+    function next(offset) {
+      return api('/k/v1/apps.json', { limit: 100, offset: offset }).then(function (resp) {
+        apps = apps.concat(resp.apps);
+        return resp.apps.length === 100 ? next(offset + 100) : apps;
+      });
+    }
+    return next(0);
+  }
+
+  function collect(appId) {
+    var requests = {
+      fields: api('/k/v1/app/form/fields.json', { app: appId }),
+      appAcl: api('/k/v1/app/acl.json', { app: appId }),
+      recordAcl: api('/k/v1/record/acl.json', { app: appId }),
+      fieldAcl: api('/k/v1/field/acl.json', { app: appId }),
+      plugins: api('/k/v1/app/plugins.json', { app: appId }),
+      customize: api('/k/v1/app/customize.json', { app: appId }),
+      actions: api('/k/v1/app/actions.json', { app: appId })
+    };
+    var keys = Object.keys(requests);
+    return Promise.all(keys.map(function (k) { return settle(requests[k]); })).then(function (list) {
+      var results = {};
+      keys.forEach(function (k, i) { results[k] = list[i]; });
+      return results;
+    });
+  }
+
+  // 同時に調べるアプリは3つまでにして、kintoneに負担をかけない
+  function scanAll(apps, onProgress) {
+    var snapshots = {};
+    var index = 0;
+    var done = 0;
+    function worker() {
+      if (index >= apps.length) return Promise.resolve();
+      var app = apps[index++];
+      return collect(app.appId).then(function (results) {
+        snapshots[app.appId] = appSnapshot(app, results);
+        done += 1;
+        onProgress(done, apps.length);
+        return worker();
+      });
+    }
+    var workers = [];
+    for (var i = 0; i < Math.min(3, apps.length); i++) workers.push(worker());
+    return Promise.all(workers).then(function () { return snapshots; });
+  }
+
+  function download(bytes, fileName) {
+    var blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    var url = URL.createObjectURL(blob);
+    var a = el('a', { href: url, download: fileName });
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+
+  function readFile(file) {
+    return new Promise(function (resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function () { resolve(new Uint8Array(reader.result)); };
+      reader.onerror = function () { reject(new Error('ファイルを読み込めませんでした。')); };
+      reader.readAsArrayBuffer(file);
+    });
+  }
+
+  function licenseKey() {
+    try { return (kintone.plugin.app.getConfig(PLUGIN_ID) || {}).license || ''; } catch (e) { return ''; }
+  }
+
+  function openModal() {
+    if (document.getElementById(P + '-overlay')) return;
+    var closeBtn = el('button', { type: 'button', class: P + '-close', 'aria-label': '閉じる', text: '×' });
+    var licenseLine = el('p', { class: P + '-license', text: 'ライセンスを確認しています…' });
+    var fileInput = el('input', { type: 'file', accept: '.xlsx', class: P + '-file', id: P + '-prev' });
+    var runBtn = el('button', { type: 'button', class: P + '-btn ' + P + '-primary', text: '点検台帳を作成', disabled: 'disabled' });
+    var status = el('p', { class: P + '-status', role: 'status' });
+    var dialog = el('div', { class: P + '-dialog', role: 'dialog', 'aria-modal': 'true', 'aria-label': '棚卸し・変更監視パック' }, [
+      el('div', { class: P + '-head' }, [el('h2', { text: '棚卸し・変更監視パック' }), closeBtn]),
+      licenseLine,
+      el('p', { class: P + '-lead', text: 'すべてのアプリの設定を読み取り、点検台帳（Excel）を作ります。前回の点検台帳を選ぶと、変わったところも一覧にします。' }),
+      el('div', { class: P + '-prev' }, [el('label', { for: P + '-prev', text: '前回の点検台帳（任意）' }), fileInput]),
+      el('div', { class: P + '-controls' }, [runBtn]),
+      status
+    ]);
+    var overlay = el('div', { id: P + '-overlay', class: P + '-overlay' }, [dialog]);
+    function close() {
+      document.removeEventListener('keydown', onKey);
+      if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+    }
+    function onKey(e) { if (e.key === 'Escape') close(); }
+    closeBtn.addEventListener('click', close);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', onKey);
+    document.body.appendChild(overlay);
+
+    var licenseText = '';
+    window.DaichoyaLicense.check(licenseKey(), location.hostname).then(function (lic) {
+      licenseText = lic.message;
+      licenseLine.textContent = 'ライセンス：' + lic.message;
+      licenseLine.className = P + '-license ' + P + '-license-' + lic.state;
+      if (lic.ok) {
+        runBtn.removeAttribute('disabled');
+        status.textContent = '「点検台帳を作成」を押してください。アプリの数によっては数分かかります。';
+      } else {
+        status.textContent = '';
+        status.appendChild(document.createTextNode('ライセンスキーは、プラグインの設定画面で入力します。30日間の無料試用も申し込めます（'));
+        status.appendChild(el('a', { href: FORM_URL, target: '_blank', rel: 'noopener', text: '詳しくはこちら' }));
+        status.appendChild(document.createTextNode('）。'));
+      }
+    });
+
+    runBtn.addEventListener('click', function () {
+      runBtn.setAttribute('disabled', 'disabled');
+      var file = fileInput.files && fileInput.files[0];
+      var prevPromise = file ? readFile(file).then(readSnapshot) : Promise.resolve(null);
+      var prev;
+      status.textContent = file ? '前回の点検台帳を読み込み中…' : 'アプリの一覧を読み込み中…';
+      prevPromise.then(function (p) {
+        prev = p;
+        status.textContent = 'アプリの一覧を読み込み中…';
+        return getAllApps();
+      }).then(function (apps) {
+        return scanAll(apps, function (done, total) { status.textContent = 'アプリの設定を読み込み中…（' + done + ' / ' + total + '）'; });
+      }).then(function (apps) {
+        var now = new Date();
+        var snapshot = { v: 1, host: window.DaichoyaLicense.normalizeDomain(location.hostname), takenAt: now.toISOString(), apps: apps };
+        var sheets = buildSheets(snapshot, prev, now, licenseText);
+        var stamp = dateText(now).slice(0, 10).replace(/-/g, '');
+        download(buildXlsx(sheets), '点検台帳_' + stamp + '.xlsx');
+        status.textContent = summaryText(snapshot, sheets, !!prev) + 'ファイルは次回の点検で「前回の点検台帳」として使えます。';
+      }).catch(function (error) {
+        status.textContent = '点検台帳を作成できませんでした（' + ((error && error.message) || '原因不明') + '）。';
+      }).then(function () {
+        runBtn.removeAttribute('disabled');
+      });
+    });
+  }
+
+  kintone.events.on('app.record.index.show', function (event) {
+    var space = kintone.app.getHeaderMenuSpaceElement();
+    if (!space || document.getElementById(P + '-open')) return event;
+    var button = el('button', { id: P + '-open', type: 'button', class: P + '-btn', text: '棚卸し' });
+    button.addEventListener('click', openModal);
+    space.appendChild(button);
+    return event;
+  });
+})(typeof kintone !== 'undefined' ? kintone.$PLUGIN_ID : null);
