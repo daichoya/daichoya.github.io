@@ -99,17 +99,27 @@
     <p class="note prose">前回の点検台帳を選んで作ると、変わったところだけを「変更点」のシートにまとめます。毎月の点検で、知らないうちに変わった設定に気づけます。<br>点検台帳は台帳屋のサーバーには送られず、点検した人のパソコンに保存されます。1つのアプリの詳しい設計書は、無料の<a href="plugins/design-doc.html">設計書ジェネレーター</a>で作れます。</p>
 
     <h2 id="price">料金（有料版）</h2>
+    <div class="prose"><p>お使いのkintoneにあるアプリの数で、3つのプランから選べます。アプリの数は、「無料で点検する」の結果で分かります。</p></div>
+    <div class="table-scroll">
+      <table class="facts price-table">
+        <thead><tr><th scope="col">プラン</th><th scope="col">月額（税込）</th><th scope="col">年額（税込）</th><th scope="col">お申し込み</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">アプリ100個まで</th><td><strong>3,300円</strong></td><td>33,000円</td><td><div class="actions"><a class="btn btn-primary" href="https://buy.stripe.com/8x27sNfFG60Z0E21FL9EI00" rel="noopener">月額3,300円で申し込む</a><a class="btn btn-primary" href="https://buy.stripe.com/3cI14p0KMexvbiG5W19EI01" rel="noopener">年額33,000円で申し込む</a></div></td></tr>
+          <tr><th scope="row">アプリ500個まで</th><td><strong>9,900円</strong></td><td>99,000円</td><td><div class="actions"><a class="btn btn-primary" href="https://buy.stripe.com/8x2fZjbpq2ONeuS7059EI02" rel="noopener">月額9,900円で申し込む</a><a class="btn btn-primary" href="https://buy.stripe.com/14A5kFalmgFD3Qeach9EI03" rel="noopener">年額99,000円で申し込む</a></div></td></tr>
+          <tr><th scope="row">アプリの数の上限なし</th><td><strong>19,800円</strong></td><td>198,000円</td><td><div class="actions"><a class="btn btn-primary" href="https://buy.stripe.com/cNi5kFalmexvfyWesx9EI04" rel="noopener">月額19,800円で申し込む</a><a class="btn btn-primary" href="https://buy.stripe.com/5kQfZjalmgFD0E298d9EI05" rel="noopener">年額198,000円で申し込む</a></div></td></tr>
+        </tbody>
+      </table>
+    </div>
     <div class="prose">
-      <p class="price"><strong>月額3,300円</strong>（税込）、または年額33,000円（税込）</p>
       <ul>
-        <li>kintone環境ごとの料金です。利用人数による追加料金はありません。</li>
-        <li>30日間の無料試用があります。カードの登録は要りません。</li>
+        <li>kintone環境ごとの料金です。利用人数による追加料金はありません。年額は10か月分の料金です。</li>
+        <li>アプリの数は、点検した人が見られるアプリの数です。プランの上限を超えても点検は止まらず、画面と点検台帳に、プランの変更のお願いを表示します。</li>
+        <li>30日間の無料試用があります（アプリの数の上限なし）。カードの登録は要りません。</li>
         <li>お支払いはクレジットカードです。お申し込みのときに入力したkintoneの環境で使えるライセンスキーが、15分ほどでメールで届きます。</li>
-        <li>月額・年額とも自動で更新します。解約は、<a href="https://billing.stripe.com/p/login/8x27sNfFG60Z0E21FL9EI00" rel="noopener">ご契約の管理ページ（カードの変更・解約・領収書）</a>から、またはメールでいつでもお手続きいただけます。</li>
+        <li>月額・年額とも自動で更新します。解約は、<a href="https://billing.stripe.com/p/login/8x27sNfFG60Z0E21FL9EI00" rel="noopener">ご契約の管理ページ（カードの変更・解約・領収書）</a>から、またはメールでいつでもお手続きいただけます。プランの変更は、メールでお知らせください。</li>
         <li>社内の稟議に使う<a href="estimate.html">見積書は、こちらから作れます</a>。</li>
       </ul>
     </div>
-    <div class="actions"><a class="btn btn-primary" href="https://buy.stripe.com/8x27sNfFG60Z0E21FL9EI00" rel="noopener">月額3,300円で申し込む</a><a class="btn btn-primary" href="https://buy.stripe.com/3cI14p0KMexvbiG5W19EI01" rel="noopener">年額33,000円で申し込む</a></div>
     <ul class="note prose">
       <li>お申し込みの画面で、お使いのkintoneの環境（○○.cybozu.com）と会社名を入力してください。ライセンスキーは、入力した環境でだけ使えます。</li>
       <li>無料試用のあとに申し込む場合は、届いた新しいキーを、プラグインの設定に貼り直してください。点検台帳や設定はそのまま使えます。</li>
@@ -128,12 +138,13 @@
     </ol>
     <div class="actions"><a class="btn btn-primary" href="https://docs.google.com/forms/d/e/1FAIpQLSeazyhYt9ZZf3fJufgTl02byKzbnpDxQjxyjDhJAbuV_heLbQ/viewform" rel="noopener">30日間の無料試用を申し込む</a></div>
     <div class="download" id="download">
-      <a class="btn btn-primary" href="downloads/daichoya-inventory-pack-1.2.0.zip" download>ダウンロード（v1.2.0・zip・42KB）</a><p class="note hash">ファイルの確認用（SHA-256）：<code>1fbf465ae6efb2f1dcf0f5911c80b57c358a22ca79eee6fb68006aff4d203049</code></p>
+      <a class="btn btn-primary" href="downloads/daichoya-inventory-pack-1.2.1.zip" download>ダウンロード（v1.2.1・zip・42KB）</a><p class="note hash">ファイルの確認用（SHA-256）：<code>9101028155d597d1b31401b523b00ea04a5b28f53e50faed3adbbab32b1cb4c5</code></p>
       <p class="note">ご利用の前に<a href="terms.html">利用規約</a>をお読みください。無料の点検も、有料版も、同じファイルです。</p>
     </div>
 
     <h2>更新履歴</h2>
     <ul class="prose">
+      <li>1.2.1（2026年11月5日）：料金をアプリの数で3つのプランにしたのに合わせ、無料の点検の結果に、この環境に合うプランを表示するようにしました。</li>
       <li>1.2.0（2026年11月5日）：ライセンスキーがなくても全アプリを点検し、件数と例を表示する「無料で点検する」を追加しました。注意点に健康診断の項目（スペースに入っていないアプリ、初期の管理者アカウント、外部のURLから読み込むJavaScript・CSS、アプリの説明、初期のままのフィールドコード）を足しました。</li>
       <li>1.1.1（2026年11月5日）：「つながり」のシートに、点検した人が見られないアプリへのアクションも残すようにしました（相手のアプリは「見られないアプリ」と表示）。点検報告に、点検したのは見られるアプリだけであることを書きました。</li>
       <li>1.1.0（2026年11月5日）：「フィールドの使われ方」のシートを追加（ほかのアプリから使われているフィールドと、設定では使われていないフィールド）</li>

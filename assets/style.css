@@ -254,3 +254,4 @@ code { overflow-wrap: anywhere; word-break: normal; }
 .page > .wrap > ul.api { margin: 0 0 1em; }
 .download .hash { flex-basis: 100%; font-size: 12px; color: var(--muted); }
 .download .hash code { font-size: 12px; overflow-wrap: anywhere; }
+.price-table td .actions { margin-top: 0; gap: 8px; white-space: normal; }

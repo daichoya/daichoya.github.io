@@ -68,6 +68,11 @@
       <form class="est-form" id="est-form" onsubmit="return false;">
         <label>宛名（会社名）<input id="est-company" type="text" placeholder="株式会社〇〇" autocomplete="organization"></label>
         <label>ご担当者（任意）<input id="est-person" type="text" placeholder="情報システム部 〇〇様"></label>
+        <label>プラン（お使いのkintoneのアプリの数）<select id="est-tier">
+          <option value="100">アプリ100個まで</option>
+          <option value="500">アプリ500個まで</option>
+          <option value="0">アプリの数の上限なし</option>
+        </select></label>
         <label>お支払い<select id="est-plan">
           <option value="year">年額（1年分）</option>
           <option value="month">月額（12か月分）</option>
@@ -114,8 +119,12 @@
 <script>
 (function () {
   'use strict';
-  // 有料版の料金（税込）。pro.html の料金と同じにする
-  var PRICES = { month: { unit: 3300, months: 12, label: '月額' }, year: { unit: 33000, months: 0, label: '年額' } };
+  // 有料版の料金（税込）。pro.html・利用規約・特定商取引法に基づく表記の料金と同じにする
+  var TIERS = {
+    100: { name: 'アプリ100個まで', month: 3300, year: 33000 },
+    500: { name: 'アプリ500個まで', month: 9900, year: 99000 },
+    0: { name: 'アプリの数の上限なし', month: 19800, year: 198000 }
+  };
   var PRODUCT = 'kintoneプラグイン「台帳屋 棚卸し・変更監視パック」';
   function $(id) { return document.getElementById(id); }
   function yen(n) { return n.toLocaleString('ja-JP') + '円'; }
@@ -124,7 +133,9 @@
   var until = new Date(today.getTime() + 30 * 86400000);
   var no = 'Q' + today.getFullYear() + ('0' + (today.getMonth() + 1)).slice(-2) + ('0' + today.getDate()).slice(-2) + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
   function render() {
-    var plan = PRICES[$('est-plan').value];
+    var tier = TIERS[$('est-tier').value];
+    var kind = $('est-plan').value;
+    var plan = { unit: tier[kind], months: kind === 'month' ? 12 : 0, label: kind === 'month' ? '月額' : '年額' };
     var count = Math.max(1, Math.min(50, parseInt($('est-count').value, 10) || 1));
     var qty = plan.months ? plan.months * count : count;
     var amount = plan.unit * qty;
@@ -133,13 +144,13 @@
     $('out-no').textContent = no;
     $('out-date').textContent = ymd(today);
     $('out-until').textContent = ymd(until);
-    $('out-item').textContent = PRODUCT + ' ご利用料（' + plan.label + (plan.months ? '・12か月分' : '・1年分') + '、kintone環境' + count + '個）';
+    $('out-item').textContent = PRODUCT + ' ' + tier.name + ' ご利用料（' + plan.label + (plan.months ? '・12か月分' : '・1年分') + '、kintone環境' + count + '個）';
     $('out-unit').textContent = yen(plan.unit) + (plan.months ? '／月・環境' : '／年・環境');
     $('out-qty').textContent = plan.months ? count + '環境 × 12か月' : count + '環境';
     $('out-amount').textContent = yen(amount);
     $('out-total').textContent = yen(amount);
   }
-  ['est-company', 'est-person', 'est-plan', 'est-count'].forEach(function (id) { $(id).addEventListener('input', render); $(id).addEventListener('change', render); });
+  ['est-company', 'est-person', 'est-tier', 'est-plan', 'est-count'].forEach(function (id) { $(id).addEventListener('input', render); $(id).addEventListener('change', render); });
   render();
 })();
 </script>

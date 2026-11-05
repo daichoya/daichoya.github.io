@@ -939,8 +939,27 @@
     return { over: over, text: 'アプリ' + max + '個まで' + (over ? '（この環境で点検したアプリは' + appCount + '個です。プランの変更をお願いします）' : '') };
   }
 
+  // 料金のプラン（税込）。pro.html の料金と同じにする。apps：アプリの数の上限（0は上限なし）
+  var PLANS = [
+    { apps: 100, name: 'アプリ100個まで', month: 3300, year: 33000 },
+    { apps: 500, name: 'アプリ500個まで', month: 9900, year: 99000 },
+    { apps: 0, name: 'アプリの数の上限なし', month: 19800, year: 198000 }
+  ];
+
+  function recommendPlan(appCount) {
+    for (var i = 0; i < PLANS.length; i++) if (!PLANS[i].apps || appCount <= PLANS[i].apps) return PLANS[i];
+    return PLANS[PLANS.length - 1];
+  }
+
+  function yen(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '円'; }
+
+  function planText(appCount) {
+    var p = recommendPlan(appCount);
+    return 'この環境のアプリは' + appCount + '個なので、プランは「' + p.name + '」（月額' + yen(p.month) + '・年額' + yen(p.year) + '、税込）です。';
+  }
+
   var Core = {
-    freeSummary: freeSummary, planNote: planNote, healthChecks: healthChecks, envWarnings: envWarnings,
+    freeSummary: freeSummary, planNote: planNote, recommendPlan: recommendPlan, planText: planText, healthChecks: healthChecks, envWarnings: envWarnings,
     buildXlsx: buildXlsx, readSnapshot: readSnapshot, readZip: readZip,
     appSnapshot: appSnapshot, diffSnapshots: diffSnapshots, buildSheets: buildSheets, summaryText: summaryText,
     fieldSignature: fieldSignature, warningsFor: warningsFor, extractLinks: extractLinks, entityText: entityText, dateText: dateText
@@ -1109,6 +1128,7 @@
     if (sum.unreadable) box.appendChild(el('p', { class: P + '-note', text: '権限がなく、設定の一部を読み取れなかったアプリが' + sum.unreadable + '個あります。kintoneシステム管理者が点検すると、すべて読み取れます。' }));
     box.appendChild(el('div', { class: P + '-cta' }, [
       el('p', { text: '有料版では、すべての一覧と、どのアプリのどの設定かをExcelの点検台帳にまとめます。次回からは、前回の点検から変わったところも分かります。' }),
+      el('p', { class: P + '-note', text: planText(sum.apps) }),
       el('div', { class: P + '-controls' }, [
         el('a', { class: P + '-btn ' + P + '-primary ' + P + '-link', href: trialUrl(domain), target: '_blank', rel: 'noopener', text: '30日間無料で、すべてを見る' }),
         el('a', { class: P + '-btn ' + P + '-link', href: PRICE_URL, target: '_blank', rel: 'noopener', text: '料金を見る' })
@@ -1215,7 +1235,7 @@
         var sheets = buildSheets(snapshot, prev, now, licenseText, sc.dir);
         var stamp = dateText(now).slice(0, 10).replace(/-/g, '');
         download(buildXlsx(sheets), '点検台帳_' + stamp + '.xlsx');
-        if (plan.over) result.appendChild(el('p', { class: P + '-note ' + P + '-warn', text: 'ご契約のプランは' + plan.text + '。' }));
+        if (plan.over) result.appendChild(el('p', { class: P + '-note ' + P + '-warn', text: 'ご契約のプランは' + plan.text + '。' + planText(count) + 'プランの変更は、daichoya.plugins@gmail.com までメールでお知らせください。' }));
         done(summaryText(snapshot, sheets, !!prev) + 'ファイルは次回の点検で「前回の点検台帳」として使えます。');
       }).catch(fail);
     });
