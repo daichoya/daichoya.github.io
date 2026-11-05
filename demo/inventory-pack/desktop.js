@@ -9,6 +9,8 @@
 
   // 共通部品：設定に出てくるユーザー・組織・グループを集める（js/refs.js）
   var Refs = typeof module !== 'undefined' && module.exports ? require('../../../common/js/refs.js') : window.DaichoyaRefs;
+  // 共通部品：フィールドが使われている場所を探す（js/fieldrefs.js）
+  var FieldRefs = typeof module !== 'undefined' && module.exports ? require('../../../common/js/fieldrefs.js') : window.DaichoyaFieldRefs;
 
   // ===== 1. Excel（xlsx）の書き出し =====
   // xlsxは「XMLファイルをまとめたzip」。無圧縮のzipを自前で作る（設計書ジェネレーターと同じ方式）。
@@ -419,6 +421,68 @@
     return rows;
   }
 
+  // フィールドの使われ方（このアプリの中）。レコードの中身は見ず、設定だけで判断する
+  var NOT_DATA_FIELDS = { SUBTABLE: 1, REFERENCE_TABLE: 1 };
+  var SYSTEM_FIELDS = { RECORD_NUMBER: 1, CREATOR: 1, CREATED_TIME: 1, MODIFIER: 1, UPDATED_TIME: 1 };
+
+  function fieldUse(app, val) {
+    var fields = val('fields');
+    if (!fields) return null;
+    var settings = {
+      fields: fields, views: val('views'), reports: val('reports'), recordAcl: val('recordAcl'), fieldAcl: val('fieldAcl'),
+      status: val('status'), general: val('general'), perRecord: val('perRecord'), reminder: val('reminder'),
+      actions: val('actions'), appSettings: val('appSettings')
+    };
+    var flat = FieldRefs.flatFields(fields.properties);
+    return FieldRefs.choices(fields.properties).filter(function (c) { return !NOT_DATA_FIELDS[c.type]; }).map(function (c) {
+      var places = [];
+      var own = flat[c.code] && flat[c.code].prop;
+      // ルックアップで、ほかのフィールドに値をコピーしているなら、それ自体が働いている設定
+      if (own && own.lookup && (own.lookup.fieldMappings || []).length) places.push('ルックアップ（ほかのフィールドへのコピー）');
+      FieldRefs.find({ appId: app.appId, appName: app.name, code: c.code }, settings, [], []).forEach(function (h) {
+        if (h.place === 'ルックアップ') return; // そのフィールド自身がルックアップであること（使われている場所ではない）
+        if (places.indexOf(h.place) < 0) places.push(h.place);
+      });
+      return { c: c.code, l: c.label, t: c.type, u: places };
+    });
+  }
+
+  // ほかのアプリのフィールドを参照している設定（ルックアップ・関連レコード一覧・アクション）だけを、短い形で残す
+  function crossRefs(properties, actions) {
+    var props = {};
+    var labels = labelMap(properties);
+    function stub(code) { if (code && !props[code]) props[code] = { label: labels[code] || code }; }
+    function keep(code, p) {
+      var lk = p.lookup;
+      var rt = p.referenceTable;
+      if (lk && relatedId(lk.relatedApp)) {
+        props[code] = { label: p.label || code, type: p.type, lookup: {
+          relatedApp: { app: relatedId(lk.relatedApp) }, relatedKeyField: lk.relatedKeyField,
+          fieldMappings: (lk.fieldMappings || []).map(function (m) { return { field: m.field, relatedField: m.relatedField }; }),
+          lookupPickerFields: lk.lookupPickerFields || [], filterCond: lk.filterCond || '', sort: lk.sort || '' } };
+        (lk.fieldMappings || []).forEach(function (m) { stub(m.field); });
+      } else if (rt && relatedId(rt.relatedApp)) {
+        props[code] = { label: p.label || code, type: p.type, referenceTable: {
+          relatedApp: { app: relatedId(rt.relatedApp) },
+          condition: rt.condition ? { field: rt.condition.field, relatedField: rt.condition.relatedField } : null,
+          displayFields: rt.displayFields || [], filterCond: rt.filterCond || '', sort: rt.sort || '' } };
+      }
+    }
+    Object.keys(properties || {}).forEach(function (code) {
+      var p = properties[code];
+      if (p.type === 'SUBTABLE') Object.keys(p.fields || {}).forEach(function (inner) { keep(inner, p.fields[inner]); });
+      else keep(code, p);
+    });
+    var acts = {};
+    Object.keys((actions && actions.actions) || {}).forEach(function (name) {
+      var a = actions.actions[name];
+      if (!a || !a.destApp || !a.destApp.app) return;
+      acts[name] = { name: a.name || name, index: a.index, destApp: { app: String(a.destApp.app) },
+        mappings: (a.mappings || []).filter(function (m) { return m.destField; }).map(function (m) { return { destField: m.destField }; }) };
+    });
+    return { properties: props, actions: acts };
+  }
+
   // results: アプリごとの API の結果 { ok, value } / { ok: false, error }
   function appSnapshot(app, results) {
     function val(k) { return results[k] && results[k].ok ? results[k].value : null; }
@@ -446,6 +510,8 @@
       records: recordActivity(val('records')),
       refs: Refs.collect({ appAcl: val('appAcl'), recordAcl: val('recordAcl'), fieldAcl: val('fieldAcl'), status: val('status'), general: val('general'), perRecord: val('perRecord'), reminder: val('reminder'), fields: val('fields'), views: val('views'), reports: val('reports'), actions: val('actions') }),
       soleManager: Refs.soleManager(val('appAcl')),
+      fieldUse: fieldUse(app, val),
+      xref: properties ? crossRefs(properties, val('actions')) : null,
       warnings: warningsFor(val('appAcl'), val('recordAcl'), val('fieldAcl'), labels),
       errors: errors
     };
@@ -629,6 +695,65 @@
 
   var SNAPSHOT_CHUNK = 30000; // Excelの1つのセルに入る文字数（32,767）より少なくする
 
+  var USE_ORDER = { ほかのアプリから使われています: 0, 設定では使われていません: 1, このアプリの中で使われています: 2 };
+
+  // フィールドの使われ方：ほかのアプリから使われているフィールドと、設定のどこにも出てこないフィールド
+  function fieldUseRows(apps) {
+    var byTarget = {};
+    apps.forEach(function (a) {
+      if (!a.xref) return;
+      var targets = {};
+      Object.keys(a.xref.properties).forEach(function (code) {
+        var p = a.xref.properties[code];
+        var t = (p.lookup && p.lookup.relatedApp.app) || (p.referenceTable && p.referenceTable.relatedApp.app);
+        if (t) targets[t] = true;
+      });
+      Object.keys(a.xref.actions).forEach(function (n) { targets[a.xref.actions[n].destApp.app] = true; });
+      Object.keys(targets).forEach(function (t) {
+        if (t === a.id) return;
+        (byTarget[t] = byTarget[t] || []).push({ appId: a.id, name: a.name, fields: { properties: a.xref.properties }, actions: { actions: a.xref.actions } });
+      });
+    });
+    var rows = [];
+    var count = { other: 0, blocked: 0, unused: 0 };
+    apps.forEach(function (a) {
+      if (!a.fieldUse) return;
+      var props = {};
+      Object.keys(a.labels || {}).forEach(function (code) { props[code] = { label: a.labels[code] }; });
+      var others = byTarget[a.id] || [];
+      var hasJs = !!(a.customize && a.customize.files.some(function (f) { return f.kind === 'JavaScript'; }));
+      var hasPlugins = !!(a.plugins && a.plugins.length);
+      var list = [];
+      a.fieldUse.forEach(function (f) {
+        var from = others.length ? FieldRefs.find({ appId: a.id, appName: a.name, code: f.c }, { fields: { properties: props } }, [], others)
+          .filter(function (h) { return h.scope === 'ほかのアプリ'; }) : [];
+        if (SYSTEM_FIELDS[f.t] && !from.length) return; // 消せないフィールドは、ほかのアプリから使われているときだけ載せる
+        var blocks = from.some(function (h) { return h.blocks; });
+        var judge = from.length ? 'ほかのアプリから使われています' : f.u.length ? 'このアプリの中で使われています' : '設定では使われていません';
+        var fromText = [];
+        from.forEach(function (h) {
+          var t = 'アプリ' + h.appId + '「' + h.appName + '」の' + h.place + (h.blocks ? '★' : '');
+          if (fromText.indexOf(t) < 0) fromText.push(t);
+        });
+        var check = '';
+        if (blocks) check = 'ほかのアプリの設定を直すまで、このフィールドは削除できません。';
+        else if (from.length) check = '削除や変更の前に、相手のアプリの設定を確かめてください。';
+        else if (!f.u.length) {
+          check = [hasJs ? 'JavaScriptのカスタマイズの中で使っていないか' : '', hasPlugins ? 'プラグインの設定で使っていないか' : '']
+            .filter(Boolean).join('、');
+          check = check ? check + '確かめてください。' : '';
+        }
+        if (from.length) count.other += 1;
+        if (blocks) count.blocked += 1;
+        if (judge === '設定では使われていません') count.unused += 1;
+        list.push([a.id, a.name, f.l, f.c, FIELD_TYPES[f.t] || f.t, judge, f.u.join('、'), fromText.join('、'), check]);
+      });
+      list.sort(function (x, y) { return USE_ORDER[x[5]] - USE_ORDER[y[5]]; });
+      rows = rows.concat(list);
+    });
+    return { rows: rows, count: count };
+  }
+
   function buildSheets(snapshot, prev, now, licenseText, dir) {
     var apps = Object.keys(snapshot.apps).map(function (id) { return snapshot.apps[id]; })
       .sort(function (a, b) { return Number(a.id) - Number(b.id); });
@@ -679,6 +804,8 @@
     refRows.sort(function (x, y) { var lv = { 見つかりません: 0, 利用停止中: 1 }; return ((x[0] in lv ? lv[x[0]] : 2) - (y[0] in lv ? lv[y[0]] : 2)) || (x[3] < y[3] ? -1 : x[3] > y[3] ? 1 : 0) || (Number(x[4]) - Number(y[4])); });
     var linkRows = [];
     apps.forEach(function (a) { a.links.forEach(function (l) { linkRows.push([l.from, names[l.from] || '', l.kind, l.to, names[l.to] || '（見られないアプリ）', l.place]); }); });
+    var use = fieldUseRows(apps);
+    cover.splice(5, 0, ['フィールドの使われ方', 'ほかのアプリから使われている ' + use.count.other + '個（うち、kintoneが削除を止めるもの ' + use.count.blocked + '個）、設定では使われていない ' + use.count.unused + '個']);
 
     var json = JSON.stringify(snapshot);
     var chunks = [[RECORD_MARK]];
@@ -697,11 +824,16 @@
       { name: 'プラグイン', widths: [8, 24, 36, 36, 8], blocks: [{ title: null, header: ['アプリID', 'アプリ名', 'プラグイン名', 'プラグインID', '状態'], rows: pluginRows, note: pluginRows.length ? null : 'プラグインを追加しているアプリはありません。' }] },
       { name: 'カスタマイズ', widths: [8, 24, 18, 10, 12, 6, 8, 60], blocks: [{ title: null, header: ['アプリID', 'アプリ名', '適用するユーザー', '画面', '種類', '順', '形式', 'ファイル名・URL'], rows: customRows, note: customRows.length ? null : 'JavaScript・CSSによるカスタマイズはありません。' }] },
       { name: 'つながり', widths: [10, 24, 16, 10, 24, 36], blocks: [{ title: null, header: ['元のアプリID', '元のアプリ', 'つながりの種類', '相手のアプリID', '相手のアプリ', '設定のある場所'], rows: linkRows, note: linkRows.length ? null : 'ルックアップ・関連レコード一覧・アクションでつながっているアプリはありません。' }] },
+      { name: 'フィールドの使われ方', widths: [8, 24, 24, 20, 14, 26, 40, 50, 44], blocks: [{ title: null, header: ['アプリID', 'アプリ名', 'フィールド名', 'フィールドコード', '種類', '判定', 'このアプリでの使われ方', 'ほかのアプリからの使われ方', '確かめること'], rows: use.rows,
+        styles: use.rows.map(function (r) { return /★/.test(r[7]) ? STYLE.warn : STYLE.body; }),
+        note: use.rows.length
+          ? '★は、使われている間はkintoneがフィールドの削除を止める設定です。「設定では使われていません」は、計算式・一覧・グラフ・アクセス権・プロセス管理・通知・アクション・レコードのタイトルと、ほかのアプリのルックアップ・関連レコード一覧・アクションのどれにも出てこない、という意味です。利用者が値を入力して使っている場合や、JavaScript・プラグインの設定の中で使っている場合があるため、削除の前に確かめてください。'
+          : 'フィールドの設定を読み取れたアプリがありません。' }] },
       { name: RECORD_SHEET, hidden: true, widths: [20], blocks: [{ title: null, header: [], rows: chunks }] }
     ];
   }
 
-  var ERROR_KEYS = { records: 'レコードの件数', status: 'プロセス管理', general: 'アプリの条件通知', perRecord: 'レコードの条件通知', reminder: 'リマインダーの条件通知', views: '一覧', reports: 'グラフ', fields: 'フィールド', appAcl: 'アプリのアクセス権', recordAcl: 'レコードのアクセス権', fieldAcl: 'フィールドのアクセス権', plugins: 'プラグイン', customize: 'カスタマイズ', actions: 'アクション' };
+  var ERROR_KEYS = { appSettings: 'レコードのタイトル', records: 'レコードの件数', status: 'プロセス管理', general: 'アプリの条件通知', perRecord: 'レコードの条件通知', reminder: 'リマインダーの条件通知', views: '一覧', reports: 'グラフ', fields: 'フィールド', appAcl: 'アプリのアクセス権', recordAcl: 'レコードのアクセス権', fieldAcl: 'フィールドのアクセス権', plugins: 'プラグイン', customize: 'カスタマイズ', actions: 'アクション' };
 
   function summaryText(snapshot, sheets, compared) {
     var count = Object.keys(snapshot.apps).length;
@@ -773,7 +905,8 @@
       perRecord: api('/k/v1/app/notifications/perRecord.json', { app: appId }),
       reminder: api('/k/v1/app/notifications/reminder.json', { app: appId }),
       views: api('/k/v1/app/views.json', { app: appId }),
-      reports: api('/k/v1/app/reports.json', { app: appId })
+      reports: api('/k/v1/app/reports.json', { app: appId }),
+      appSettings: api('/k/v1/app/settings.json', { app: appId })
     };
     var keys = Object.keys(requests);
     return Promise.all(keys.map(function (k) { return settle(requests[k]); })).then(function (list) {
