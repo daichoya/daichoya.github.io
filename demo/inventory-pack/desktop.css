@@ -78,3 +78,5 @@
 .dcy-ip-link:not(.dcy-ip-primary) { color: #333; }
 .dcy-ip-result .dcy-ip-table td:nth-child(2) { white-space: nowrap; }
 .dcy-ip-result .dcy-ip-table td:first-child { min-width: 9em; }
+.dcy-ip-report { margin-top: 16px; padding: 16px; border: 1px solid #bcd9ef; background: #f3f8fc; font-size: 14px; }
+.dcy-ip-report p { margin: 0; }
