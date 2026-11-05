@@ -28,24 +28,28 @@
 <main>
 <div class="page">
   <div class="wrap">
-    <p class="breadcrumb"><a href="../index.html">台帳屋</a> ／ プラグイン</p>
+    <p class="breadcrumb"><a href="../index.html">台帳屋</a> ／ <a href="../index.html#plugins">プラグイン</a></p>
     <div class="page-head"><img src="../images/icons/design-doc.png" alt="" width="44" height="44"><h1>設計書ジェネレーター</h1></div>
+    <p class="tagline">アプリの設計書を、Excelで自動作成。</p>
     <div class="lead prose">
-      <p>kintoneアプリの設定を読み取り、Excelの設計書を作成するプラグインです。</p>
-      <p>引き継ぎや監査で設計資料が必要になったときに、設定画面を見ながら書き写す手間を省けます。</p>
+      <p>アプリの設定を読み取り、表紙を含む8シートのExcel設計書を作ります。引き継ぎや監査で設計資料が必要になったときに、設定画面を見ながら書き写す手間を省けます。</p>
     </div>
-    <div class="actions"><a class="btn btn-primary" href="../demo.html">デモで試す（登録不要）</a><a class="btn" href="#download">ダウンロード</a></div>
+    <ul class="chips"><li class="free">無料・人数制限なし</li><li>保存：Excel</li><li>データは外部に送信しません</li></ul>
+    <div class="actions"><a class="btn btn-primary" href="#download">ダウンロード（無料）</a><a class="btn" href="../demo.html">デモで試す（登録不要）</a></div>
     <figure class="shot">
       <a href="../images/design-doc-excel.webp" title="画像を大きく表示"><img src="../images/design-doc-excel.webp" width="1100" height="495" alt="設計書のフィールドのシート。フィールド名・種類・必須・初期値・計算式やルックアップの参照先が表に並んでいる"></a>
       <figcaption>見本のアプリで作成した設計書（「フィールド」シート）</figcaption>
     </figure>
 
+    <h2>こんなときに</h2>
+    <ul class="prose">
+      <li>担当者の交代で、アプリの設計資料を引き継ぎたい</li>
+      <li>監査や情報システム部門から、アプリの設計書を出すように言われた</li>
+      <li>設定画面を見ながら、設計書を手で書き写している</li>
+    </ul>
+
     <h2>設計書の内容</h2>
-    <div class="prose"><p>1枚目は表紙（アプリの概要・改訂履歴・目次）です。各シートは紺の見出し行で、A4で印刷すると幅が1ページに収まり、見出し行が毎ページに出ます（ページ番号つき）。引き継ぎや監査の資料として、そのまま出せます。</p></div>
-    <figure class="shot">
-      <a href="../images/design-doc-cover.webp" title="画像を大きく表示"><img src="../images/design-doc-cover.webp" width="740" height="849" alt="設計書の表紙。アプリの概要、改訂履歴、各シートへのリンクの目次が並ぶ" loading="lazy"></a>
-      <figcaption>設計書の表紙（見本のアプリで作成し、A4で印刷したときの見た目）</figcaption>
-    </figure>
+    <div class="prose"><p>1枚目は表紙（アプリの概要・改訂履歴・目次）です。各シートは紺の見出し行で、A4で印刷すると幅が1ページに収まり、見出し行が毎ページに出ます（ページ番号つき）。</p></div>
     <div class="table-scroll">
       <table class="facts">
         <thead><tr><th scope="col">シート</th><th scope="col">記載される内容</th></tr></thead>
@@ -61,12 +65,32 @@
         </tbody>
       </table>
     </div>
-    <p class="note prose">読み取るのは運用中の設定です。<br>設定画面で保存しただけで、まだ「アプリを更新」していない変更は含まれません。</p>
-
-    <figure class="shot dialog-shot">
-      <a href="../images/design-doc-dialog.webp" title="画像を大きく表示"><img src="../images/design-doc-dialog.webp" width="720" height="249" alt="設計書ジェネレーターの画面。アプリを選んでExcelで設計書を作成するボタンがある" loading="lazy"></a>
-      <figcaption>アプリを選んでボタンを押すと、Excelファイルが保存されます</figcaption>
+    <figure class="shot">
+      <a href="../images/design-doc-cover.webp" title="画像を大きく表示"><img src="../images/design-doc-cover.webp" width="740" height="849" alt="設計書の表紙。アプリの概要、改訂履歴、各シートへのリンクの目次が並ぶ" loading="lazy"></a>
+      <figcaption>設計書の表紙（見本のアプリで作成し、A4で印刷したときの見た目）</figcaption>
     </figure>
+    <p class="note prose">読み取るのは運用中の設定です。設定画面で保存しただけで、まだ「アプリを更新」していない変更は含まれません。</p>
+
+    <h2>使い方</h2>
+    <ol class="steps">
+      <li><strong>ボタンを押す</strong><span>アプリの一覧画面の上にある「設計書を作成」を押します。</span></li>
+      <li><strong>アプリを選ぶ</strong><span>設計書を作るアプリを選んで「Excelで設計書を作成」を押します。</span></li>
+      <li><strong>保存される</strong><span>設計書_アプリ名_日付.xlsx が保存されます。直したときは、表紙の改訂履歴に書き足します。</span></li>
+    </ol>
+    <figure class="shot dialog-shot">
+      <a href="../images/design-doc-dialog.webp" title="画像を大きく表示"><img src="../images/design-doc-dialog.webp" width="720" height="242" alt="設計書ジェネレーターの画面。アプリを選んで「Excelで設計書を作成」を押すボタンがある" loading="lazy"></a>
+      <figcaption>「設計書を作成」を押したときの画面</figcaption>
+    </figure>
+
+    <div class="related prose"><p><strong>全アプリをまとめて資料にするなら</strong></p><p>このプラグインは、アプリを1つずつ設計書にします。全アプリの権限・人の指定・プラグイン・つながりを1つのExcelの点検台帳にまとめ、前回の点検から変わった設定も一覧にするのは、有料版の<a href="../pro.html#why">棚卸し・変更監視パック</a>（月額3,300円から、30日間無料）です。見直したほうがよい設定の件数と例だけなら、<a href="../pro.html#free">無料の点検</a>で分かります。</p></div>
+
+    <h2>導入方法</h2>
+    <ol class="prose">
+      <li>下の「ダウンロード」から、プラグインのファイル（zip）を保存します。zipは展開せず、そのまま使います。</li>
+      <li>kintoneの歯車アイコンから「kintoneシステム管理」を開き、「プラグイン」の「読み込む」でファイルを読み込みます。</li>
+      <li>どれか1つのアプリの「アプリの設定」→「プラグイン」で「台帳屋 設計書ジェネレーター」を追加し、「アプリを更新」を押します。</li>
+      <li>一覧画面の上に「設計書を作成」ボタンが出ます。1つのアプリに追加すれば、ほかのアプリの設計書も作れます。</li>
+    </ol>
 
     <h2>動作環境</h2>
     <div class="table-scroll">
@@ -81,30 +105,11 @@
       </table>
     </div>
 
-    <h2>導入方法</h2>
-    <ol class="prose">
-      <li>下の「ダウンロード」から、プラグインのファイル（zip）を保存します。zipは展開せず、そのまま使います。</li>
-      <li>kintoneの歯車アイコンから「kintoneシステム管理」を開き、「プラグイン」の「読み込む」でファイルを読み込みます。</li>
-      <li>利用するアプリの「アプリの設定」→「プラグイン」で、「台帳屋 設計書ジェネレーター」を追加します。</li>
-      <li>「アプリを更新」をクリックします。</li>
-      <li>アプリの一覧画面の上部に「設計書を作成」ボタンが表示されます。</li>
-    </ol>
-    <div class="related prose"><p><strong>このプラグインは無料です</strong>（利用人数の制限なし・ずっと無料）。</p><p>全アプリをまとめて調べるなら、<a href="../pro.html#free">無料の点検</a>で、見直したほうがよい設定の件数と例が分かります。すべてのアプリをまとめた点検台帳（Excel）と、前回の点検から変わった設定の一覧は、有料版の<a href="../pro.html#why">棚卸し・変更監視パック</a>（月額3,300円から、30日間無料）でできます。</p></div>
-
     <h2 id="download">ダウンロード</h2>
     <div class="download">
       <a class="btn btn-primary" href="../downloads/daichoya-design-doc-1.1.0.zip" download>ダウンロード（v1.1.0・zip・19KB）</a><p class="note hash">ファイルの確認用（SHA-256）：<code>b363bff94a3ad6defef6c1afe806cafc79856fefc1561962fea402cc27368a52</code></p>
       <p class="note">ご利用の前に<a href="../terms.html">利用規約</a>をお読みください。</p>
     </div>
-
-    <h2>更新履歴</h2>
-    <ul class="prose">
-      <li>1.1.0（2026年11月5日）：設計書の見た目を、提出しやすい形に整えました。表紙（概要・改訂履歴・目次）、紺の見出し行、見出し行の固定とフィルター、A4の印刷設定（幅に合わせる・見出し行を毎ページ・ページ番号）が付きます。</li>
-      <li>1.0.3（2026年11月5日）：画面の下のご案内を、この環境のアプリの数と、全アプリを無料で点検できる「棚卸し・変更監視パック」へのご案内に変えました。機能の変更はありません。</li>
-      <li>1.0.2（2026年11月5日）：権限がなく読み取れなかった項目を「0件」と表示していたのを、「読み取れませんでした」と表示するようにしました。</li>
-      <li>1.0.1（2026年11月5日）：画面の下に、有料版（棚卸し・変更監視パック）のご案内を1行加えました。機能の変更はありません。</li>
-      <li>1.0.0（2026年11月5日）：最初の公開版</li>
-    </ul>
 
     <h2>困ったときは</h2>
     <ul class="prose">
@@ -112,8 +117,20 @@
       <li>JavaScriptやCSSによるカスタマイズは、読み込んでいるファイルの一覧だけを載せます。ファイルの中で何をしているかは、手で書き足してください。</li>
       <li>ゲストスペースのアプリには、現在対応していません。</li>
       <li>そのほかの不具合やご要望は、<a href="mailto:daichoya.plugins@gmail.com">daichoya.plugins@gmail.com</a> までお知らせください。</li>
+      <li>関連するガイド：<a href="../guide/design-doc.html">kintoneアプリの設計書の作り方</a></li>
     </ul>
-    <div class="related prose"><p>関連するガイド：<a href="../guide/design-doc.html">kintoneアプリの設計書の作り方</a></p></div>
+
+    <h2>更新履歴</h2>
+    <p class="prose">1.1.0（2026年11月5日）：設計書の見た目を、提出しやすい形に整えました。表紙（概要・改訂履歴・目次）、紺の見出し行、見出し行の固定とフィルター、A4の印刷設定（幅に合わせる・見出し行を毎ページ・ページ番号）が付きます。</p>
+    <details class="history prose">
+      <summary>以前の更新</summary>
+      <ul>
+        <li>1.0.3（2026年11月5日）：画面の下のご案内を、この環境のアプリの数と、全アプリを無料で点検できる「棚卸し・変更監視パック」へのご案内に変えました。機能の変更はありません。</li>
+        <li>1.0.2（2026年11月5日）：権限がなく読み取れなかった項目を「0件」と表示していたのを、「読み取れませんでした」と表示するようにしました。</li>
+        <li>1.0.1（2026年11月5日）：画面の下に、有料版（棚卸し・変更監視パック）のご案内を1行加えました。機能の変更はありません。</li>
+        <li>1.0.0（2026年11月5日）：最初の公開版</li>
+      </ul>
+    </details>
   </div>
 </div>
 
