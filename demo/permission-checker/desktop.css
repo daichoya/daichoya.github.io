@@ -1,0 +1,52 @@
+/* 台帳屋 権限チェッカー：kintone本体の見た目に干渉しないよう、すべて dcy-pc- で始まるクラス名を使う */
+.dcy-pc-btn {
+  height: 40px;
+  padding: 0 16px;
+  margin-left: 8px;
+  border: 1px solid #e3e7e8;
+  border-radius: 4px;
+  background: #f7f9fa;
+  color: #3498db;
+  font-size: 14px;
+  cursor: pointer;
+}
+.dcy-pc-btn:hover { background: #eef3f6; }
+.dcy-pc-btn[disabled] { color: #a8a8a8; cursor: not-allowed; }
+.dcy-pc-primary { background: #3498db; border-color: #3498db; color: #fff; }
+.dcy-pc-primary:hover { background: #217dbb; }
+
+.dcy-pc-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 16px;
+  background: rgba(0, 0, 0, 0.4);
+  overflow-y: auto;
+}
+.dcy-pc-dialog {
+  width: 100%;
+  max-width: 1100px;
+  padding: 24px;
+  border-radius: 6px;
+  background: #fff;
+  color: #333;
+  box-sizing: border-box;
+}
+.dcy-pc-head { display: flex; align-items: center; justify-content: space-between; }
+.dcy-pc-head h2 { margin: 0; font-size: 20px; }
+.dcy-pc-close { border: none; background: none; font-size: 24px; cursor: pointer; color: #666; }
+.dcy-pc-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 16px 0 8px; }
+.dcy-pc-controls .dcy-pc-btn { margin-left: 0; }
+.dcy-pc-select { height: 40px; min-width: 320px; max-width: 100%; padding: 0 8px; font-size: 14px; }
+.dcy-pc-status { min-height: 20px; margin: 8px 0; color: #666; }
+.dcy-pc-result h3 { margin: 24px 0 8px; font-size: 16px; }
+.dcy-pc-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.dcy-pc-table th,
+.dcy-pc-table td { padding: 6px 8px; border: 1px solid #e3e7e8; text-align: left; vertical-align: top; }
+.dcy-pc-table th { background: #f5f5f5; font-weight: bold; white-space: nowrap; }
+.dcy-pc-yes { color: #1a7f37; text-align: center !important; }
+.dcy-pc-no { color: #b0b0b0; text-align: center !important; }
+.dcy-pc-empty { color: #888; text-align: center !important; }

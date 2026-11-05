@@ -1,0 +1,54 @@
+/* 台帳屋 設計書ジェネレーター：kintone本体の見た目に干渉しないよう、すべて dcy-dd- で始まるクラス名を使う */
+.dcy-dd-btn {
+  height: 40px;
+  padding: 0 16px;
+  margin-left: 8px;
+  border: 1px solid #e3e7e8;
+  border-radius: 4px;
+  background: #f7f9fa;
+  color: #3498db;
+  font-size: 14px;
+  cursor: pointer;
+}
+.dcy-dd-btn:hover { background: #eef3f6; }
+.dcy-dd-btn[disabled] { color: #a8a8a8; cursor: not-allowed; }
+.dcy-dd-primary { background: #3498db; border-color: #3498db; color: #fff; }
+.dcy-dd-primary:hover { background: #217dbb; }
+
+.dcy-dd-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 16px;
+  background: rgba(0, 0, 0, 0.4);
+  overflow-y: auto;
+}
+.dcy-dd-dialog {
+  width: 100%;
+  max-width: 1100px;
+  padding: 24px;
+  border-radius: 6px;
+  background: #fff;
+  color: #333;
+  box-sizing: border-box;
+}
+.dcy-dd-head { display: flex; align-items: center; justify-content: space-between; }
+.dcy-dd-head h2 { margin: 0; font-size: 20px; }
+.dcy-dd-close { border: none; background: none; font-size: 24px; cursor: pointer; color: #666; }
+.dcy-dd-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 16px 0 8px; }
+.dcy-dd-controls .dcy-dd-btn { margin-left: 0; }
+.dcy-dd-select { height: 40px; min-width: 320px; max-width: 100%; padding: 0 8px; font-size: 14px; }
+.dcy-dd-status { min-height: 20px; margin: 8px 0; color: #666; }
+.dcy-dd-result h3 { margin: 24px 0 8px; font-size: 16px; }
+.dcy-dd-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.dcy-dd-table th,
+.dcy-dd-table td { padding: 6px 8px; border: 1px solid #e3e7e8; text-align: left; vertical-align: top; }
+.dcy-dd-table th { background: #f5f5f5; font-weight: bold; white-space: nowrap; }
+.dcy-dd-yes { color: #1a7f37; text-align: center !important; }
+.dcy-dd-no { color: #b0b0b0; text-align: center !important; }
+.dcy-dd-empty { color: #888; text-align: center !important; }
+.dcy-dd-lead { margin: 12px 0 0; color: #555; font-size: 14px; }
+.dcy-dd-dialog { max-width: 720px; }
