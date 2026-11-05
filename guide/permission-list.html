@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>kintoneのアクセス権を一覧で確認する方法（アプリ・レコード・フィールド）｜台帳屋</title>
+<meta name="description" content="kintoneのアクセス権は、アプリ・レコード・フィールドの3か所に分かれています。それぞれの意味と優先順位、標準の画面での確認手順、一覧表にまとめる方法を説明します。">
+<link rel="canonical" href="https://daichoya.github.io/guide/permission-list.html">
+<meta property="og:title" content="kintoneのアクセス権を一覧で確認する方法（アプリ・レコード・フィールド）｜台帳屋">
+<meta property="og:description" content="kintoneのアクセス権は、アプリ・レコード・フィールドの3か所に分かれています。それぞれの意味と優先順位、標準の画面での確認手順、一覧表にまとめる方法を説明します。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://daichoya.github.io/guide/permission-list.html">
+<meta property="og:site_name" content="台帳屋">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:image" content="https://daichoya.github.io/images/ogp.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="../index.html"><span class="brand-name">台帳屋</span><span class="brand-sub">kintone管理者向けプラグイン</span></a>
+    <nav class="site-nav" aria-label="サイト内のページ"><a href="../index.html#plugins">プラグイン</a><a href="../demo.html">デモ</a><a href="../index.html#price">料金</a><a href="../guide/index.html" aria-current="page">ガイド</a><a href="../security.html">セキュリティ</a><a href="../index.html#faq">よくある質問</a></nav>
+  </div>
+</header>
+<main>
+<div class="page">
+  <div class="wrap">
+    <p class="breadcrumb"><a href="../index.html">台帳屋</a> ／ <a href="../guide/index.html">使い方ガイド</a></p>
+    <h1>kintoneのアクセス権を一覧で確認する方法</h1>
+    <p class="updated">2026年11月5日</p>
+    <div class="lead prose">
+      <p>「このアプリは、誰が何をできるのか」を確かめたいとき、kintoneでは3つの設定画面を順に開く必要があります。</p>
+      <p>このページでは、アクセス権の仕組みと、確認した内容を一覧表にまとめる方法を説明します。</p>
+    </div>
+
+    <h2>アクセス権は3か所に分かれている</h2>
+    <div class="prose">
+      <p>kintoneのアクセス権は、アプリ・レコード・フィールドの3か所で設定します。<br>どれもアプリの設定画面の「設定」タブにある「アクセス権」から開きます。</p>
+    </div>
+    <div class="table-scroll">
+      <table class="facts">
+        <thead><tr><th scope="col">種類</th><th scope="col">対象</th><th scope="col">設定できる操作</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">アプリ</th><td>アプリのすべてのレコード</td><td>レコードの閲覧・追加・編集・削除、アプリ管理、ファイルの読み込み・書き出し</td></tr>
+          <tr><th scope="row">レコード</th><td>条件に合うレコード（例：「在籍状況」が「退職」のレコード）</td><td>閲覧・編集・削除</td></tr>
+          <tr><th scope="row">フィールド</th><td>指定したフィールド（例：「住所」）</td><td>閲覧・編集</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>上の行の設定が優先される</h2>
+    <div class="prose">
+      <p>どの画面でも、ユーザー・組織・グループごとに1行ずつ設定を並べます。<br>1人のユーザーが複数の行に当てはまるときは、上にある行の設定が使われます。</p>
+      <p>たとえば、1行目に「人事部」、2行目に「Everyone」があるとします。<br>人事部の人はEveryoneにも含まれますが、1行目の「人事部」の設定が使われます。</p>
+      <p>そのため、権限を確かめるときは、行の順番も一緒に記録しておく必要があります。<br>同じ内容の行でも、並び順が変わると結果が変わるためです。</p>
+    </div>
+
+    <h2>実際にできる操作は、3つの設定の組み合わせで決まる</h2>
+    <div class="prose">
+      <p>3つの設定は別々の画面にありますが、実際に操作できるかどうかは組み合わせで決まります。<br>たとえば、フィールドで編集を許可していても、そのレコードの編集がレコードのアクセス権で許可されていなければ、編集できません。</p>
+      <p>特定の人から見た結果を確かめるには、その人の立場で画面を開いてみるのが確実です。<br>サイボウズのガイドブックでも、設定のあとに別のユーザーで表示を確認する手順が紹介されています。</p>
+    </div>
+
+    <h2>標準の画面で確認する手順</h2>
+    <ol class="prose">
+      <li>確認したいアプリを開き、歯車のアイコンから「アプリの設定」を開きます。</li>
+      <li>「設定」タブの「アクセス権」から「アプリ」を開き、行の並びと各操作の許可を書き留めます。</li>
+      <li>同じように「レコード」を開き、行ごとの条件と許可を書き留めます。</li>
+      <li>「フィールド」を開き、アクセス権を設定しているフィールドを書き留めます。</li>
+      <li>ほかのアプリでも、1〜4を繰り返します。</li>
+    </ol>
+    <div class="prose">
+      <p class="note">設定画面で変更を保存しても、「アプリを更新」を押すまでは運用中のアプリに反映されません。<br>点検の記録には、どの時点の設定かも書いておくと、あとで食い違いに気づけます。</p>
+    </div>
+
+    <h2>一覧表にまとめるときの形</h2>
+    <div class="prose">
+      <p>点検や引き継ぎの資料にするなら、3つの設定を1つの表にまとめると読みやすくなります。<br>次のような列にしておくと、アプリが増えても同じ形で続けられます。</p>
+    </div>
+    <div class="table-scroll">
+      <table class="facts sample">
+        <thead><tr><th scope="col">アプリ</th><th scope="col">種類</th><th scope="col">順番</th><th scope="col">対象</th><th scope="col">条件・フィールド</th><th scope="col">閲覧</th><th scope="col">編集</th><th scope="col">削除</th><th scope="col">その他</th></tr></thead>
+        <tbody>
+          <tr><td>案件管理</td><td>アプリ</td><td>1</td><td>営業部（組織）</td><td>—</td><td>○</td><td>○</td><td>×</td><td>追加○</td></tr>
+          <tr><td>案件管理</td><td>アプリ</td><td>2</td><td>Everyone</td><td>—</td><td>○</td><td>×</td><td>×</td><td></td></tr>
+          <tr><td>案件管理</td><td>レコード</td><td>1</td><td>作成者</td><td>ステータスが「完了」</td><td>○</td><td>×</td><td>×</td><td></td></tr>
+          <tr><td>案件管理</td><td>フィールド</td><td>1</td><td>経理部（組織）</td><td>原価</td><td>○</td><td>○</td><td>—</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">表の内容は説明のための例です。</p>
+
+    <h2>点検のときに見ておきたい点</h2>
+    <ul class="prose">
+      <li>Everyoneに「アプリ管理」や「削除」が付いていないか</li>
+      <li>異動・退職した人が、個人として行に残っていないか</li>
+      <li>Everyoneのような広い範囲の行が上のほうにあり、その下の行の制限が効かなくなっていないか</li>
+      <li>原価や個人情報など、見せる人を絞りたいフィールドに、フィールドのアクセス権が設定されているか</li>
+    </ul>
+
+    <h2>アプリが多いときは、APIやプラグインで書き出す</h2>
+    <div class="prose">
+      <p>3つの設定は、kintoneのREST APIでも取得できます。<br>どれも、そのアプリの管理権限が必要です。</p>
+    </div>
+    <ul class="api prose">
+      <li>アプリ：<code>/k/v1/app/acl.json</code></li>
+      <li>レコード：<code>/k/v1/record/acl.json</code></li>
+      <li>フィールド：<code>/k/v1/field/acl.json</code></li>
+    </ul>
+    <div class="prose">
+      <p>プログラムを書かずに済ませたい場合は、台帳屋の<a href="../plugins/permission-checker.html">権限チェッカー</a>（無料）を使うと、3つの設定を1画面に並べて表示し、そのままCSVに書き出せます。<br>上の行ほど優先される順番も、そのまま表に残ります。</p>
+    </div>
+    <div class="actions"><a class="btn btn-primary" href="../demo.html">権限チェッカーをデモで試す</a></div>
+
+    <h2>参考</h2>
+    <ul class="prose refs">
+      <li><a href="https://kintone.cybozu.co.jp/material/pdf/kintone_guidebook_vol08.pdf" rel="noopener">kintoneガイドブック「アクセス権」（サイボウズ）</a></li>
+      <li><a href="https://cybozu.dev/ja/kintone/docs/rest-api/apps/settings/get-app-permissions/" rel="noopener">アプリのアクセス権を取得する（cybozu developer network）</a></li>
+      <li><a href="https://cybozu.dev/ja/kintone/docs/rest-api/records/evaluate-record-permissions/" rel="noopener">レコードのアクセス権を評価する（cybozu developer network）</a></li>
+    </ul>
+  </div>
+</div>
+
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <nav aria-label="規約とお問い合わせ">
+      <a href="../privacy.html">プライバシーポリシー</a>
+      <a href="../terms.html">利用規約</a>
+      <span>お問い合わせ：<a href="mailto:daichoya.plugins@gmail.com">daichoya.plugins@gmail.com</a></span>
+    </nav>
+    <p>kintoneはサイボウズ株式会社の登録商標です。台帳屋は、サイボウズ株式会社とは関係のない個人の開発者が提供しています。</p>
+    <p>&copy; 2026 台帳屋</p>
+  </div>
+</footer>
+</body>
+</html>

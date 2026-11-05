@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>kintoneでアプリの参照元を調べる方法（ルックアップ・関連レコード一覧・アクション）｜台帳屋</title>
+<meta name="description" content="kintoneでは、マスタのアプリを見ても、どのアプリからルックアップや関連レコード一覧で参照されているか分かりません。つながりの調べ方と、改修前に確認しておきたい点を説明します。">
+<link rel="canonical" href="https://daichoya.github.io/guide/app-references.html">
+<meta property="og:title" content="kintoneでアプリの参照元を調べる方法（ルックアップ・関連レコード一覧・アクション）｜台帳屋">
+<meta property="og:description" content="kintoneでは、マスタのアプリを見ても、どのアプリからルックアップや関連レコード一覧で参照されているか分かりません。つながりの調べ方と、改修前に確認しておきたい点を説明します。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://daichoya.github.io/guide/app-references.html">
+<meta property="og:site_name" content="台帳屋">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:image" content="https://daichoya.github.io/images/ogp.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="../index.html"><span class="brand-name">台帳屋</span><span class="brand-sub">kintone管理者向けプラグイン</span></a>
+    <nav class="site-nav" aria-label="サイト内のページ"><a href="../index.html#plugins">プラグイン</a><a href="../demo.html">デモ</a><a href="../index.html#price">料金</a><a href="../guide/index.html" aria-current="page">ガイド</a><a href="../security.html">セキュリティ</a><a href="../index.html#faq">よくある質問</a></nav>
+  </div>
+</header>
+<main>
+<div class="page">
+  <div class="wrap">
+    <p class="breadcrumb"><a href="../index.html">台帳屋</a> ／ <a href="../guide/index.html">使い方ガイド</a></p>
+    <h1>kintoneでアプリの参照元を調べる方法</h1>
+    <p class="updated">2026年11月5日</p>
+    <div class="lead prose">
+      <p>顧客マスタのフィールドを変えたい。でも、どのアプリがこのマスタを参照しているのか分からない。<br>kintoneでは、よくある悩みです。</p>
+      <p>このページでは、分かりにくい理由と、つながりの調べ方を説明します。</p>
+    </div>
+
+    <h2>参照される側のアプリには、何も表示されない</h2>
+    <div class="prose">
+      <p>アプリ同士をつなぐ設定は、どれも「つなぐ側」のアプリで行います。<br>参照される側のアプリの設定画面には、どこから参照されているかは表示されません。</p>
+    </div>
+    <div class="table-scroll">
+      <table class="facts">
+        <thead><tr><th scope="col">つながり</th><th scope="col">設定するアプリ</th><th scope="col">設定の中身</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">ルックアップ</th><td>データを取ってくる側（例：案件管理）</td><td>参照するアプリ、キーにするフィールド、コピーするフィールド</td></tr>
+          <tr><th scope="row">関連レコード一覧</th><td>一覧を表示する側（例：顧客マスタ）</td><td>表示するアプリ、絞り込みの条件、表示するフィールド</td></tr>
+          <tr><th scope="row">アプリアクション</th><td>元になるレコードがある側（例：案件管理）</td><td>作成先のアプリ、コピーするフィールド</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="prose">
+      <p>たとえば、案件管理アプリが顧客マスタをルックアップで参照していても、顧客マスタの設定画面を見るだけでは、そのことに気づけません。</p>
+    </div>
+
+    <h2>改修の前に確かめておきたい理由</h2>
+    <div class="prose">
+      <p>参照される側のアプリでフィールドを削除したり、設定を変えたりすると、参照している側のアプリに影響が出ることがあります。<br>アプリそのものを削除する場合も同じです。</p>
+      <p>また、ルックアップで取ってきた値は、元のアプリの値を直しても自動では変わりません。<br>マスタの内容を一斉に直すときは、参照している側のアプリで値を取り直す作業も必要になります。</p>
+    </div>
+
+    <h2>標準の画面で調べる手順</h2>
+    <ol class="prose">
+      <li>kintoneシステム管理の「アプリ管理」から、アプリの一覧をCSVで書き出し、調べるアプリの一覧を作ります。</li>
+      <li>アプリを1つずつ開き、「フォーム」タブでルックアップと関連レコード一覧のフィールドを探して、参照しているアプリを書き留めます。</li>
+      <li>「設定」タブの「アクション」も開き、作成先のアプリを書き留めます。</li>
+      <li>書き留めた表を、参照されている側のアプリで並べ替えると、「このアプリを参照しているアプリ」の一覧になります。</li>
+    </ol>
+    <div class="prose">
+      <p>アプリが多いほど、この作業には時間がかかります。<br>テーブルの中に置かれたルックアップは見落としやすいので、気をつけてください。</p>
+    </div>
+
+    <h2>REST APIで調べる</h2>
+    <div class="prose">
+      <p>フィールドの設定を取得するAPI（<code>/k/v1/app/form/fields.json</code>）では、ルックアップと関連レコード一覧の参照先のアプリが分かります。<br>アクションは、<code>/k/v1/app/actions.json</code> で取得できます（そのアプリの管理権限が必要です）。</p>
+      <p>すべてのアプリについて取得し、参照先ごとに集計し直せば、参照元の一覧が作れます。<br>ただし、参照先のアプリを閲覧する権限がないと、参照先の情報を取得できない場合があります。</p>
+    </div>
+
+    <h2>図で確かめる</h2>
+    <div class="prose">
+      <p>台帳屋の<a href="../plugins/app-map.html">アプリ相関マップ</a>（無料）は、上のAPIを使って、選んだアプリとつながっているアプリを図で表示するプラグインです。<br>左に「このアプリを参照しているアプリ」、右に「このアプリが参照しているアプリ」を並べ、つながりの一覧はCSVに書き出せます。</p>
+    </div>
+    <figure class="shot">
+      <a href="../images/app-map-diagram.webp" title="画像を大きく表示"><img src="../images/app-map-diagram.webp" width="1100" height="480" alt="アプリ相関マップの図。中央の案件管理アプリに、左から見積書と請求管理、右から顧客マスタ・対応履歴・商品マスタが線でつながっている" loading="lazy"></a>
+      <figcaption>見本のアプリで表示した例</figcaption>
+    </figure>
+    <div class="actions"><a class="btn btn-primary" href="../demo.html">アプリ相関マップをデモで試す</a></div>
+
+    <h2>参考</h2>
+    <ul class="prose refs">
+      <li><a href="https://kintone.cybozu.co.jp/material/pdf/kintone_guidebook_vol04.pdf" rel="noopener">kintoneガイドブック「ルックアップ」（サイボウズ）</a></li>
+      <li><a href="https://cybozu.dev/ja/kintone/docs/rest-api/apps/settings/" rel="noopener">アプリの設定を取得・変更するAPIの一覧（cybozu developer network）</a></li>
+      <li><a href="https://zenn.dev/kai0707/articles/3f38fcd8a30d41" rel="noopener">kintoneのアプリ間の参照関係を可視化する（Zenn）</a></li>
+    </ul>
+  </div>
+</div>
+
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <nav aria-label="規約とお問い合わせ">
+      <a href="../privacy.html">プライバシーポリシー</a>
+      <a href="../terms.html">利用規約</a>
+      <span>お問い合わせ：<a href="mailto:daichoya.plugins@gmail.com">daichoya.plugins@gmail.com</a></span>
+    </nav>
+    <p>kintoneはサイボウズ株式会社の登録商標です。台帳屋は、サイボウズ株式会社とは関係のない個人の開発者が提供しています。</p>
+    <p>&copy; 2026 台帳屋</p>
+  </div>
+</footer>
+</body>
+</html>

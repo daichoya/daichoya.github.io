@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>kintoneアプリの設計書の作り方（載せる項目と手順）｜台帳屋</title>
+<meta name="description" content="kintoneアプリの設計書に載せる項目と、設定画面から書き写すときのコツ、APIやプラグインで自動で作る方法を説明します。引き継ぎや監査の資料づくりに。">
+<link rel="canonical" href="https://daichoya.github.io/guide/design-doc.html">
+<meta property="og:title" content="kintoneアプリの設計書の作り方（載せる項目と手順）｜台帳屋">
+<meta property="og:description" content="kintoneアプリの設計書に載せる項目と、設定画面から書き写すときのコツ、APIやプラグインで自動で作る方法を説明します。引き継ぎや監査の資料づくりに。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://daichoya.github.io/guide/design-doc.html">
+<meta property="og:site_name" content="台帳屋">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:image" content="https://daichoya.github.io/images/ogp.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="../index.html"><span class="brand-name">台帳屋</span><span class="brand-sub">kintone管理者向けプラグイン</span></a>
+    <nav class="site-nav" aria-label="サイト内のページ"><a href="../index.html#plugins">プラグイン</a><a href="../demo.html">デモ</a><a href="../index.html#price">料金</a><a href="../guide/index.html" aria-current="page">ガイド</a><a href="../security.html">セキュリティ</a><a href="../index.html#faq">よくある質問</a></nav>
+  </div>
+</header>
+<main>
+<div class="page">
+  <div class="wrap">
+    <p class="breadcrumb"><a href="../index.html">台帳屋</a> ／ <a href="../guide/index.html">使い方ガイド</a></p>
+    <h1>kintoneアプリの設計書の作り方</h1>
+    <p class="updated">2026年11月5日</p>
+    <div class="lead prose">
+      <p>kintoneのアプリは画面を見ながら作れる反面、設計の資料が残らないまま使われ続けることがよくあります。</p>
+      <p>このページでは、設計書に載せる項目と、作り方を3通り説明します。</p>
+    </div>
+
+    <h2>設計書が必要になる場面</h2>
+    <ul class="prose">
+      <li>担当者が交代し、アプリの作りを引き継ぐとき</li>
+      <li>監査や社内の点検で、アプリの設定を資料で求められたとき</li>
+      <li>アプリを直す前に、いまの設定を記録しておきたいとき</li>
+    </ul>
+    <div class="prose">
+      <p>サイボウズの「kintoneガバナンスガイドライン」でも、重要なアプリは設計の資料を作っておくことがすすめられています。</p>
+    </div>
+
+    <h2>設計書に載せる項目</h2>
+    <div class="prose">
+      <p>アプリの設定は、いくつかの画面に分かれています。<br>設計書には、次の項目を載せておくと、あとから読んだ人がアプリの動きを追えます。</p>
+    </div>
+    <div class="table-scroll">
+      <table class="facts">
+        <thead><tr><th scope="col">項目</th><th scope="col">書いておく内容</th><th scope="col">設定がある場所</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">概要</th><td>アプリ名、アプリID、目的、管理している人、最後に確認した日</td><td>アプリの設定の「設定」タブ</td></tr>
+          <tr><th scope="row">フィールド</th><td>フィールド名、フィールドコード、種類、必須かどうか、初期値、選択肢、計算式、ルックアップの参照先</td><td>「フォーム」タブ</td></tr>
+          <tr><th scope="row">一覧</th><td>一覧ごとの絞り込み条件、並び順、表示するフィールド</td><td>「一覧」タブ</td></tr>
+          <tr><th scope="row">プロセス管理</th><td>ステータス、作業者、アクションと実行できる条件</td><td>「設定」タブの「プロセス管理」</td></tr>
+          <tr><th scope="row">通知</th><td>アプリの条件通知、レコードの条件通知、リマインダーの条件通知</td><td>「設定」タブの「通知」</td></tr>
+          <tr><th scope="row">アクセス権</th><td>アプリ・レコード・フィールドのアクセス権と、行の順番</td><td>「設定」タブの「アクセス権」</td></tr>
+          <tr><th scope="row">プラグイン</th><td>追加しているプラグイン</td><td>「設定」タブの「プラグイン」</td></tr>
+          <tr><th scope="row">カスタマイズ</th><td>読み込んでいるJavaScript・CSSのファイル名と、その目的</td><td>「設定」タブの「JavaScript / CSSでカスタマイズ」</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>方法1：設定画面を見ながら書き写す</h2>
+    <div class="prose">
+      <p>道具を使わずに作るなら、ExcelやGoogleスプレッドシートに、項目ごとのシートを作って書き写します。<br>書き写すときは、次の点に気をつけると、あとで役に立つ資料になります。</p>
+    </div>
+    <ul class="prose">
+      <li><strong>フィールドは、フォームに並んでいる順に書く。</strong>画面と見比べやすくなります。</li>
+      <li><strong>フィールドコードも書く。</strong>カスタマイズや外部のサービスとの連携は、フィールド名ではなくフィールドコードで動いています。</li>
+      <li><strong>計算式とルックアップの設定は、省略せずに写す。</strong>直すときに一番よく見る部分です。</li>
+      <li><strong>確認した日を書く。</strong>アプリはあとから変わるため、いつの時点の設定かが分からないと、資料として使えません。</li>
+    </ul>
+    <div class="prose">
+      <p class="note">アプリをテンプレートとしてファイルに書き出す機能もありますが、別の環境でアプリを作り直すためのファイルです。<br>人が読む資料としては使えません。</p>
+    </div>
+
+    <h2>方法2：REST APIで設定を取得する</h2>
+    <div class="prose">
+      <p>アプリの数が多い場合や、定期的に作り直したい場合は、kintoneのREST APIで設定を取得し、表に整える方法があります。<br>主に使うのは次のAPIで、どれも読み取りだけのものです。</p>
+    </div>
+    <div class="table-scroll">
+      <table class="facts">
+        <tbody>
+          <tr><th scope="row">フィールド・配置</th><td><code>/k/v1/app/form/fields.json</code>・<code>/k/v1/app/form/layout.json</code></td></tr>
+          <tr><th scope="row">一覧</th><td><code>/k/v1/app/views.json</code></td></tr>
+          <tr><th scope="row">プロセス管理</th><td><code>/k/v1/app/status.json</code></td></tr>
+          <tr><th scope="row">通知</th><td><code>/k/v1/app/notifications/general.json</code>・<code>perRecord.json</code>・<code>reminder.json</code></td></tr>
+          <tr><th scope="row">アクセス権</th><td><code>/k/v1/app/acl.json</code>・<code>/k/v1/record/acl.json</code>・<code>/k/v1/field/acl.json</code></td></tr>
+          <tr><th scope="row">プラグイン</th><td><code>/k/v1/app/plugins.json</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="prose">
+      <p>アクセス権や通知の設定を取得するには、そのアプリの管理権限が必要です。<br>取得したJSONをExcelの表に整える部分は、自分でプログラムを書くことになります。</p>
+    </div>
+
+    <h2>方法3：プラグインで自動で作る</h2>
+    <div class="prose">
+      <p>台帳屋の<a href="../plugins/design-doc.html">設計書ジェネレーター</a>（無料）は、方法2のAPIを使って、アプリの設定をExcelの設計書にまとめるプラグインです。<br>概要・フィールド・一覧・プロセス管理・通知・アクセス権・プラグインの7シートを、ボタン1つで作ります。</p>
+      <p>JavaScriptやCSSによるカスタマイズには、まだ対応していません。<br>カスタマイズをしているアプリは、その部分を設計書に手で書き足してください。</p>
+    </div>
+    <div class="actions"><a class="btn btn-primary" href="../demo.html">設計書ジェネレーターをデモで試す</a></div>
+
+    <h2>参考</h2>
+    <ul class="prose refs">
+      <li><a href="https://kintone.cybozu.co.jp/material/pdf/kintone_governance_guideline.pdf" rel="noopener">kintoneガバナンスガイドライン（サイボウズ）</a></li>
+      <li><a href="https://cybozu.dev/ja/kintone/docs/rest-api/apps/settings/" rel="noopener">アプリの設定を取得・変更するAPIの一覧（cybozu developer network）</a></li>
+    </ul>
+  </div>
+</div>
+
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <nav aria-label="規約とお問い合わせ">
+      <a href="../privacy.html">プライバシーポリシー</a>
+      <a href="../terms.html">利用規約</a>
+      <span>お問い合わせ：<a href="mailto:daichoya.plugins@gmail.com">daichoya.plugins@gmail.com</a></span>
+    </nav>
+    <p>kintoneはサイボウズ株式会社の登録商標です。台帳屋は、サイボウズ株式会社とは関係のない個人の開発者が提供しています。</p>
+    <p>&copy; 2026 台帳屋</p>
+  </div>
+</footer>
+</body>
+</html>

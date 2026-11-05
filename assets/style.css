@@ -235,3 +235,20 @@ code { overflow-wrap: anywhere; word-break: normal; }
   .assure span::before { content: "・"; margin: 0 2px 0 0; }
   .assure span + span::before { content: "・"; margin: 0 2px 0 0; }
 }
+
+/* 使い方ガイド */
+.updated { margin: -4px 0 12px; font-size: 13px; color: var(--muted); }
+.guide-list { list-style: none; padding: 0; margin: 28px 0 0; max-width: 42em; }
+.guide-list li { padding: 18px 0; border-top: 1px solid var(--line); }
+.guide-list li:last-child { border-bottom: 1px solid var(--line); }
+.guide-list a { font-size: 18px; font-weight: 700; }
+.guide-list p { margin: 6px 0 0; color: var(--muted); font-size: 15px; }
+.refs { font-size: 14px; }
+.sample td { white-space: nowrap; font-size: 14px; }
+.related { margin-top: 40px; padding: 16px 20px; border: 1px solid var(--line); background: var(--band); }
+.related p { margin: 0; }
+@media (max-width: 720px) {
+  /* 6項目を3つずつ2段に並べ、1項目だけ次の段に落ちないようにする */
+  .site-nav { display: grid; grid-template-columns: repeat(3, max-content); gap: 4px 20px; padding-bottom: 10px; }
+}
+.page > .wrap > ul.api { margin: 0 0 1em; }
