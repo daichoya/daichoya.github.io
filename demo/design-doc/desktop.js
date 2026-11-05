@@ -8,208 +8,17 @@
   'use strict';
 
   // ===== 1. Excel（xlsx）ファイルの組み立て =====
-  // xlsxは「XMLファイルをまとめたzip」なので、無圧縮のzipを自前で作る。
-
-  var CRC_TABLE = (function () {
-    var table = new Uint32Array(256);
-    for (var n = 0; n < 256; n++) {
-      var c = n;
-      for (var k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
-      table[n] = c >>> 0;
-    }
-    return table;
-  })();
-
-  function crc32(bytes) {
-    var c = 0xFFFFFFFF;
-    for (var i = 0; i < bytes.length; i++) c = CRC_TABLE[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
-    return (c ^ 0xFFFFFFFF) >>> 0;
-  }
-
-  function utf8(text) {
-    return new TextEncoder().encode(text);
-  }
-
-  function concatBytes(chunks) {
-    var total = chunks.reduce(function (sum, c) { return sum + c.length; }, 0);
-    var out = new Uint8Array(total);
-    var pos = 0;
-    chunks.forEach(function (c) { out.set(c, pos); pos += c.length; });
-    return out;
-  }
-
-  // files: [{ name: 'xl/workbook.xml', data: Uint8Array }]
-  function buildZip(files) {
-    var chunks = [];
-    var central = [];
-    var offset = 0;
-    files.forEach(function (file) {
-      var name = utf8(file.name);
-      var data = file.data;
-      var crc = crc32(data);
-
-      var local = new Uint8Array(30 + name.length);
-      var lv = new DataView(local.buffer);
-      lv.setUint32(0, 0x04034b50, true);
-      lv.setUint16(4, 20, true);
-      lv.setUint16(6, 0x0800, true); // ファイル名はUTF-8
-      lv.setUint16(8, 0, true);      // 無圧縮
-      lv.setUint16(10, 0, true);
-      lv.setUint16(12, 0x21, true);  // 1980-01-01
-      lv.setUint32(14, crc, true);
-      lv.setUint32(18, data.length, true);
-      lv.setUint32(22, data.length, true);
-      lv.setUint16(26, name.length, true);
-      lv.setUint16(28, 0, true);
-      local.set(name, 30);
-
-      var entry = new Uint8Array(46 + name.length);
-      var cv = new DataView(entry.buffer);
-      cv.setUint32(0, 0x02014b50, true);
-      cv.setUint16(4, 20, true);
-      cv.setUint16(6, 20, true);
-      cv.setUint16(8, 0x0800, true);
-      cv.setUint16(10, 0, true);
-      cv.setUint16(12, 0, true);
-      cv.setUint16(14, 0x21, true);
-      cv.setUint32(16, crc, true);
-      cv.setUint32(20, data.length, true);
-      cv.setUint32(24, data.length, true);
-      cv.setUint16(28, name.length, true);
-      cv.setUint16(30, 0, true);
-      cv.setUint16(32, 0, true);
-      cv.setUint16(34, 0, true);
-      cv.setUint16(36, 0, true);
-      cv.setUint32(38, 0, true);
-      cv.setUint32(42, offset, true);
-      entry.set(name, 46);
-
-      chunks.push(local, data);
-      central.push(entry);
-      offset += local.length + data.length;
-    });
-    var centralBytes = concatBytes(central);
-    var end = new Uint8Array(22);
-    var ev = new DataView(end.buffer);
-    ev.setUint32(0, 0x06054b50, true);
-    ev.setUint16(8, files.length, true);
-    ev.setUint16(10, files.length, true);
-    ev.setUint32(12, centralBytes.length, true);
-    ev.setUint32(16, offset, true);
-    return concatBytes(chunks.concat([centralBytes, end]));
-  }
-
-  function xmlEscape(value) {
-    return String(value === undefined || value === null ? '' : value)
-      .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
-  }
-
-  function columnName(index) {
-    var name = '';
-    var n = index + 1;
-    while (n > 0) {
-      var m = (n - 1) % 26;
-      name = String.fromCharCode(65 + m) + name;
-      n = Math.floor((n - 1) / 26);
-    }
-    return name;
-  }
-
-  // シート名に使えない文字を除き、31文字以内にする
-  function sheetName(name) {
-    return String(name).replace(/[\[\]:*?\/\\]/g, '_').slice(0, 31) || 'Sheet';
-  }
-
-  var STYLE = { plain: 0, header: 1, body: 2, title: 3 };
-
-  function cell(ref, value, style) {
-    return '<c r="' + ref + '" t="inlineStr" s="' + style + '"><is><t xml:space="preserve">' +
-      xmlEscape(value) + '</t></is></c>';
-  }
-
-  // sheet: { name, widths: [数値], blocks: [{ title, header: [], rows: [[]], note }] }
-  function sheetXml(sheet) {
-    var rowsXml = [];
-    var r = 1;
-    function addRow(values, style) {
-      var cells = values.map(function (v, i) { return cell(columnName(i) + r, v, style); }).join('');
-      rowsXml.push('<row r="' + r + '">' + cells + '</row>');
-      r += 1;
-    }
-    sheet.blocks.forEach(function (block, i) {
-      if (i > 0) r += 1; // 表と表の間を1行あける
-      if (block.title) addRow([block.title], STYLE.title);
-      if (block.header && block.header.length) addRow(block.header, STYLE.header);
-      (block.rows || []).forEach(function (row) { addRow(row, STYLE.body); });
-      if (block.note) addRow([block.note], STYLE.plain);
-    });
-    var cols = (sheet.widths || []).map(function (w, i) {
-      return '<col min="' + (i + 1) + '" max="' + (i + 1) + '" width="' + w + '" customWidth="1"/>';
-    }).join('');
-    return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-      '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
-      (cols ? '<cols>' + cols + '</cols>' : '') +
-      '<sheetData>' + rowsXml.join('') + '</sheetData></worksheet>';
-  }
-
-  var STYLES_XML = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-    '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
-    '<fonts count="2"><font><sz val="11"/><name val="Yu Gothic"/></font><font><b/><sz val="11"/><name val="Yu Gothic"/></font></fonts>' +
-    '<fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill>' +
-    '<fill><patternFill patternType="solid"><fgColor rgb="FFDDEBF7"/><bgColor indexed="64"/></patternFill></fill></fills>' +
-    '<borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border>' +
-    '<border><left style="thin"><color rgb="FFBFBFBF"/></left><right style="thin"><color rgb="FFBFBFBF"/></right>' +
-    '<top style="thin"><color rgb="FFBFBFBF"/></top><bottom style="thin"><color rgb="FFBFBFBF"/></bottom><diagonal/></border></borders>' +
-    '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>' +
-    '<cellXfs count="4">' +
-    '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>' +
-    '<xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1"/>' +
-    '<xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf>' +
-    '<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/>' +
-    '</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
+  // 共通部品（js/xlsx.js）で作る。表紙・目次・見出しの色・固定行・フィルター・印刷設定は、台帳屋のどの製品でも同じ体裁にそろえる。
+  var Xlsx = typeof module !== 'undefined' && module.exports ? require('../../../common/js/xlsx.js') : window.DaichoyaXlsx;
+  var STYLE = Xlsx.STYLE;
+  var crc32 = Xlsx.crc32;
+  var buildZip = Xlsx.buildZip;
+  var sheetName = Xlsx.sheetName;
+  var columnName = Xlsx.columnName;
 
   function buildXlsx(sheets) {
-    var names = sheets.map(function (s) { return sheetName(s.name); });
-    var contentTypes = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-      '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
-      '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
-      '<Default Extension="xml" ContentType="application/xml"/>' +
-      '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' +
-      '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' +
-      sheets.map(function (s, i) {
-        return '<Override PartName="/xl/worksheets/sheet' + (i + 1) + '.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>';
-      }).join('') + '</Types>';
-    var rootRels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
-      '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>' +
-      '</Relationships>';
-    var workbook = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-      '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>' +
-      names.map(function (n, i) {
-        return '<sheet name="' + xmlEscape(n) + '" sheetId="' + (i + 1) + '" r:id="rId' + (i + 1) + '"/>';
-      }).join('') + '</sheets></workbook>';
-    var workbookRels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
-      sheets.map(function (s, i) {
-        return '<Relationship Id="rId' + (i + 1) + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet' + (i + 1) + '.xml"/>';
-      }).join('') +
-      '<Relationship Id="rId' + (sheets.length + 1) + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>' +
-      '</Relationships>';
-    var files = [
-      { name: '[Content_Types].xml', data: utf8(contentTypes) },
-      { name: '_rels/.rels', data: utf8(rootRels) },
-      { name: 'xl/workbook.xml', data: utf8(workbook) },
-      { name: 'xl/_rels/workbook.xml.rels', data: utf8(workbookRels) },
-      { name: 'xl/styles.xml', data: utf8(STYLES_XML) }
-    ];
-    sheets.forEach(function (s, i) {
-      files.push({ name: 'xl/worksheets/sheet' + (i + 1) + '.xml', data: utf8(sheetXml(s)) });
-    });
-    return buildZip(files);
+    var title = (sheets[0] && sheets[0].docTitle) || 'アプリ設計書';
+    return Xlsx.build(sheets, { title: title, creator: '台帳屋 設計書ジェネレーター', footer: '台帳屋 設計書ジェネレーター' });
   }
 
   // ===== 2. kintoneの設定を設計書の表に変換する（純粋な関数。テスト対象） =====
@@ -489,13 +298,28 @@
     });
 
     return [
-      { name: '概要', widths: [20, 70], blocks: [{ title: null, header: ['項目', '内容'], rows: overview }] },
-      { name: 'フィールド', widths: [6, 22, 22, 20, 7, 9, 16, 50, 22], blocks: withError([{ title: null, header: ['順', 'フィールド名', 'フィールドコード', '種類', '必須', '重複禁止', '初期値', '詳細（選択肢・計算式・参照先など）', '配置'], rows: fieldList }], 'fields') },
-      { name: '一覧', widths: [6, 22, 14, 40, 30, 50], blocks: withError([{ title: null, header: ['順', '一覧名', '種類', '絞り込み条件', '並び順', '表示するフィールド'], rows: views }], 'views') },
+      { name: '概要', widths: [20, 12, 46, 18], orientation: 'portrait', tabColor: 'FF1F3A5F', docTitle: 'アプリ設計書：' + (app.name || ''),
+        heading: { title: 'アプリ設計書', sub: (app.name || '') + '（アプリID ' + (app.appId || '') + '）　／　作成日時：' + generatedAt + '　／　作成：台帳屋 設計書ジェネレーター' },
+        blocks: [
+          { title: 'アプリの概要', header: ['項目', '内容'], rows: overview, labels: true, span: 3 },
+          { title: '改訂履歴', header: ['版', '日付', '内容', '作成者'], rows: [['1.0', String(generatedAt || '').slice(0, 10), '設計書ジェネレーターで作成', ''], ['', '', '', ''], ['', '', '', '']],
+            note: '設計書を直したときは、版・日付・内容・作成者を書き足してください。' },
+          Object.assign(Xlsx.contents([
+            ['フィールド', '全フィールドの名前・コード・種類・必須・初期値・選択肢や計算式・配置'],
+            ['一覧', '一覧の種類・絞り込み条件・並び順・表示するフィールド'],
+            ['プロセス管理', 'ステータス・作業者・アクション'],
+            ['通知', 'アプリの条件通知・レコードの条件通知・リマインダーの条件通知'],
+            ['アクセス権', 'アプリ・レコード・フィールドのアクセス権'],
+            ['プラグイン', '追加しているプラグインと、有効・無効'],
+            ['カスタマイズ', 'JavaScript・CSSのファイルと、適用するユーザー']
+          ]), { span: 3 })
+        ] },
+      { name: 'フィールド', list: true, widths: [6, 22, 22, 20, 7, 9, 16, 50, 22], blocks: withError([{ title: null, ids: [0], centers: [4, 5], header: ['順', 'フィールド名', 'フィールドコード', '種類', '必須', '重複禁止', '初期値', '詳細（選択肢・計算式・参照先など）', '配置'], rows: fieldList }], 'fields') },
+      { name: '一覧', list: true, widths: [6, 22, 14, 40, 30, 50], blocks: withError([{ title: null, ids: [0], header: ['順', '一覧名', '種類', '絞り込み条件', '並び順', '表示するフィールド'], rows: views }], 'views') },
       { name: 'プロセス管理', widths: [6, 24, 28, 40, 40], blocks: withError(processBlocks(val('status')), 'status') },
       { name: '通知', widths: [30, 30, 30, 30, 16], blocks: notify },
       { name: 'アクセス権', widths: [22, 30, 20, 16, 10, 10, 10, 10, 10, 10], blocks: permission },
-      { name: 'プラグイン', widths: [40, 36, 10], blocks: withError([{ title: null, header: ['プラグイン名', 'プラグインID', '状態'], rows: plugins }], 'plugins') },
+      { name: 'プラグイン', list: true, widths: [40, 36, 10], blocks: withError([{ title: null, header: ['プラグイン名', 'プラグインID', '状態'], rows: plugins }], 'plugins') },
       { name: 'カスタマイズ', widths: [30, 14, 6, 10, 70], blocks: err('customize') ? [{ title: null, header: [], rows: [], note: err('customize') }] : customizeBlocks(val('customize')) }
     ];
   }

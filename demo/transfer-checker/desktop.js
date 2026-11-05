@@ -85,12 +85,33 @@
     return '﻿' + lines.map(function (row) { return row.map(csvEscape).join(','); }).join('\r\n') + '\r\n';
   }
 
+  // ===== 提出用のExcel（共通部品 js/xlsx.js。見出しの色・固定行・フィルター・A4の印刷設定つき） =====
+  var Xlsx = typeof module !== 'undefined' && module.exports ? require('../../../common/js/xlsx.js') : (typeof window !== 'undefined' ? window.DaichoyaXlsx : null);
+  function excelAtText(d) {
+    var pad = function (n) { return ('0' + n).slice(-2); };
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+  function excelSub(info, product) {
+    return 'kintone環境：' + (info.host || '') + '　／　作成日時：' + excelAtText(info.at || new Date()) + '　／　作成：台帳屋 ' + product;
+  }
+
+  // info: { app: アプリ名, host: kintoneの環境, at: 作成日時 }
+  function buildExcel(list, info) {
+    return Xlsx.listBook({
+      title: 'ユーザー・組織・グループの指定', target: info.app, sub: excelSub(info, '異動・退職チェッカー'), sheet: 'ユーザーの指定',
+      header: CSV_HEADER, rows: list.map(function (r) { return [r.state, r.typeLabel, r.name, r.code, r.place, r.detail]; }),
+      styles: list.map(function (r) { return r.state === '見つかりません' ? Xlsx.STYLE.important : r.state === '利用停止中' ? Xlsx.STYLE.warn : Xlsx.STYLE.body; }),
+      widths: [15, 10, 18, 22, 30, 60], creator: '台帳屋 異動・退職チェッカー',
+      note: '赤の行：もういないユーザーや、なくなった組織・グループ。黄の行：利用停止中のユーザー。'
+    });
+  }
+
   function safeFileName(name) {
     var s = String(name || '').replace(/[\\/:*?"<>|]/g, '_').trim();
     return s || 'app';
   }
 
-  var Core = { SETTINGS: SETTINGS, analyze: analyze, summaryLines: summaryLines, filterRows: filterRows, buildCsv: buildCsv, safeFileName: safeFileName };
+  var Core = { SETTINGS: SETTINGS, analyze: analyze, summaryLines: summaryLines, filterRows: filterRows, buildCsv: buildCsv, buildExcel: buildExcel, safeFileName: safeFileName };
 
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = Core;
@@ -163,6 +184,28 @@
     container.appendChild(el('table', { class: P + '-table' }, [thead, el('tbody', {}, body)]));
   }
 
+
+  function saveExcel(bytes, fileName) {
+    var blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    var url = URL.createObjectURL(blob);
+    var a = el('a', { href: url, download: fileName });
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+  // 「Excelで保存」は、「CSVで書き出す」と同じときに押せるようにする
+  function syncButton(from, to) {
+    to.disabled = from.disabled;
+    new MutationObserver(function () { to.disabled = from.disabled; }).observe(from, { attributes: true, attributeFilter: ['disabled'] });
+  }
+
+  function downloadExcel() {
+    if (!current.list) return;
+    var d = new Date(); var stamp = d.getFullYear() + ('0' + (d.getMonth() + 1)).slice(-2) + ('0' + d.getDate()).slice(-2);
+    saveExcel(buildExcel(current.list, { app: current.displayName, host: location.hostname, at: d }), 'ユーザーの指定_' + current.appName + '_' + stamp + '.xlsx');
+  }
+
   function downloadCsv() {
     if (!current.list) return;
     var blob = new Blob([buildCsv(current.list)], { type: 'text/csv;charset=utf-8' });
@@ -192,6 +235,7 @@
     var appNames = {};
     var select = el('select', { class: P + '-select', 'aria-label': '調べるアプリ' });
     var runBtn = el('button', { type: 'button', class: P + '-btn ' + P + '-primary', text: 'ユーザーの指定を調べる' });
+    var excelBtn = el('button', { type: 'button', class: P + '-btn', text: 'Excelで保存', disabled: 'disabled' });
     var csvBtn = el('button', { type: 'button', class: P + '-btn', text: 'CSVで書き出す', disabled: 'disabled' });
     var closeBtn = el('button', { type: 'button', class: P + '-close', 'aria-label': '閉じる', text: '×' });
     var status = el('p', { class: P + '-status', role: 'status' });
@@ -202,7 +246,7 @@
     var dialog = el('div', { class: P + '-dialog', role: 'dialog', 'aria-modal': 'true', 'aria-label': '異動・退職チェッカー' }, [
       el('div', { class: P + '-head' }, [el('h2', { text: '異動・退職チェッカー' }), closeBtn]),
       el('p', { class: P + '-lead', text: 'アプリの設定に出てくるユーザー・組織・グループを一覧にします。異動・退職・組織変更の前に、見直す場所を確かめられます。' }),
-      el('div', { class: P + '-controls' }, [select, runBtn, csvBtn]),
+      el('div', { class: P + '-controls' }, [select, runBtn, excelBtn, csvBtn]),
       status, summary, tools, result,
       el('p', { class: P + '-note', text: '調べる設定：アクセス権（アプリ・レコード・フィールド）、プロセス管理、通知（アプリ・レコード・リマインダー）、ユーザー選択などのフィールドの初期値と選択肢、一覧・グラフ・アクセス権・通知の条件、アクション。プラグインの設定やJavaScriptの中は調べません。' }),
       moreLink()
@@ -219,6 +263,8 @@
     overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
     document.addEventListener('keydown', onKey);
     csvBtn.addEventListener('click', downloadCsv);
+    excelBtn.addEventListener('click', downloadExcel);
+    syncButton(csvBtn, excelBtn);
     filter.addEventListener('input', function () { if (current.list) renderTable(result, filterRows(current.list, filter.value)); });
 
     runBtn.addEventListener('click', function () {
@@ -237,6 +283,7 @@
           return;
         }
         current.appName = safeFileName(appNames[appId] || ('app' + appId));
+        current.displayName = appNames[appId] || ('アプリID ' + appId);
         current.list = found.list;
         status.textContent = '';
         summary.innerHTML = '';

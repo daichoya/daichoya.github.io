@@ -13,181 +13,13 @@
   var FieldRefs = typeof module !== 'undefined' && module.exports ? require('../../../common/js/fieldrefs.js') : window.DaichoyaFieldRefs;
 
   // ===== 1. Excel（xlsx）の書き出し =====
-  // xlsxは「XMLファイルをまとめたzip」。無圧縮のzipを自前で作る（設計書ジェネレーターと同じ方式）。
-
-  var CRC_TABLE = (function () {
-    var table = new Uint32Array(256);
-    for (var n = 0; n < 256; n++) {
-      var c = n;
-      for (var k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
-      table[n] = c >>> 0;
-    }
-    return table;
-  })();
-
-  function crc32(bytes) {
-    var c = 0xFFFFFFFF;
-    for (var i = 0; i < bytes.length; i++) c = CRC_TABLE[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
-    return (c ^ 0xFFFFFFFF) >>> 0;
-  }
-
-  function utf8(text) { return new TextEncoder().encode(text); }
-
-  function concatBytes(chunks) {
-    var total = chunks.reduce(function (sum, c) { return sum + c.length; }, 0);
-    var out = new Uint8Array(total);
-    var pos = 0;
-    chunks.forEach(function (c) { out.set(c, pos); pos += c.length; });
-    return out;
-  }
-
-  function buildZip(files) {
-    var chunks = [];
-    var central = [];
-    var offset = 0;
-    files.forEach(function (file) {
-      var name = utf8(file.name);
-      var data = file.data;
-      var crc = crc32(data);
-      var local = new Uint8Array(30 + name.length);
-      var lv = new DataView(local.buffer);
-      lv.setUint32(0, 0x04034b50, true);
-      lv.setUint16(4, 20, true);
-      lv.setUint16(6, 0x0800, true);
-      lv.setUint16(12, 0x21, true);
-      lv.setUint32(14, crc, true);
-      lv.setUint32(18, data.length, true);
-      lv.setUint32(22, data.length, true);
-      lv.setUint16(26, name.length, true);
-      local.set(name, 30);
-      var entry = new Uint8Array(46 + name.length);
-      var cv = new DataView(entry.buffer);
-      cv.setUint32(0, 0x02014b50, true);
-      cv.setUint16(4, 20, true);
-      cv.setUint16(6, 20, true);
-      cv.setUint16(8, 0x0800, true);
-      cv.setUint16(14, 0x21, true);
-      cv.setUint32(16, crc, true);
-      cv.setUint32(20, data.length, true);
-      cv.setUint32(24, data.length, true);
-      cv.setUint16(28, name.length, true);
-      cv.setUint32(42, offset, true);
-      entry.set(name, 46);
-      chunks.push(local, data);
-      central.push(entry);
-      offset += local.length + data.length;
-    });
-    var centralBytes = concatBytes(central);
-    var end = new Uint8Array(22);
-    var ev = new DataView(end.buffer);
-    ev.setUint32(0, 0x06054b50, true);
-    ev.setUint16(8, files.length, true);
-    ev.setUint16(10, files.length, true);
-    ev.setUint32(12, centralBytes.length, true);
-    ev.setUint32(16, offset, true);
-    return concatBytes(chunks.concat([centralBytes, end]));
-  }
-
-  function xmlEscape(value) {
-    return String(value === undefined || value === null ? '' : value)
-      .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '')
-      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  }
-
-  function columnName(index) {
-    var name = '';
-    var n = index + 1;
-    while (n > 0) {
-      var m = (n - 1) % 26;
-      name = String.fromCharCode(65 + m) + name;
-      n = Math.floor((n - 1) / 26);
-    }
-    return name;
-  }
-
-  function sheetName(name) { return String(name).replace(/[\[\]:*?\/\\]/g, '_').slice(0, 31) || 'Sheet'; }
-
-  var STYLE = { plain: 0, header: 1, body: 2, title: 3, warn: 4 };
-
-  function cell(ref, value, style) {
-    return '<c r="' + ref + '" t="inlineStr" s="' + style + '"><is><t xml:space="preserve">' + xmlEscape(value) + '</t></is></c>';
-  }
-
-  // sheet: { name, widths, hidden, blocks: [{ title, header, rows, note, styles }] }
-  function sheetXml(sheet) {
-    var rowsXml = [];
-    var r = 1;
-    function addRow(values, style) {
-      var cells = values.map(function (v, i) { return cell(columnName(i) + r, v, Array.isArray(style) ? style[i] : style); }).join('');
-      rowsXml.push('<row r="' + r + '">' + cells + '</row>');
-      r += 1;
-    }
-    sheet.blocks.forEach(function (block, i) {
-      if (i > 0) r += 1;
-      if (block.title) addRow([block.title], STYLE.title);
-      if (block.header && block.header.length) addRow(block.header, STYLE.header);
-      (block.rows || []).forEach(function (row, j) { addRow(row, (block.styles && block.styles[j]) || STYLE.body); });
-      if (block.note) addRow([block.note], STYLE.plain);
-    });
-    var cols = (sheet.widths || []).map(function (w, i) {
-      return '<col min="' + (i + 1) + '" max="' + (i + 1) + '" width="' + w + '" customWidth="1"/>';
-    }).join('');
-    return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-      '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
-      (cols ? '<cols>' + cols + '</cols>' : '') + '<sheetData>' + rowsXml.join('') + '</sheetData></worksheet>';
-  }
-
-  var STYLES_XML = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-    '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
-    '<fonts count="2"><font><sz val="11"/><name val="Yu Gothic"/></font><font><b/><sz val="11"/><name val="Yu Gothic"/></font></fonts>' +
-    '<fills count="4"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill>' +
-    '<fill><patternFill patternType="solid"><fgColor rgb="FFDDEBF7"/><bgColor indexed="64"/></patternFill></fill>' +
-    '<fill><patternFill patternType="solid"><fgColor rgb="FFFFF2CC"/><bgColor indexed="64"/></patternFill></fill></fills>' +
-    '<borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border>' +
-    '<border><left style="thin"><color rgb="FFBFBFBF"/></left><right style="thin"><color rgb="FFBFBFBF"/></right>' +
-    '<top style="thin"><color rgb="FFBFBFBF"/></top><bottom style="thin"><color rgb="FFBFBFBF"/></bottom><diagonal/></border></borders>' +
-    '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>' +
-    '<cellXfs count="5">' +
-    '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>' +
-    '<xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1"/>' +
-    '<xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf>' +
-    '<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/>' +
-    '<xf numFmtId="0" fontId="0" fillId="3" borderId="1" xfId="0" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf>' +
-    '</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
+  // 共通部品（js/xlsx.js）で作る。見出しの色・固定行・フィルター・印刷設定は、台帳屋のどの製品でも同じ体裁にそろえる。
+  var Xlsx = typeof module !== 'undefined' && module.exports ? require('../../../common/js/xlsx.js') : window.DaichoyaXlsx;
+  var STYLE = Xlsx.STYLE;
+  var utf8 = Xlsx.utf8;
 
   function buildXlsx(sheets) {
-    var contentTypes = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-      '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
-      '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
-      '<Default Extension="xml" ContentType="application/xml"/>' +
-      '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' +
-      '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' +
-      sheets.map(function (s, i) {
-        return '<Override PartName="/xl/worksheets/sheet' + (i + 1) + '.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>';
-      }).join('') + '</Types>';
-    var rootRels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
-      '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>';
-    var workbook = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-      '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>' +
-      sheets.map(function (s, i) {
-        return '<sheet name="' + xmlEscape(sheetName(s.name)) + '" sheetId="' + (i + 1) + '"' + (s.hidden ? ' state="hidden"' : '') + ' r:id="rId' + (i + 1) + '"/>';
-      }).join('') + '</sheets></workbook>';
-    var workbookRels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
-      sheets.map(function (s, i) {
-        return '<Relationship Id="rId' + (i + 1) + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet' + (i + 1) + '.xml"/>';
-      }).join('') +
-      '<Relationship Id="rId' + (sheets.length + 1) + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>';
-    var files = [
-      { name: '[Content_Types].xml', data: utf8(contentTypes) },
-      { name: '_rels/.rels', data: utf8(rootRels) },
-      { name: 'xl/workbook.xml', data: utf8(workbook) },
-      { name: 'xl/_rels/workbook.xml.rels', data: utf8(workbookRels) },
-      { name: 'xl/styles.xml', data: utf8(STYLES_XML) }
-    ];
-    sheets.forEach(function (s, i) { files.push({ name: 'xl/worksheets/sheet' + (i + 1) + '.xml', data: utf8(sheetXml(s)) }); });
-    return buildZip(files);
+    return Xlsx.build(sheets, { title: 'kintoneアプリ 点検台帳', creator: '台帳屋 棚卸し・変更監視パック', footer: '台帳屋 棚卸し・変更監視パック' });
   }
 
   // ===== 2. 前回の点検台帳の読み込み =====
@@ -745,27 +577,50 @@
     '.bar{position:sticky;top:0;display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:10px 16px;background:#f5f6f7;border-bottom:1px solid #ccc}' +
     '.bar button{height:40px;padding:0 18px;border:none;background:#3498db;color:#fff;font:inherit;font-size:11pt;cursor:pointer}' +
     '.sheet{max-width:186mm;margin:0 auto;padding:8mm 4mm 12mm}' +
-    'h1{margin:0 0 4mm;font-size:16pt;text-align:center;letter-spacing:.15em}' +
-    'h2{margin:4mm 0 1.5mm;padding-left:6px;border-left:4px solid #222;font-size:10.5pt}' +
-    'table{width:100%;border-collapse:collapse}th,td{padding:2px 5px;border:1px solid #999;text-align:left;vertical-align:top}tr{break-inside:avoid}' +
-    'th{background:#eef1f3}.n{text-align:right;white-space:nowrap}.total td{font-weight:bold}' +
+    'h1{margin:0;padding-top:5mm;font-size:16pt;text-align:center;letter-spacing:.15em;color:#1f3a5f}' +
+    '.sheet{position:relative}.date{position:absolute;top:0;right:0;margin:0;font-size:9pt}' +
+    '.parties{display:flex;justify-content:space-between;gap:8mm;margin:3mm 0 2mm}.parties div{flex:1}' +
+    '.fill{display:inline-block;min-width:52mm;border-bottom:1px solid #666;padding:0 2px}.fill:empty::before{content:attr(data-placeholder);color:#aaa}' +
+    '.summary{margin:1.5mm 0 1mm;padding:2mm 3mm;border:1px solid #1f3a5f;border-left:5px solid #1f3a5f;background:#f4f7fb;font-size:10pt}' +
+    '.summary b{color:#1f3a5f}.scope{margin:1mm 0 0;font-size:8.5pt;color:#444}' +
+    'h2{margin:3.5mm 0 1.5mm;padding-left:6px;border-left:4px solid #1f3a5f;font-size:10.5pt;color:#1f3a5f}' +
+    'table{width:100%;border-collapse:collapse}th,td{padding:1.5px 5px;border:1px solid #999;text-align:left;vertical-align:top}tr{break-inside:avoid}' +
+    'th{background:#1f3a5f;color:#fff;border-color:#1f3a5f}.n{text-align:right;white-space:nowrap}.total td{font-weight:bold;background:#eef2f6}.imp{color:#b42318;font-weight:bold}' +
     '.meta td{padding:1px 0;border:none}.note{margin:1.5mm 0 0;font-size:8pt;color:#555}' +
     '.two{display:flex;gap:5mm}.two>section{flex:1;min-width:0}.items td{font-size:8pt}' +
-    '.end{display:flex;gap:4mm;align-items:stretch}.memo{flex:1;min-height:18mm;padding:4px 6px;border:1px solid #999;white-space:pre-wrap}.memo:empty::before{content:attr(data-placeholder);color:#999}' +
+    '.end{display:flex;gap:4mm;align-items:stretch}.memo{flex:1;min-height:15mm;padding:4px 6px;border:1px solid #999;white-space:pre-wrap}.memo:empty::before{content:attr(data-placeholder);color:#999}' +
     '.sign{display:flex;flex:none}.sign div{width:22mm;margin-left:-1px;border:1px solid #999;text-align:center}' +
-    '.sign span{display:block;border-bottom:1px solid #999;background:#eef1f3;font-size:8.5pt}.sign i{display:block;height:16mm}' +
+    '.sign span{display:block;border-bottom:1px solid #999;background:#eef1f3;font-size:8.5pt}.sign i{display:block;height:14mm}' +
     '.foot{margin-top:3mm;font-size:8pt;color:#666}' +
     '@media screen and (max-width:700px){.two{display:block}}' +
-    '@media print{.bar{display:none}.sheet{max-width:none;padding:0}.memo:empty::before{content:""}.sheet{padding:0 1px}}';
+    '@media print{.bar{display:none}.sheet{max-width:none;padding:0}.memo:empty::before{content:""}.fill:empty::before{content:""}.sheet{padding:0 1px}}';
+
+  // 報告書の冒頭に置く総評（数字は点検の結果だけから作る）
+  function summarySentence(d) {
+    var out = '<b>総評：</b>点検したアプリ' + d.apps + '個で、見直したほうがよい設定（注意点）が<b>' + d.total + '件</b>見つかりました（うち要確認 <span class="imp">' + d.important + '件</span>）。';
+    if (d.before && known(d.before.total)) {
+      var diff = d.total - d.before.total;
+      out += '前回の点検（' + esc(dateText(d.before.at).slice(0, 10)) + '）と比べて、' + (diff < 0 ? Math.abs(diff) + '件減りました。' : diff > 0 ? diff + '件増えました。' : '件数は変わっていません。');
+    }
+    if (d.diff) {
+      var changes = d.diff.reduce(function (n, r) { return n + r.add + r.change + r.remove; }, 0);
+      out += '前回からの設定の変更は' + changes + '件です。';
+    }
+    out += d.important ? '「4. 要確認の項目」から、優先して確かめてください。' : '要確認の項目はありませんでした。';
+    return out;
+  }
 
   function reportHtml(d) {
     var day = dateText(d.at).slice(0, 10);
     var h = [];
     h.push('<!doctype html><html lang="ja"><head><meta charset="utf-8"><title>kintoneアプリ点検報告書（' + esc(day) + '）</title><style>' + REPORT_CSS + '</style></head><body>');
-    h.push('<div class="bar"><button type="button" id="dcy-print">印刷・PDFで保存</button><span class="note">「所見・対応」の欄は、この画面で書き込んでから印刷できます。印刷の画面で「PDFに保存」を選ぶとPDFになります。</span></div>');
-    h.push('<div class="sheet"><h1>kintoneアプリ 点検報告書</h1>');
-    h.push('<table class="meta"><tr><td>点検日時：' + esc(dateText(d.at)) + '</td><td>kintone環境：' + esc(d.host) + '</td></tr>' +
-      '<tr><td>点検した人：' + esc(d.user) + '</td><td>点検したアプリ：' + d.apps + '個（点検した人が見られるアプリ）</td></tr></table>');
+    h.push('<div class="bar"><button type="button" id="dcy-print">印刷・PDFで保存</button><span class="note">「提出先」「報告者」「所見・対応」の欄は、この画面で書き込んでから印刷できます。印刷の画面で「PDFに保存」を選ぶとPDFになります。</span></div>');
+    h.push('<div class="sheet"><p class="date">' + esc(day.replace(/^(\d+)-(\d+)-(\d+)$/, function (_, y, m, dd) { return y + '年' + Number(m) + '月' + Number(dd) + '日'; })) + '</p><h1>kintoneアプリ 点検報告書</h1>');
+    h.push('<div class="parties"><div>提出先：<span class="fill" contenteditable="true" data-placeholder="（例）情報システム部長 様"></span></div>' +
+      '<div style="text-align:right">報告者：<span class="fill" contenteditable="true" data-placeholder="部署・氏名">' + esc(d.user) + '</span></div></div>');
+    h.push('<div class="summary">' + summarySentence(d) + '</div>');
+    h.push('<p class="scope">点検の範囲：kintone環境「' + esc(d.host) + '」で、点検した人が見られるアプリ' + d.apps + '個。点検日時：' + esc(dateText(d.at)) +
+      '。方法：台帳屋 棚卸し・変更監視パックで、アプリの設定を読み取って点検しました（設定は変えていません。レコードの中身は読んでいません）。</p>');
 
     h.push('<h2>1. 点検の結果</h2><table><tr><th>区分</th><th class="n">件数</th><th class="n">うち要確認</th><th class="n">前回</th><th class="n">増減</th></tr>');
     d.groups.forEach(function (g) {
@@ -811,7 +666,7 @@
 
     h.push('<h2>5. 所見・対応</h2><div class="end"><div class="memo" contenteditable="true" data-placeholder="対応したこと、対応の予定、担当などを書き込めます"></div>');
     h.push('<div class="sign"><div><span>点検者</span><i></i></div><div><span>確認者</span><i></i></div><div><span>承認者</span><i></i></div></div></div>');
-    h.push('<p class="foot">台帳屋 棚卸し・変更監視パックで作成しました。点検するのは設定だけで、レコードの中身は読みません。詳しい内容は、同じときに作成した点検台帳（Excel）をご覧ください。' + (d.plan ? 'ご契約のプラン：' + esc(d.plan) + '。' : '') + '</p>');
+    h.push('<p class="foot">台帳屋 棚卸し・変更監視パックで作成。詳しい内容は、同じときに作成した点検台帳（Excel）の各シートをご覧ください。' + (d.plan ? 'ご契約のプラン：' + esc(d.plan) + '。' : '') + '</p>');
     h.push('</div></body></html>');
     return h.join('');
   }
@@ -1049,22 +904,35 @@
       ? { title: null, header: ['区分', 'アプリID', 'アプリ名', '項目', '内容', '前回', '今回'], rows: diff, note: diff.length ? null : '前回の点検から、変わったところはありません。' }
       : { title: null, header: [], rows: [], note: '前回の点検台帳を選ばずに作成したため、比較していません。次回の点検で、このファイルを選ぶと変更点が分かります。' };
     return [
-      { name: '点検報告', widths: [32, 70], blocks: [
-        { title: 'kintoneアプリの点検報告', header: ['項目', '内容'], rows: cover },
-        { title: '点検の推移（新しい順）', header: ['点検日時', '結果'], rows: historyRows,
-          note: historyRows.length < 2 ? '次回の点検で、このファイルを「前回の点検台帳」に選ぶと、点検ごとの件数がここに並びます。' : null }
-      ] },
-      { name: 'アプリ一覧', widths: [8, 30, 10, 16, 18, 16, 18, 12, 10, 12, 14, 12, 18, 12, 10, 40], blocks: [{ title: null, header: ['アプリID', 'アプリ名', 'スペースID', '作成者', '作成日時', '設定の最終更新者', '設定の最終更新', '設定の更新からの日数', 'フィールド数', 'プラグイン数', 'カスタマイズ数', 'レコード数', 'レコードの最終更新', 'レコードの更新からの日数', '注意点', '読み取れなかった項目'], rows: appRows }] },
-      { name: '変更点', widths: [8, 8, 24, 18, 36, 40, 40], blocks: [diffBlock] },
-      { name: '注意点', widths: [8, 8, 24, 10, 6, 24, 60], blocks: [{ title: null, header: ['重要度', 'アプリID', 'アプリ名', '種類', '順', '対象', '内容'], rows: warnings, styles: warnings.map(function (w) { return w[0] === '要確認' ? STYLE.warn : STYLE.body; }), note: warnings.length ? null : '注意点は見つかりませんでした。' }] },
-      { name: '権限一覧', widths: [8, 24, 10, 6, 30, 28, 40], blocks: [{ title: null, header: ['アプリID', 'アプリ名', '種類', '順', '条件・フィールド', '対象', '権限'], rows: aclRows }] },
-      { name: 'ユーザーの指定', widths: [12, 10, 16, 24, 8, 24, 24, 60], blocks: [{ title: null, header: ['状態', '種類', '名前', 'コード', 'アプリID', 'アプリ名', '設定の場所', '内容'], rows: refRows, styles: refRows.map(function (r) { return r[0] === '見つかりません' ? STYLE.warn : STYLE.body; }), note: refRows.length ? null : 'ユーザー・組織・グループを指定している設定はありません。' }] },
-      { name: 'プラグイン', widths: [8, 24, 36, 36, 8, 14], blocks: [{ title: null, header: ['アプリID', 'アプリ名', 'プラグイン名', 'プラグインID', '状態', '許可'], rows: pluginRows,
+      { name: '点検報告', widths: [34, 84], orientation: 'portrait', tabColor: 'FF1F3A5F',
+        heading: { title: 'kintoneアプリ 点検台帳', sub: 'kintone環境：' + snapshot.host + '　／　点検日時：' + dateText(now) + '　／　作成：台帳屋 棚卸し・変更監視パック' },
+        blocks: [
+          { title: '点検の概要', header: ['項目', '内容'], rows: cover, labels: true },
+          { title: '点検の推移（新しい順）', header: ['点検日時', '結果'], rows: historyRows, labels: true,
+            note: historyRows.length < 2 ? '次回の点検で、このファイルを「前回の点検台帳」に選ぶと、点検ごとの件数がここに並びます。' : null },
+          Xlsx.contents([
+            ['アプリ一覧', '全アプリの作成者・設定の最終更新・フィールド数・レコードの件数と最終更新'],
+            ['変更点', '前回の点検台帳と比べて、追加・削除・変更された設定'],
+            ['注意点', '見直したほうがよい設定（要確認は赤、確認は白）'],
+            ['権限一覧', '全アプリのアプリ・レコード・フィールドのアクセス権'],
+            ['ユーザーの指定', '設定に出てくるユーザー・組織・グループ（もういない人を先頭に）'],
+            ['プラグイン', 'どのアプリに、どのプラグインが入っているか'],
+            ['カスタマイズ', 'どのアプリに、どのJavaScript・CSSが入っているか'],
+            ['つながり', 'ルックアップ・関連レコード一覧・アクションでつながるアプリ'],
+            ['フィールドの使われ方', 'ほかのアプリから使われているフィールドと、設定では使われていないフィールド']
+          ])
+        ] },
+      { name: 'アプリ一覧', list: true, widths: [7, 24, 7, 13, 15, 13, 15, 9, 8, 8, 9, 9, 15, 9, 7, 28], blocks: [{ title: null, ids: [0, 2], numbers: [7, 8, 9, 10, 11, 13, 14], header: ['アプリID', 'アプリ名', 'スペースID', '作成者', '作成日時', '設定の最終更新者', '設定の最終更新', '設定の更新からの日数', 'フィールド数', 'プラグイン数', 'カスタマイズ数', 'レコード数', 'レコードの最終更新', 'レコードの更新からの日数', '注意点', '読み取れなかった項目'], rows: appRows }] },
+      { name: '変更点', list: true, widths: [8, 8, 24, 18, 36, 40, 40], blocks: [Object.assign({ ids: [1] }, diffBlock)] },
+      { name: '注意点', list: true, widths: [8, 7, 22, 13, 5, 24, 62], blocks: [{ title: null, ids: [1], numbers: [4], header: ['重要度', 'アプリID', 'アプリ名', '種類', '順', '対象', '内容'], rows: warnings, styles: warnings.map(function (w) { return w[0] === '要確認' ? STYLE.important : STYLE.body; }), note: warnings.length ? null : '注意点は見つかりませんでした。' }] },
+      { name: '権限一覧', list: true, widths: [7, 24, 10, 5, 30, 28, 40], blocks: [{ title: null, ids: [0], numbers: [3], header: ['アプリID', 'アプリ名', '種類', '順', '条件・フィールド', '対象', '権限'], rows: aclRows }] },
+      { name: 'ユーザーの指定', list: true, widths: [12, 10, 16, 24, 8, 24, 24, 60], blocks: [{ title: null, ids: [4], header: ['状態', '種類', '名前', 'コード', 'アプリID', 'アプリ名', '設定の場所', '内容'], rows: refRows, styles: refRows.map(function (r) { return r[0] === '見つかりません' ? STYLE.warn : STYLE.body; }), note: refRows.length ? null : 'ユーザー・組織・グループを指定している設定はありません。' }] },
+      { name: 'プラグイン', list: true, widths: [7, 24, 36, 36, 8, 14], blocks: [{ title: null, ids: [0], header: ['アプリID', 'アプリ名', 'プラグイン名', 'プラグインID', '状態', '許可'], rows: pluginRows,
         styles: pluginRows.map(function (r) { return r[5] === '許可していない' ? STYLE.warn : STYLE.body; }),
         note: pluginRows.length ? (allowed && allowed.length ? null : '「許可」の列は、設定画面で許可するプラグインを指定すると入ります。') : 'プラグインを追加しているアプリはありません。' }] },
-      { name: 'カスタマイズ', widths: [8, 24, 18, 10, 12, 6, 8, 60], blocks: [{ title: null, header: ['アプリID', 'アプリ名', '適用するユーザー', '画面', '種類', '順', '形式', 'ファイル名・URL'], rows: customRows, note: customRows.length ? null : 'JavaScript・CSSによるカスタマイズはありません。' }] },
-      { name: 'つながり', widths: [10, 24, 16, 10, 24, 36], blocks: [{ title: null, header: ['元のアプリID', '元のアプリ', 'つながりの種類', '相手のアプリID', '相手のアプリ', '設定のある場所'], rows: linkRows, note: linkRows.length ? null : 'ルックアップ・関連レコード一覧・アクションでつながっているアプリはありません。' }] },
-      { name: 'フィールドの使われ方', widths: [8, 24, 24, 20, 14, 26, 40, 50, 44], blocks: [{ title: null, header: ['アプリID', 'アプリ名', 'フィールド名', 'フィールドコード', '種類', '判定', 'このアプリでの使われ方', 'ほかのアプリからの使われ方', '確かめること'], rows: use.rows,
+      { name: 'カスタマイズ', list: true, widths: [7, 24, 18, 10, 12, 5, 8, 60], blocks: [{ title: null, ids: [0], numbers: [5], header: ['アプリID', 'アプリ名', '適用するユーザー', '画面', '種類', '順', '形式', 'ファイル名・URL'], rows: customRows, note: customRows.length ? null : 'JavaScript・CSSによるカスタマイズはありません。' }] },
+      { name: 'つながり', list: true, widths: [10, 24, 16, 10, 24, 36], blocks: [{ title: null, ids: [0, 3], header: ['元のアプリID', '元のアプリ', 'つながりの種類', '相手のアプリID', '相手のアプリ', '設定のある場所'], rows: linkRows, note: linkRows.length ? null : 'ルックアップ・関連レコード一覧・アクションでつながっているアプリはありません。' }] },
+      { name: 'フィールドの使われ方', list: true, widths: [7, 22, 22, 18, 13, 24, 36, 44, 40], blocks: [{ title: null, ids: [0], header: ['アプリID', 'アプリ名', 'フィールド名', 'フィールドコード', '種類', '判定', 'このアプリでの使われ方', 'ほかのアプリからの使われ方', '確かめること'], rows: use.rows,
         styles: use.rows.map(function (r) { return /★/.test(r[7]) ? STYLE.warn : STYLE.body; }),
         note: use.rows.length
           ? '★は、使われている間はkintoneがフィールドの削除を止める設定です。「設定では使われていません」は、計算式・一覧・グラフ・アクセス権・プロセス管理・通知・アクション・レコードのタイトルと、ほかのアプリのルックアップ・関連レコード一覧・アクションのどれにも出てこない、という意味です。利用者が値を入力して使っている場合や、JavaScript・プラグインの設定の中で使っている場合があるため、削除の前に確かめてください。点検した人が見られないアプリで使われているフィールドは、ここに出ません。kintoneシステム管理者でない人が点検したときは、特に注意してください。'

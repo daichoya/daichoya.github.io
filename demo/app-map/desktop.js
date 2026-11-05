@@ -297,6 +297,25 @@
     return '﻿' + [header].concat(rows).map(function (r) { return r.map(csvEscape).join(','); }).join('\r\n') + '\r\n';
   }
 
+  // ===== 提出用のExcel（共通部品 js/xlsx.js。見出しの色・固定行・フィルター・A4の印刷設定つき） =====
+  var Xlsx = typeof module !== 'undefined' && module.exports ? require('../../../common/js/xlsx.js') : (typeof window !== 'undefined' ? window.DaichoyaXlsx : null);
+  function excelAtText(d) {
+    var pad = function (n) { return ('0' + n).slice(-2); };
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+  function excelSub(info, product) {
+    return 'kintone環境：' + (info.host || '') + '　／　作成日時：' + excelAtText(info.at || new Date()) + '　／　作成：台帳屋 ' + product;
+  }
+
+  // info: { app: アプリ名, host: kintoneの環境, at: 作成日時 }
+  function buildExcel(rows, info) {
+    return Xlsx.listBook({
+      title: 'アプリのつながり', target: info.app, sub: excelSub(info, 'アプリ相関マップ'), sheet: 'つながり',
+      header: ROW_HEADER, rows: rows, widths: [14, 18, 26, 12, 30, 50], ids: [3], creator: '台帳屋 アプリ相関マップ',
+      note: rows.length ? 'ルックアップ・関連レコード一覧・アクションでつながるアプリです。図は「図を画像で保存」で保存できます。' : 'つながっているアプリはありません。'
+    });
+  }
+
   function safeFileName(name) {
     var s = String(name || '').replace(/[\\/:*?"<>|]/g, '_').trim();
     return s || 'app';
@@ -324,6 +343,7 @@
     linkRows: linkRows,
     ROW_HEADER: ROW_HEADER,
     buildCsv: buildCsv,
+    buildExcel: buildExcel,
     truncate: truncate,
     safeFileName: safeFileName,
     dateStamp: dateStamp,
@@ -400,6 +420,22 @@
     return Promise.all(workers).then(function () { return { links: links, scan: scan }; });
   }
 
+
+  function saveExcel(bytes, fileName) {
+    var blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    var url = URL.createObjectURL(blob);
+    var a = el('a', { href: url, download: fileName });
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+  // 「Excelで保存」は、「CSVで書き出す」と同じときに押せるようにする
+  function syncButton(from, to) {
+    to.disabled = from.disabled;
+    new MutationObserver(function () { to.disabled = from.disabled; }).observe(from, { attributes: true, attributeFilter: ['disabled'] });
+  }
+
   function saveBlob(blob, fileName) {
     var url = URL.createObjectURL(blob);
     var a = el('a', { href: url, download: fileName });
@@ -460,6 +496,7 @@
     var select = el('select', { class: P + '-select', 'aria-label': '中心にするアプリ' });
     var runBtn = el('button', { type: 'button', class: P + '-btn ' + P + '-primary', text: '相関マップを表示' });
     var pngBtn = el('button', { type: 'button', class: P + '-btn', text: '画像で保存（PNG）', disabled: 'disabled' });
+    var excelBtn = el('button', { type: 'button', class: P + '-btn', text: '一覧をExcelで保存', disabled: 'disabled' });
     var csvBtn = el('button', { type: 'button', class: P + '-btn', text: '一覧をCSVで書き出す', disabled: 'disabled' });
     var closeBtn = el('button', { type: 'button', class: P + '-close', 'aria-label': '閉じる', text: '×' });
     var status = el('p', { class: P + '-status', role: 'status' });
@@ -468,7 +505,7 @@
     var dialog = el('div', { class: P + '-dialog', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'アプリ相関マップ' }, [
       el('div', { class: P + '-head' }, [el('h2', { text: 'アプリ相関マップ' }), closeBtn]),
       el('p', { class: P + '-lead', text: 'ルックアップ・関連レコード一覧・アクションでつながっているアプリを図にします。図のアプリを押すと、そのアプリを中心に切り替えます。' }),
-      el('div', { class: P + '-controls' }, [select, runBtn, pngBtn, csvBtn]),
+      el('div', { class: P + '-controls' }, [select, runBtn, pngBtn, excelBtn, csvBtn]),
       status, mapBox, tableBox,
       moreLink()
     ]);
@@ -535,6 +572,11 @@
       }).catch(function (error) { status.textContent = error.message; });
     });
 
+    excelBtn.addEventListener('click', function () {
+      if (!current) return;
+      saveExcel(buildExcel(current.rows, { app: names[current.appId] || ('アプリID ' + current.appId), host: location.hostname, at: new Date() }), '相関マップ_' + safeFileName(names[current.appId]) + '_' + dateStamp(new Date()) + '.xlsx');
+    });
+    syncButton(csvBtn, excelBtn);
     csvBtn.addEventListener('click', function () {
       if (!current) return;
       var blob = new Blob([buildCsv(ROW_HEADER, current.rows)], { type: 'text/csv;charset=utf-8' });

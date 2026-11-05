@@ -118,8 +118,9 @@
   ];
 
   // Excelで文字化けしないよう、BOM付きUTF-8・CRLF改行で作る
-  function buildCsv(data) {
-    var lines = [CSV_HEADER];
+  // 権限の表の行（CSVとExcelで同じ中身）
+  function permissionLines(data) {
+    var lines = [];
     data.app.forEach(function (r) {
       lines.push(['アプリ', r.order, '', '', r.type, r.code, r.includeSubs, r.appEditable,
         r.recordViewable, r.recordAddable, r.recordEditable, r.recordDeletable,
@@ -133,9 +134,34 @@
       lines.push(['フィールド', '', r.fieldLabel, r.fieldCode, r.type, r.code, r.includeSubs,
         '', '', '', '', '', '', '', r.accessibility]);
     });
+    return lines;
+  }
+
+  function buildCsv(data) {
+    var lines = [CSV_HEADER].concat(permissionLines(data));
     return '﻿' + lines.map(function (row) {
       return row.map(csvEscape).join(',');
     }).join('\r\n') + '\r\n';
+  }
+
+  // ===== 提出用のExcel（共通部品 js/xlsx.js。見出しの色・固定行・フィルター・A4の印刷設定つき） =====
+  var Xlsx = typeof module !== 'undefined' && module.exports ? require('../../../common/js/xlsx.js') : (typeof window !== 'undefined' ? window.DaichoyaXlsx : null);
+  function excelAtText(d) {
+    var pad = function (n) { return ('0' + n).slice(-2); };
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+  function excelSub(info, product) {
+    return 'kintone環境：' + (info.host || '') + '　／　作成日時：' + excelAtText(info.at || new Date()) + '　／　作成：台帳屋 ' + product;
+  }
+
+  // info: { app: アプリ名, host: kintoneの環境, at: 作成日時 }
+  function buildExcel(data, info) {
+    return Xlsx.listBook({
+      title: '権限一覧', target: info.app, sub: excelSub(info, '権限チェッカー'), sheet: '権限一覧',
+      header: CSV_HEADER, rows: permissionLines(data), widths: [10, 8, 26, 16, 10, 22, 9, 8, 6, 6, 6, 6, 9, 9, 12],
+      numbers: [1], centers: [6, 7, 8, 9, 10, 11, 12, 13], creator: '台帳屋 権限チェッカー',
+      note: '○：権限あり　－：権限なし。アプリとレコードのアクセス権は、優先順位の数の小さい行が優先されます。'
+    });
   }
 
   // Windowsのファイル名に使えない文字を置き換える
@@ -161,6 +187,7 @@
     fieldRows: fieldRows,
     csvEscape: csvEscape,
     buildCsv: buildCsv,
+    buildExcel: buildExcel,
     safeFileName: safeFileName,
     errorMessage: errorMessage
   };
@@ -257,6 +284,28 @@
     ));
   }
 
+
+  function saveExcel(bytes, fileName) {
+    var blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    var url = URL.createObjectURL(blob);
+    var a = el('a', { href: url, download: fileName });
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+  // 「Excelで保存」は、「CSVで書き出す」と同じときに押せるようにする
+  function syncButton(from, to) {
+    to.disabled = from.disabled;
+    new MutationObserver(function () { to.disabled = from.disabled; }).observe(from, { attributes: true, attributeFilter: ['disabled'] });
+  }
+
+  function downloadExcel() {
+    if (!current.data) return;
+    var d = new Date(); var stamp = d.getFullYear() + ('0' + (d.getMonth() + 1)).slice(-2) + ('0' + d.getDate()).slice(-2);
+    saveExcel(buildExcel(current.data, { app: current.displayName, host: location.hostname, at: d }), '権限一覧_' + current.appName + '_' + stamp + '.xlsx');
+  }
+
   function downloadCsv() {
     if (!current.data) return;
     var blob = new Blob([buildCsv(current.data)], { type: 'text/csv;charset=utf-8' });
@@ -286,13 +335,14 @@
     var appNames = {};
     var select = el('select', { class: P + '-select', 'aria-label': '確認するアプリ' });
     var runBtn = el('button', { type: 'button', class: P + '-btn ' + P + '-primary', text: '権限を表示' });
+    var excelBtn = el('button', { type: 'button', class: P + '-btn', text: 'Excelで保存', disabled: 'disabled' });
     var csvBtn = el('button', { type: 'button', class: P + '-btn', text: 'CSVで書き出す', disabled: 'disabled' });
     var closeBtn = el('button', { type: 'button', class: P + '-close', 'aria-label': '閉じる', text: '×' });
     var status = el('p', { class: P + '-status', role: 'status' });
     var result = el('div', { class: P + '-result' });
     var dialog = el('div', { class: P + '-dialog', role: 'dialog', 'aria-modal': 'true', 'aria-label': '権限チェッカー' }, [
       el('div', { class: P + '-head' }, [el('h2', { text: '権限チェッカー' }), closeBtn]),
-      el('div', { class: P + '-controls' }, [select, runBtn, csvBtn]),
+      el('div', { class: P + '-controls' }, [select, runBtn, excelBtn, csvBtn]),
       status,
       result,
       moreLink()
@@ -309,6 +359,8 @@
     overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
     document.addEventListener('keydown', onKey);
     csvBtn.addEventListener('click', downloadCsv);
+    excelBtn.addEventListener('click', downloadExcel);
+    syncButton(csvBtn, excelBtn);
 
     runBtn.addEventListener('click', function () {
       var appId = select.value;
@@ -320,6 +372,7 @@
       fetchPermissions(appId).then(function (data) {
         current.appId = appId;
         current.appName = safeFileName(appNames[appId] || ('app' + appId));
+        current.displayName = appNames[appId] || ('アプリID ' + appId);
         current.data = data;
         status.textContent = '';
         renderResult(result, data);

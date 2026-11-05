@@ -36,16 +36,21 @@
     </div>
     <div class="actions"><a class="btn btn-primary" href="../demo.html">デモで試す（登録不要）</a><a class="btn" href="#download">ダウンロード</a></div>
     <figure class="shot">
-      <a href="../images/design-doc-excel.webp" title="画像を大きく表示"><img src="../images/design-doc-excel.webp" width="1100" height="418" alt="設計書のフィールドのシート。フィールド名・種類・必須・初期値・計算式やルックアップの参照先が表に並んでいる"></a>
+      <a href="../images/design-doc-excel.webp" title="画像を大きく表示"><img src="../images/design-doc-excel.webp" width="1100" height="495" alt="設計書のフィールドのシート。フィールド名・種類・必須・初期値・計算式やルックアップの参照先が表に並んでいる"></a>
       <figcaption>見本のアプリで作成した設計書（「フィールド」シート）</figcaption>
     </figure>
 
     <h2>設計書の内容</h2>
+    <div class="prose"><p>1枚目は表紙（アプリの概要・改訂履歴・目次）です。各シートは紺の見出し行で、A4で印刷すると幅が1ページに収まり、見出し行が毎ページに出ます（ページ番号つき）。引き継ぎや監査の資料として、そのまま出せます。</p></div>
+    <figure class="shot">
+      <a href="../images/design-doc-cover.webp" title="画像を大きく表示"><img src="../images/design-doc-cover.webp" width="740" height="849" alt="設計書の表紙。アプリの概要、改訂履歴、各シートへのリンクの目次が並ぶ" loading="lazy"></a>
+      <figcaption>設計書の表紙（見本のアプリで作成し、A4で印刷したときの見た目）</figcaption>
+    </figure>
     <div class="table-scroll">
       <table class="facts">
         <thead><tr><th scope="col">シート</th><th scope="col">記載される内容</th></tr></thead>
         <tbody>
-          <tr><th scope="row">概要</th><td>アプリ名、ID、説明、作成者、更新日時、フィールド数、一覧の数</td></tr>
+          <tr><th scope="row">概要（表紙）</th><td>アプリ名、ID、説明、作成者、更新日時、フィールド数、一覧の数。改訂履歴の欄と、各シートへのリンクの目次</td></tr>
           <tr><th scope="row">フィールド</th><td>フォームの配置順に、種類・必須・重複禁止・初期値・選択肢・計算式・ルックアップの参照先・テーブルやグループ</td></tr>
           <tr><th scope="row">一覧</th><td>一覧ごとの絞り込み条件、並び順、表示するフィールド</td></tr>
           <tr><th scope="row">プロセス管理</th><td>ステータスと作業者、アクション（実行前・実行後・条件）</td></tr>
@@ -88,12 +93,13 @@
 
     <h2 id="download">ダウンロード</h2>
     <div class="download">
-      <a class="btn btn-primary" href="../downloads/daichoya-design-doc-1.0.3.zip" download>ダウンロード（v1.0.3・zip・14KB）</a><p class="note hash">ファイルの確認用（SHA-256）：<code>aa1911549cc5afcc0c489af3201a5e7a8302f7511daf5b1b1307761e95fe086a</code></p>
+      <a class="btn btn-primary" href="../downloads/daichoya-design-doc-1.1.0.zip" download>ダウンロード（v1.1.0・zip・19KB）</a><p class="note hash">ファイルの確認用（SHA-256）：<code>b363bff94a3ad6defef6c1afe806cafc79856fefc1561962fea402cc27368a52</code></p>
       <p class="note">ご利用の前に<a href="../terms.html">利用規約</a>をお読みください。</p>
     </div>
 
     <h2>更新履歴</h2>
     <ul class="prose">
+      <li>1.1.0（2026年11月5日）：設計書の見た目を、提出しやすい形に整えました。表紙（概要・改訂履歴・目次）、紺の見出し行、見出し行の固定とフィルター、A4の印刷設定（幅に合わせる・見出し行を毎ページ・ページ番号）が付きます。</li>
       <li>1.0.3（2026年11月5日）：画面の下のご案内を、この環境のアプリの数と、全アプリを無料で点検できる「棚卸し・変更監視パック」へのご案内に変えました。機能の変更はありません。</li>
       <li>1.0.2（2026年11月5日）：権限がなく読み取れなかった項目を「0件」と表示していたのを、「読み取れませんでした」と表示するようにしました。</li>
       <li>1.0.1（2026年11月5日）：画面の下に、有料版（棚卸し・変更監視パック）のご案内を1行加えました。機能の変更はありません。</li>
