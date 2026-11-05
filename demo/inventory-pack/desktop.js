@@ -515,6 +515,7 @@
       fieldUse: fieldUse(app, val),
       xref: properties ? crossRefs(properties, val('actions')) : null,
       warnings: warningsFor(val('appAcl'), val('recordAcl'), val('fieldAcl'), labels),
+      health: healthChecks(app, properties, val('customize')),
       errors: errors
     };
   }
@@ -596,6 +597,53 @@
     fieldAclRows(fieldAcl, labels || {}).forEach(function (r) {
       if (r.entity && r.entity.type === 'USER') out.push({ level: '確認', kind: 'フィールド', order: r.order, target: r.target, text: 'ユーザー個人を指定しています（' + r.field + '）。' });
     });
+    return out;
+  }
+
+  // ===== 3-2. 健康診断（サイボウズの「kintoneガバナンスガイドライン」の点検項目と、保守のしやすさ） =====
+
+  // kintoneが最初に付けるフィールドコード（日本語・英語の画面）。末尾に _0 などが付くこともある
+  var DEFAULT_CODE = /^(文字列__1行_|文字列__複数行_|リッチエディター|数値|計算|ラジオボタン|チェックボックス|複数選択|ドロップダウン|日付|時刻|日時|添付ファイル|リンク|ユーザー選択|組織選択|グループ選択|テーブル|関連レコード一覧|Text|Text_area|Rich_text|Number|Calculated|Radio_button|Check_box|Multi_choice|Drop_down|Date|Time|Date_and_time|Attachment|Link|User_selection|Department_selection|Group_selection|Table|Related_records)(_\d+)?$/;
+  var KINTONE_HOST = /^https:\/\/[^\/]+\.(cybozu\.com|kintone\.com|cybozu\.cn)\//;
+
+  function defaultCodes(properties) {
+    var out = [];
+    Object.keys(properties || {}).forEach(function (code) {
+      var p = properties[code];
+      if (DEFAULT_CODE.test(code)) out.push(code);
+      if (p.type === 'SUBTABLE') Object.keys(p.fields || {}).forEach(function (inner) { if (DEFAULT_CODE.test(inner)) out.push(inner); });
+    });
+    return out;
+  }
+
+  function hostOf(url) {
+    var m = /^https?:\/\/([^\/?#]+)/.exec(String(url || ''));
+    return m ? m[1] : String(url || '');
+  }
+
+  // app：アプリ一覧の1件（spaceId・description）。properties・customize：読み取れなかったときは null
+  function healthChecks(app, properties, customize) {
+    var out = [];
+    var item = function (level, target, text) { out.push({ level: level, kind: '健康診断', order: '', target: target, text: text }); };
+    if (!app.spaceId) item('確認', 'スペース', 'スペースに入っていないアプリです。kintoneガバナンスガイドラインでは、スペースに所属しないアプリを作らない運用が例に挙げられています。');
+    if (app.description !== undefined && !String(app.description || '').replace(/<[^>]*>/g, '').trim()) item('確認', 'アプリの説明', 'アプリの説明がありません。引き継ぎのときに何のアプリか分かるよう、目的や担当を書いておくと安心です。');
+    if (customize) {
+      var outside = {};
+      customizeFiles(customize).forEach(function (f) { if (f.form === 'URL' && !KINTONE_HOST.test(f.name)) outside[hostOf(f.name)] = true; });
+      var hosts = Object.keys(outside);
+      if (hosts.length) item('要確認', 'JavaScript・CSS', '外部のURL（' + hosts.join('、') + '）からJavaScript・CSSを読み込んでいます。読み込み先が変わると、アプリの動きも変わります。読み込み先を管理しているか確かめてください。');
+    }
+    if (properties) {
+      var codes = defaultCodes(properties);
+      if (codes.length) item('確認', 'フィールドコード', '初期のままのフィールドコードが' + codes.length + '個あります（例：' + codes.slice(0, 3).join('、') + '）。計算式やJavaScriptで使うときに分かりにくいため、意味の分かるコードにしておくと保守が楽になります。');
+    }
+    return out;
+  }
+
+  // 環境全体の点検。env：{ administrator: true（使える）/ false（停止中）/ null（確かめられなかった） }
+  function envWarnings(env) {
+    var out = [];
+    if (env && env.administrator === true) out.push({ level: '確認', kind: '健康診断', order: '', target: 'ユーザー：Administrator', text: '最初からある管理者のアカウント「Administrator」が使える状態です。kintoneガバナンスガイドラインでは、業務で使わないなら停止することがすすめられています。' });
     return out;
   }
 
@@ -763,9 +811,11 @@
     apps.forEach(function (a) { names[a.id] = a.name; });
     var warnings = [];
     var referencedBy = referencedApps(apps);
-    var noteOf = function (a) { return a.warnings.concat(usageWarnings(a, now, referencedBy), refWarnings(a, dir)); };
+    var noteOf = function (a) { return a.warnings.concat(usageWarnings(a, now, referencedBy), refWarnings(a, dir), a.health || []); };
+    envWarnings(snapshot.env).forEach(function (w) { warnings.push([w.level, '', '（環境全体）', w.kind, '', w.target, w.text]); });
     apps.forEach(function (a) { noteOf(a).forEach(function (w) { warnings.push([w.level, a.id, a.name, w.kind, String(w.order), w.target, w.text]); }); });
     var diff = prev ? diffSnapshots(prev, snapshot) : null;
+    var healthCount = warnings.filter(function (w) { return w[3] === '健康診断'; }).length;
     var withErrors = apps.filter(function (a) { return Object.keys(a.errors).length; });
 
     var cover = [
@@ -773,11 +823,12 @@
       ['kintone環境', snapshot.host],
       ['点検したアプリ', apps.length + '個（点検した人が見られるアプリだけです。見られないアプリは含みません）'],
       ['読み取れなかった項目があるアプリ', withErrors.length + '個' + (withErrors.length ? '（「アプリ一覧」シートの右端の列を参照）' : '')],
-      ['注意点（権限・利用状況・ユーザーの指定）', warnings.length + '件'],
+      ['注意点（権限・利用状況・ユーザーの指定・健康診断）', warnings.length + '件（うち健康診断 ' + healthCount + '件）'],
       ['前回の点検', prev ? dateText(prev.takenAt) + '（' + (prev.host || '') + '）' : '比較していません'],
       ['前回からの変更', diff ? diff.length + '件' : '－'],
       ['ライセンス', licenseText || '']
     ];
+    if (snapshot.plan) cover.push(['ご契約のプラン', snapshot.plan]);
     var appRows = apps.map(function (a) {
       return [a.id, a.name, a.spaceId, a.creator, dateText(a.createdAt), a.modifier, dateText(a.modifiedAt), daysSince(a.modifiedAt, now),
         a.fields ? String(Object.keys(a.fields).length) : '', a.plugins ? String(a.plugins.length) : '', a.customize ? String(a.customize.files.length) : '',
@@ -844,7 +895,52 @@
     return count + '個のアプリを点検しました。注意点は' + warn + '件' + (compared ? '、前回からの変更は' + diff + '件' : '') + 'です。';
   }
 
+  // 無料の点検で見せるまとめ：件数と、種類ごとに例を少しだけ（一覧とExcelは有料版）
+  var FREE_GROUPS = [
+    { name: '権限', kinds: ['アプリ', 'レコード', 'フィールド'] },
+    { name: 'ユーザーの指定（退職・異動）', kinds: ['ユーザーの指定'] },
+    { name: '使われていないかもしれないアプリ', kinds: ['利用状況'] },
+    { name: '健康診断（ガバナンスガイドラインの点検項目など）', kinds: ['健康診断'] }
+  ];
+
+  function freeSummary(snapshot, sheets, examplesPerGroup) {
+    var per = examplesPerGroup === undefined ? 2 : examplesPerGroup;
+    var rows = sheets[3].blocks[0].rows;
+    var groups = FREE_GROUPS.map(function (g) {
+      var hit = rows.filter(function (r) { return g.kinds.indexOf(r[3]) >= 0; });
+      hit = hit.slice().sort(function (x, y) { return (x[0] === '要確認' ? 0 : 1) - (y[0] === '要確認' ? 0 : 1); });
+      return {
+        name: g.name, count: hit.length, important: hit.filter(function (r) { return r[0] === '要確認'; }).length,
+        examples: hit.slice(0, per).map(function (r) { return { app: r[2], target: r[5], text: r[6] }; })
+      };
+    });
+    var use = sheets[9] && sheets[9].blocks[0].rows;
+    var fieldCount = { other: 0, blocked: 0, unused: 0 };
+    (use || []).forEach(function (r) {
+      if (r[5] === 'ほかのアプリから使われています') { fieldCount.other += 1; if (/★/.test(r[7])) fieldCount.blocked += 1; }
+      if (r[5] === '設定では使われていません') fieldCount.unused += 1;
+    });
+    var apps = Object.keys(snapshot.apps).map(function (id) { return snapshot.apps[id]; });
+    return {
+      apps: apps.length,
+      total: rows.length,
+      important: rows.filter(function (r) { return r[0] === '要確認'; }).length,
+      groups: groups,
+      fields: fieldCount,
+      unreadable: apps.filter(function (a) { return Object.keys(a.errors).length; }).length
+    };
+  }
+
+  // キーに「アプリの数の上限（a）」があるときの確かめ。上限を超えても止めず、プランの変更をお願いする
+  function planNote(payload, appCount) {
+    var max = payload && Number(payload.a);
+    if (!max) return { over: false, text: '' };
+    var over = appCount > max;
+    return { over: over, text: 'アプリ' + max + '個まで' + (over ? '（この環境で点検したアプリは' + appCount + '個です。プランの変更をお願いします）' : '') };
+  }
+
   var Core = {
+    freeSummary: freeSummary, planNote: planNote, healthChecks: healthChecks, envWarnings: envWarnings,
     buildXlsx: buildXlsx, readSnapshot: readSnapshot, readZip: readZip,
     appSnapshot: appSnapshot, diffSnapshots: diffSnapshots, buildSheets: buildSheets, summaryText: summaryText,
     fieldSignature: fieldSignature, warningsFor: warningsFor, extractLinks: extractLinks, entityText: entityText, dateText: dateText
@@ -855,7 +951,6 @@
   // ===== 6. 画面（kintone上でだけ動く部分） =====
 
   var P = 'dcy-ip';
-  var FORM_URL = 'https://daichoya.github.io/pro.html';
 
   function el(tag, attrs, children) {
     var node = document.createElement(tag);
@@ -962,22 +1057,89 @@
     try { return (kintone.plugin.app.getConfig(PLUGIN_ID) || {}).license || ''; } catch (e) { return ''; }
   }
 
+  var TRIAL_FORM = 'https://docs.google.com/forms/d/e/1FAIpQLSeazyhYt9ZZf3fJufgTl02byKzbnpDxQjxyjDhJAbuV_heLbQ/viewform';
+  var TRIAL_DOMAIN_ENTRY = 'entry.1870255768';
+  var PRICE_URL = 'https://daichoya.github.io/pro.html#price';
+
+  function trialUrl(domain) { return TRIAL_FORM + '?usp=pp_url&' + TRIAL_DOMAIN_ENTRY + '=' + encodeURIComponent(domain); }
+
+  // 前回の点検の日（このブラウザに残すだけ。読めないときは何も表示しない）
+  function lastRunKey() { return P + '-last-' + location.hostname; }
+  function readLastRun() { try { return window.localStorage.getItem(lastRunKey()) || ''; } catch (e) { return ''; } }
+  function saveLastRun(date) { try { window.localStorage.setItem(lastRunKey(), date); } catch (e) { /* 保存できなくても点検は続ける */ } }
+
+  // 初期の管理者アカウント（Administrator）が使えるか。確かめられないときは null
+  function administratorState() {
+    return userApi('/v1/users.json', { codes: ['Administrator'] }).then(function (resp) {
+      var u = (resp.users || [])[0];
+      return u ? u.valid !== false : false;
+    }, function () { return null; });
+  }
+
+  function scan(withRecords, status) {
+    var env = {};
+    status.textContent = 'アプリの一覧を読み込み中…';
+    return Promise.all([getAllApps(), administratorState()]).then(function (r) {
+      env.administrator = r[1];
+      return scanAll(r[0], withRecords, function (done, total) { status.textContent = 'アプリの設定を読み込み中…（' + done + ' / ' + total + '）'; });
+    }).then(function (apps) {
+      status.textContent = '設定に出てくるユーザー・組織・グループを確認中…';
+      var all = [];
+      Object.keys(apps).forEach(function (id) { all = all.concat(apps[id].refs || []); });
+      return Refs.lookup(userApi, all).then(function (dir) { return { apps: apps, dir: dir, env: env }; });
+    });
+  }
+
+  function renderFree(box, sum, domain) {
+    box.innerHTML = '';
+    box.appendChild(el('h3', { text: '無料の点検の結果' }));
+    box.appendChild(el('p', { class: P + '-lead', text: sum.apps + '個のアプリを点検し、見直したほうがよい設定が' + sum.total + '件見つかりました（うち要確認 ' + sum.important + '件）。' }));
+    var table = el('table', { class: P + '-table' });
+    table.appendChild(el('tr', {}, [el('th', { text: '種類' }), el('th', { text: '件数' }), el('th', { text: '例（すべての一覧は有料版で）' })]));
+    sum.groups.forEach(function (g) {
+      var ex = el('td', {});
+      if (!g.examples.length) ex.appendChild(document.createTextNode('－'));
+      g.examples.forEach(function (x) { ex.appendChild(el('div', { text: '「' + x.app + '」' + (x.target ? x.target + '：' : '') + x.text })); });
+      if (g.count > g.examples.length) ex.appendChild(el('div', { class: P + '-more-count', text: 'ほか ' + (g.count - g.examples.length) + '件' }));
+      table.appendChild(el('tr', {}, [el('td', { text: g.name }), el('td', { text: g.count + '件' + (g.important ? '（要確認 ' + g.important + '）' : '') }), ex]));
+    });
+    table.appendChild(el('tr', {}, [el('td', { text: 'フィールドの使われ方' }), el('td', { text: (sum.fields.other + sum.fields.unused) + '個' }),
+      el('td', { text: 'ほかのアプリから使われている ' + sum.fields.other + '個（うち削除できないもの ' + sum.fields.blocked + '個）、設定では使われていない ' + sum.fields.unused + '個' })]));
+    box.appendChild(table);
+    if (sum.unreadable) box.appendChild(el('p', { class: P + '-note', text: '権限がなく、設定の一部を読み取れなかったアプリが' + sum.unreadable + '個あります。kintoneシステム管理者が点検すると、すべて読み取れます。' }));
+    box.appendChild(el('div', { class: P + '-cta' }, [
+      el('p', { text: '有料版では、すべての一覧と、どのアプリのどの設定かをExcelの点検台帳にまとめます。次回からは、前回の点検から変わったところも分かります。' }),
+      el('div', { class: P + '-controls' }, [
+        el('a', { class: P + '-btn ' + P + '-primary ' + P + '-link', href: trialUrl(domain), target: '_blank', rel: 'noopener', text: '30日間無料で、すべてを見る' }),
+        el('a', { class: P + '-btn ' + P + '-link', href: PRICE_URL, target: '_blank', rel: 'noopener', text: '料金を見る' })
+      ]),
+      el('p', { class: P + '-note', text: '無料試用は、会社名・お名前・メールアドレスを入れるだけで申し込めます（kintoneの環境名は入力済みです）。数分でライセンスキーがメールで届きます。カードの登録は要りません。' })
+    ]));
+  }
+
   function openModal() {
     if (document.getElementById(P + '-overlay')) return;
+    var domain = window.DaichoyaLicense.normalizeDomain(location.hostname);
     var closeBtn = el('button', { type: 'button', class: P + '-close', 'aria-label': '閉じる', text: '×' });
     var licenseLine = el('p', { class: P + '-license', text: 'ライセンスを確認しています…' });
     var fileInput = el('input', { type: 'file', accept: '.xlsx', class: P + '-file', id: P + '-prev' });
     var runBtn = el('button', { type: 'button', class: P + '-btn ' + P + '-primary', text: '点検台帳を作成', disabled: 'disabled' });
+    var freeBtn = el('button', { type: 'button', class: P + '-btn', text: '無料で点検する（件数だけ）', disabled: 'disabled' });
     var recordsBox = el('input', { type: 'checkbox', id: P + '-records', checked: 'checked' });
     var status = el('p', { class: P + '-status', role: 'status' });
+    var result = el('div', { class: P + '-result' });
+    var last = readLastRun();
+    var prevBlock = el('div', { class: P + '-prev' }, [el('label', { for: P + '-prev', text: '前回の点検台帳（任意）' }), fileInput]);
     var dialog = el('div', { class: P + '-dialog', role: 'dialog', 'aria-modal': 'true', 'aria-label': '棚卸し・変更監視パック' }, [
       el('div', { class: P + '-head' }, [el('h2', { text: '棚卸し・変更監視パック' }), closeBtn]),
       licenseLine,
-      el('p', { class: P + '-lead', text: 'すべてのアプリの設定を読み取り、点検台帳（Excel）を作ります。前回の点検台帳を選ぶと、変わったところも一覧にします。' }),
-      el('div', { class: P + '-prev' }, [el('label', { for: P + '-prev', text: '前回の点検台帳（任意）' }), fileInput]),
+      el('p', { class: P + '-lead', text: 'すべてのアプリの設定を読み取って点検します。件数の点検は無料です。有料版（30日間の無料試用あり）は、点検台帳（Excel）を作り、前回の点検台帳を選ぶと変わったところも一覧にします。' }),
+      last ? el('p', { class: P + '-note', text: '前回の点検：' + last + '（このブラウザで点検した日）' }) : el('span', {}),
+      prevBlock,
       el('div', { class: P + '-option' }, [recordsBox, el('label', { for: P + '-records', text: '使われていないアプリも調べる（レコードの件数と最終更新日時だけを見ます。中身は読みません）' })]),
-      el('div', { class: P + '-controls' }, [runBtn]),
-      status
+      el('div', { class: P + '-controls' }, [runBtn, freeBtn]),
+      status,
+      result
     ]);
     var overlay = el('div', { id: P + '-overlay', class: P + '-overlay' }, [dialog]);
     function close() {
@@ -991,51 +1153,71 @@
     document.body.appendChild(overlay);
 
     var licenseText = '';
-    window.DaichoyaLicense.check(licenseKey(), location.hostname).then(function (lic) {
-      licenseText = lic.message;
-      licenseLine.textContent = 'ライセンス：' + lic.message;
-      licenseLine.className = P + '-license ' + P + '-license-' + lic.state;
-      if (lic.ok) {
+    var lic = null;
+    window.DaichoyaLicense.check(licenseKey(), location.hostname).then(function (l) {
+      lic = l;
+      licenseText = l.message;
+      licenseLine.textContent = 'ライセンス：' + l.message;
+      licenseLine.className = P + '-license ' + P + '-license-' + l.state;
+      freeBtn.removeAttribute('disabled');
+      if (l.ok) {
         runBtn.removeAttribute('disabled');
         status.textContent = '「点検台帳を作成」を押してください。アプリの数によっては数分かかります。';
       } else {
-        status.textContent = '';
-        status.appendChild(document.createTextNode('ライセンスキーは、プラグインの設定画面で入力します。30日間の無料試用も申し込めます（'));
-        status.appendChild(el('a', { href: FORM_URL, target: '_blank', rel: 'noopener', text: '詳しくはこちら' }));
-        status.appendChild(document.createTextNode('）。'));
+        runBtn.style.display = 'none';
+        prevBlock.style.display = 'none';
+        freeBtn.className = P + '-btn ' + P + '-primary';
+        licenseLine.textContent = 'ライセンス：' + (l.state === 'none' ? 'まだ設定されていません（件数の点検は無料でできます）' : l.message);
+        status.textContent = '「無料で点検する」を押すと、すべてのアプリを点検して、見直したほうがよい設定の件数と例を表示します。';
       }
+    });
+
+    function done(text) {
+      status.textContent = text;
+      saveLastRun(dateText(new Date()).slice(0, 10));
+      runBtn.removeAttribute('disabled');
+      freeBtn.removeAttribute('disabled');
+    }
+    function fail(error) {
+      status.textContent = '点検できませんでした（' + ((error && error.message) || '原因不明') + '）。';
+      if (lic && lic.ok) runBtn.removeAttribute('disabled');
+      freeBtn.removeAttribute('disabled');
+    }
+
+    freeBtn.addEventListener('click', function () {
+      freeBtn.setAttribute('disabled', 'disabled');
+      runBtn.setAttribute('disabled', 'disabled');
+      result.innerHTML = '';
+      scan(recordsBox.checked, status).then(function (sc) {
+        var now = new Date();
+        var snapshot = { v: 1, host: domain, takenAt: now.toISOString(), apps: sc.apps, env: sc.env };
+        var sheets = buildSheets(snapshot, null, now, licenseText, sc.dir);
+        renderFree(result, freeSummary(snapshot, sheets), domain);
+        done(Object.keys(sc.apps).length + '個のアプリを点検しました。');
+      }).catch(fail);
     });
 
     runBtn.addEventListener('click', function () {
       runBtn.setAttribute('disabled', 'disabled');
+      freeBtn.setAttribute('disabled', 'disabled');
+      result.innerHTML = '';
       var file = fileInput.files && fileInput.files[0];
-      var prevPromise = file ? readFile(file).then(readSnapshot) : Promise.resolve(null);
       var prev;
       status.textContent = file ? '前回の点検台帳を読み込み中…' : 'アプリの一覧を読み込み中…';
-      prevPromise.then(function (p) {
+      (file ? readFile(file).then(readSnapshot) : Promise.resolve(null)).then(function (p) {
         prev = p;
-        status.textContent = 'アプリの一覧を読み込み中…';
-        return getAllApps();
-      }).then(function (apps) {
-        return scanAll(apps, recordsBox.checked, function (done, total) { status.textContent = 'アプリの設定を読み込み中…（' + done + ' / ' + total + '）'; });
-      }).then(function (apps) {
-        status.textContent = '設定に出てくるユーザー・組織・グループを確認中…';
-        var all = [];
-        Object.keys(apps).forEach(function (id) { all = all.concat(apps[id].refs || []); });
-        return Refs.lookup(userApi, all).then(function (dir) { return { apps: apps, dir: dir }; });
-      }).then(function (scan) {
-        var apps = scan.apps;
+        return scan(recordsBox.checked, status);
+      }).then(function (sc) {
         var now = new Date();
-        var snapshot = { v: 1, host: window.DaichoyaLicense.normalizeDomain(location.hostname), takenAt: now.toISOString(), apps: apps };
-        var sheets = buildSheets(snapshot, prev, now, licenseText, scan.dir);
+        var count = Object.keys(sc.apps).length;
+        var plan = planNote(lic && lic.payload, count);
+        var snapshot = { v: 1, host: domain, takenAt: now.toISOString(), apps: sc.apps, env: sc.env, plan: plan.text || undefined };
+        var sheets = buildSheets(snapshot, prev, now, licenseText, sc.dir);
         var stamp = dateText(now).slice(0, 10).replace(/-/g, '');
         download(buildXlsx(sheets), '点検台帳_' + stamp + '.xlsx');
-        status.textContent = summaryText(snapshot, sheets, !!prev) + 'ファイルは次回の点検で「前回の点検台帳」として使えます。';
-      }).catch(function (error) {
-        status.textContent = '点検台帳を作成できませんでした（' + ((error && error.message) || '原因不明') + '）。';
-      }).then(function () {
-        runBtn.removeAttribute('disabled');
-      });
+        if (plan.over) result.appendChild(el('p', { class: P + '-note ' + P + '-warn', text: 'ご契約のプランは' + plan.text + '。' }));
+        done(summaryText(snapshot, sheets, !!prev) + 'ファイルは次回の点検で「前回の点検台帳」として使えます。');
+      }).catch(fail);
     });
   }
 

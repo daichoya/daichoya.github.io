@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>台帳屋｜kintoneの権限一覧・設計書・関係図を自動で作成するプラグイン</title>
-<meta name="description" content="kintoneの権限の一覧表・アプリの設計書・アプリの関係図・異動や退職の前の確認・フィールドの影響調査・アプリの設定の比較を、設定から自動で行うプラグイン。無料・登録不要。データは外部に送信しません。">
+<title>台帳屋｜kintoneの全アプリを無料で点検・権限一覧・設計書を自動で作成するプラグイン</title>
+<meta name="description" content="kintoneの全アプリを無料で点検し、権限の注意点・退職者の指定・使われていないアプリ・ガバナンスガイドラインの点検項目を件数で表示。権限の一覧表・設計書・関係図・フィールドの影響調査・設定の比較も無料。データは外部に送信しません。">
 <link rel="canonical" href="https://daichoya.github.io/">
-<meta property="og:title" content="台帳屋｜kintoneの権限一覧・設計書・関係図を自動で作成するプラグイン">
-<meta property="og:description" content="kintoneの権限の一覧表・アプリの設計書・アプリの関係図・異動や退職の前の確認・フィールドの影響調査・アプリの設定の比較を、設定から自動で行うプラグイン。無料・登録不要。データは外部に送信しません。">
+<meta property="og:title" content="台帳屋｜kintoneの全アプリを無料で点検・権限一覧・設計書を自動で作成するプラグイン">
+<meta property="og:description" content="kintoneの全アプリを無料で点検し、権限の注意点・退職者の指定・使われていないアプリ・ガバナンスガイドラインの点検項目を件数で表示。権限の一覧表・設計書・関係図・フィールドの影響調査・設定の比較も無料。データは外部に送信しません。">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://daichoya.github.io/">
 <meta property="og:site_name" content="台帳屋">
@@ -28,23 +28,34 @@
 <main>
 <section class="hero">
   <div class="wrap">
-    <p class="badge">無料・登録不要のkintoneプラグイン</p>
-    <h1><span class="phrase">kintoneの点検・引き継ぎの資料を、</span><span class="phrase">設定から自動で作成</span></h1>
+    <p class="badge">kintone管理者のための点検プラグイン</p>
+    <h1><span class="phrase">kintoneの全アプリを、</span><span class="phrase">無料で点検</span></h1>
     <div class="lead">
-      <p>権限の一覧表、アプリの設計書、アプリの関係図、異動・退職やフィールドの変更の前の確認、本番と検証のアプリの比較。</p>
-      <p>管理者が手作業でまとめていた資料を、6つのプラグインで作成できます。</p>
+      <p>プラグインを入れてボタンを押すだけで、全アプリの権限の注意点、退職した人が残っている設定、使われていないアプリ、ガバナンスガイドラインの点検項目を、件数と例で表示します。</p>
+      <p>すべての一覧とExcelの点検台帳は有料版（30日間無料）。1つのアプリを詳しく調べる無料のプラグインも6本あります。</p>
     </div>
     <div class="actions">
-      <a class="btn btn-primary btn-large" href="demo.html">デモを試す（登録不要）</a>
-      <a class="btn btn-large" href="#plugins">プラグインの一覧を見る</a>
+      <a class="btn btn-primary btn-large" href="pro.html#free">無料で点検する</a>
+      <a class="btn btn-large" href="demo.html">デモを試す（登録不要）</a>
     </div>
-    <p class="assure"><span>6本とも無料でダウンロードできます</span><span>利用人数・アプリ数の制限なし</span><span>データは外部に送信しません</span></p>
+    <p class="assure"><span>点検は無料・申し込み不要</span><span>データは外部に送信しません</span><span>設定やレコードを変更しません</span></p>
   </div>
 </section>
 
 <section id="problems" class="band">
   <div class="wrap">
     <h2>こんな作業に、時間がかかっていませんか？</h2>
+
+    <article class="pain">
+      <div class="pain-text">
+        <p class="pain-q">年に1回の棚卸しで、全アプリの権限・使われていないアプリ・退職した人の指定を、画面で1つずつ確かめている。</p>
+        <div class="pain-a">
+          <p class="pain-by"><a href="pro.html">棚卸し・変更監視パック</a>なら</p>
+          <p>ボタン1つで全アプリを点検し、見直したほうがよい設定の件数と例を表示します（無料）。有料版では、すべてを1つのExcelにまとめ、前回の点検から変わったところも一覧にします。</p>
+        </div>
+      </div>
+      <figure class="pain-shot"><a href="pro.html"><img src="images/inventory-free-thumb.webp" alt="棚卸し・変更監視パックの無料の点検の結果。権限・ユーザーの指定・使われていないアプリ・健康診断の件数と例が表示されている" width="1040" height="580" loading="lazy"></a></figure>
+    </article>
 
     <article class="pain">
       <div class="pain-text">
@@ -129,8 +140,8 @@
         <p>設定画面はありません。プラグインをkintoneに読み込み、アプリに追加すれば、一覧画面にボタンが表示されます。</p>
       </div>
       <div>
-        <h3>無料で使える</h3>
-        <p>6本とも無料です。利用人数やアプリ数の制限もありません。</p>
+        <h3>無料で始められる</h3>
+        <p>全アプリの点検（件数と例）と、6つのプラグインは無料です。すべての一覧とExcelの点検台帳は有料版で、30日間無料で試せます。</p>
       </div>
     </div>
   </div>
@@ -195,9 +206,9 @@
           </tr>
           <tr>
             <td><a class="name" href="pro.html">棚卸し・変更監視パック</a></td>
-            <td>全アプリの点検台帳（Excel）。前回からの変更点と、使われていないアプリも見つける</td>
+            <td>全アプリを点検。件数と例は無料。すべての一覧と点検台帳（Excel）、前回からの変更点は有料版</td>
             <td class="out">Excel</td>
-            <td class="state">月額3,300円</td>
+            <td class="state">点検は無料<br>有料版 月額3,300円</td>
           </tr>
         </tbody>
       </table>
@@ -225,9 +236,9 @@
         <thead><tr><th scope="col">プラン</th><th scope="col">おすすめの方</th><th scope="col">内容</th><th scope="col">料金（税込）</th></tr></thead>
         <tbody>
           <tr>
-            <th scope="row">無料版</th>
-            <td>特定のアプリの権限や設計を、資料にまとめたい方</td>
-            <td>6つのプラグイン。アプリを1つずつ確認・出力します。<br>公開中</td>
+            <th scope="row">無料</th>
+            <td>まず全体の状態を知りたい方、特定のアプリを資料にまとめたい方</td>
+            <td>全アプリの点検（件数と例）。6つのプラグインで、アプリを1つずつ確認・出力。<br>公開中</td>
             <td><strong>0円</strong><br>利用人数・アプリ数の制限なし</td>
           </tr>
           <tr>
@@ -240,7 +251,7 @@
       </table>
     </div>
     <p class="note">どちらも、kintoneのスタンダードコース・ワイドコースで利用できます（ライトコースはプラグインに対応していません）。<br>有料版はkintone環境ごとの料金で、利用人数による追加料金はありません。</p>
-    <div class="actions"><a class="btn btn-primary" href="pro.html#trial">有料版を30日間無料で試す</a></div>
+    <div class="actions"><a class="btn btn-primary" href="pro.html#free">無料で点検する</a><a class="btn" href="pro.html#price">有料版の料金と見積書</a></div>
   </div>
 </section>
 
@@ -267,6 +278,7 @@
       <li><a href="guide/app-references.html">kintoneでアプリの参照元を調べる方法</a></li>
       <li><a href="guide/user-references.html">kintoneで、退職者や異動者が設定されているアプリを探す方法</a></li>
       <li><a href="guide/field-usage.html">kintoneでフィールドを削除・変更する前に、使われている場所を調べる方法</a></li>
+      <li><a href="guide/app-compare.html">kintoneの本番アプリと検証アプリの設定の違いを確かめる方法</a></li>
     </ul>
   </div>
 </section>
@@ -276,7 +288,7 @@
     <h2>よくあるご質問</h2>
     <dl class="qa prose">
       <dt>本当に無料ですか？</dt>
-      <dd>はい。6本とも無料で、機能や期間の制限はありません。有料版の提供開始後も、無料版は引き続き提供します。</dd>
+      <dd>はい。6つのプラグインと、棚卸し・変更監視パックの「無料で点検する」（全アプリの件数と例）は、期間の制限なく無料で使えます。すべての一覧とExcelの点検台帳、前回からの変更点は有料版です。</dd>
       <dt>利用人数やアプリ数に制限はありますか？</dt>
       <dd>ありません。無料版・有料版とも、利用人数やアプリ数が増えても料金は変わりません。</dd>
       <dt>アプリの管理者でなくても使えますか？</dt>
@@ -297,11 +309,11 @@
 
 <section class="final">
   <div class="wrap">
-    <h2>まずはデモで、使い心地を確かめてください</h2>
-    <p class="prose">登録は不要です。見本のアプリで、6つのプラグインをすべて試せます。</p>
+    <h2>まずは、お使いのkintoneを無料で点検してください</h2>
+    <p class="prose">申し込みは不要です。kintoneの環境がなくても、見本のアプリを使ったデモで、すべてのプラグインを試せます。</p>
     <div class="actions">
-      <a class="btn btn-primary btn-large" href="demo.html">デモを試す</a>
-      <a class="btn btn-large" href="pro.html#trial">有料版を30日間無料で試す</a>
+      <a class="btn btn-primary btn-large" href="pro.html#free">無料で点検する</a>
+      <a class="btn btn-large" href="demo.html">デモを試す</a>
     </div>
     <p class="note">台帳屋は個人で開発・運営しています。不具合の修正やkintoneの仕様変更への対応は、各プラグインのページの更新履歴でお知らせします。</p>
   </div>

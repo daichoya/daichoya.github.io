@@ -67,3 +67,14 @@
 .dcy-ip-prev label { font-weight: bold; }
 .dcy-ip-option { display: flex; align-items: flex-start; gap: 8px; margin-top: 12px; font-size: 14px; }
 .dcy-ip-option input { margin-top: 4px; }
+.dcy-ip-note { margin-top: 12px; margin-bottom: 0; color: #666; font-size: 13px; }
+.dcy-ip-warn { padding: 8px 12px; border-left: 4px solid #e67e22; background: #fff8e6; color: #333; }
+.dcy-ip-result .dcy-ip-table td div + div { margin-top: 4px; }
+.dcy-ip-more-count { color: #888; }
+.dcy-ip-cta { margin-top: 20px; margin-bottom: 24px; padding: 16px; border: 1px solid #bcd9ef; background: #f3f8fc; font-size: 14px; }
+.dcy-ip-cta p { margin: 0; }
+.dcy-ip-link { display: inline-flex; align-items: center; justify-content: center; min-width: 120px; height: 48px; padding: 0 16px; text-decoration: none; box-sizing: border-box; font-size: 14px; }
+.dcy-ip-link.dcy-ip-primary { color: #fff; }
+.dcy-ip-link:not(.dcy-ip-primary) { color: #333; }
+.dcy-ip-result .dcy-ip-table td:nth-child(2) { white-space: nowrap; }
+.dcy-ip-result .dcy-ip-table td:first-child { min-width: 9em; }

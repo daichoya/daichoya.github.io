@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>見積書の作成（棚卸し・変更監視パック）｜台帳屋</title>
+<meta name="description" content="台帳屋 棚卸し・変更監視パック（有料版）の見積書を、その場で作成して印刷・PDFで保存できます。社内の稟議にお使いください。">
+<link rel="canonical" href="https://daichoya.github.io/estimate.html">
+<meta property="og:title" content="見積書の作成（棚卸し・変更監視パック）｜台帳屋">
+<meta property="og:description" content="台帳屋 棚卸し・変更監視パック（有料版）の見積書を、その場で作成して印刷・PDFで保存できます。社内の稟議にお使いください。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://daichoya.github.io/estimate.html">
+<meta property="og:site_name" content="台帳屋">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:image" content="https://daichoya.github.io/images/ogp.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="google-site-verification" content="J1TnZ6bD5c5EjVGtQBBk2eRmLsDje0VapbpwCEnbA6M">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="brand-name">台帳屋</span><span class="brand-sub">kintone管理者向けプラグイン</span></a>
+    <nav class="site-nav" aria-label="サイト内のページ"><a href="index.html#plugins">プラグイン</a><a href="demo.html">デモ</a><a href="index.html#price" aria-current="page">料金</a><a href="guide/index.html">ガイド</a><a href="security.html">セキュリティ</a><a href="index.html#faq">よくある質問</a></nav>
+  </div>
+</header>
+<main>
+<style>
+  .est-form { display: grid; gap: 12px; max-width: 560px; margin: 16px 0 24px; }
+  .est-form label { display: grid; gap: 4px; font-weight: bold; font-size: 14px; }
+  .est-form input, .est-form select { height: 44px; padding: 0 10px; border: 1px solid #c9d1d6; font: inherit; font-weight: normal; }
+  .est-paper { max-width: 760px; margin: 8px 0 24px; padding: 40px 44px; border: 1px solid #c9d1d6; background: #fff; color: #222; font-size: 14px; line-height: 1.7; }
+  .est-paper h2 { margin: 0 0 24px; padding: 0; border: none; text-align: center; font-size: 24px; letter-spacing: .4em; }
+  .est-top { display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+  .est-to { font-size: 18px; border-bottom: 1px solid #222; padding-bottom: 4px; min-width: 260px; }
+  .est-meta { text-align: right; font-size: 13px; }
+  .est-total { margin: 24px 0 16px; font-size: 18px; border-bottom: 2px solid #222; display: inline-block; padding-bottom: 4px; }
+  .est-paper table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  .est-paper th, .est-paper td { border: 1px solid #888; padding: 6px 8px; text-align: left; vertical-align: top; }
+  .est-paper td.num, .est-paper th.num { text-align: right; white-space: nowrap; }
+  .est-from { margin-top: 24px; text-align: right; font-size: 13px; }
+  .est-notes { margin-top: 16px; font-size: 13px; }
+  .est-notes li { margin: 2px 0; }
+  .est-notes, .est-from { overflow-wrap: anywhere; }
+  @media (max-width: 640px) {
+    .est-paper { padding: 20px 14px; font-size: 13px; }
+    .est-to { min-width: 0; }
+    .est-meta { text-align: left; }
+    .est-paper th, .est-paper td { padding: 4px 5px; }
+    .est-paper td.num, .est-paper th.num { white-space: normal; }
+    .est-paper td { overflow-wrap: anywhere; }
+  }
+  @media print {
+    .site-head, .site-foot, .breadcrumb, .est-screen { display: none !important; }
+    .page, .wrap { margin: 0 !important; padding: 0 !important; max-width: none !important; }
+    .est-paper { border: none; padding: 0; max-width: none; }
+  }
+</style>
+<div class="page">
+  <div class="wrap">
+    <p class="breadcrumb"><a href="index.html">台帳屋</a> ／ <a href="pro.html">棚卸し・変更監視パック</a> ／ 見積書の作成</p>
+    <div class="est-screen">
+      <h1>見積書の作成</h1>
+      <div class="lead prose">
+        <p>有料版（棚卸し・変更監視パック）の見積書を、その場で作れます。<br>入力した内容は、このページの中だけで使います。台帳屋には送られません。</p>
+      </div>
+      <form class="est-form" id="est-form" onsubmit="return false;">
+        <label>宛名（会社名）<input id="est-company" type="text" placeholder="株式会社〇〇" autocomplete="organization"></label>
+        <label>ご担当者（任意）<input id="est-person" type="text" placeholder="情報システム部 〇〇様"></label>
+        <label>お支払い<select id="est-plan">
+          <option value="year">年額（1年分）</option>
+          <option value="month">月額（12か月分）</option>
+        </select></label>
+        <label>kintoneの環境の数<input id="est-count" type="number" min="1" max="50" value="1"></label>
+      </form>
+      <div class="actions"><button class="btn btn-primary" type="button" onclick="window.print()">印刷・PDFで保存</button></div>
+      <p class="note prose">印刷の画面で「PDFに保存」を選ぶと、PDFのファイルになります。</p>
+    </div>
+
+    <div class="est-paper" id="est-paper" aria-label="見積書">
+      <h2>御見積書</h2>
+      <div class="est-top">
+        <div>
+          <p class="est-to"><span id="out-company">　　　　　　　　</span> 御中</p>
+          <p id="out-person"></p>
+          <p>下記のとおり、お見積りいたします。</p>
+        </div>
+        <div class="est-meta">
+          <div>見積番号：<span id="out-no"></span></div>
+          <div>発行日：<span id="out-date"></span></div>
+          <div>有効期限：<span id="out-until"></span></div>
+        </div>
+      </div>
+      <p class="est-total">お見積金額（税込）：<strong id="out-total"></strong></p>
+      <table>
+        <thead><tr><th>品名</th><th class="num">単価（税込）</th><th class="num">数量</th><th class="num">金額（税込）</th></tr></thead>
+        <tbody><tr><td id="out-item"></td><td class="num" id="out-unit"></td><td class="num" id="out-qty"></td><td class="num" id="out-amount"></td></tr></tbody>
+      </table>
+      <ul class="est-notes">
+        <li>kintoneの環境（〇〇.cybozu.com）ごとのライセンスです。利用人数による追加料金はありません。</li>
+        <li>お支払いはクレジットカード（Stripe）です。お支払いの確認後、ライセンスキーをメールでお送りします。</li>
+        <li>月額・年額とも自動で更新し、いつでも解約できます。くわしくは利用規約（https://daichoya.github.io/terms.html）をご覧ください。</li>
+        <li>30日間の無料試用があります（お支払い方法の登録は不要）。</li>
+      </ul>
+      <div class="est-from">
+        <div>台帳屋（kintoneプラグイン）</div>
+        <div>https://daichoya.github.io/</div>
+        <div>daichoya.plugins@gmail.com</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  'use strict';
+  // 有料版の料金（税込）。pro.html の料金と同じにする
+  var PRICES = { month: { unit: 3300, months: 12, label: '月額' }, year: { unit: 33000, months: 0, label: '年額' } };
+  var PRODUCT = 'kintoneプラグイン「台帳屋 棚卸し・変更監視パック」';
+  function $(id) { return document.getElementById(id); }
+  function yen(n) { return n.toLocaleString('ja-JP') + '円'; }
+  function ymd(d) { return d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日'; }
+  var today = new Date();
+  var until = new Date(today.getTime() + 30 * 86400000);
+  var no = 'Q' + today.getFullYear() + ('0' + (today.getMonth() + 1)).slice(-2) + ('0' + today.getDate()).slice(-2) + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
+  function render() {
+    var plan = PRICES[$('est-plan').value];
+    var count = Math.max(1, Math.min(50, parseInt($('est-count').value, 10) || 1));
+    var qty = plan.months ? plan.months * count : count;
+    var amount = plan.unit * qty;
+    $('out-company').textContent = $('est-company').value.trim() || '　　　　　　　　';
+    $('out-person').textContent = $('est-person').value.trim();
+    $('out-no').textContent = no;
+    $('out-date').textContent = ymd(today);
+    $('out-until').textContent = ymd(until);
+    $('out-item').textContent = PRODUCT + ' ご利用料（' + plan.label + (plan.months ? '・12か月分' : '・1年分') + '、kintone環境' + count + '個）';
+    $('out-unit').textContent = yen(plan.unit) + (plan.months ? '／月・環境' : '／年・環境');
+    $('out-qty').textContent = plan.months ? count + '環境 × 12か月' : count + '環境';
+    $('out-amount').textContent = yen(amount);
+    $('out-total').textContent = yen(amount);
+  }
+  ['est-company', 'est-person', 'est-plan', 'est-count'].forEach(function (id) { $(id).addEventListener('input', render); $(id).addEventListener('change', render); });
+  render();
+})();
+</script>
+
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <nav aria-label="規約とお問い合わせ">
+      <a href="privacy.html">プライバシーポリシー</a>
+      <a href="terms.html">利用規約</a>
+      <a href="tokushoho.html">特定商取引法に基づく表記</a>
+      <span>お問い合わせ：<a href="mailto:daichoya.plugins@gmail.com">daichoya.plugins@gmail.com</a></span>
+    </nav>
+    <p>kintoneはサイボウズ株式会社の登録商標です。台帳屋は、サイボウズ株式会社とは関係のない個人の開発者が提供しています。</p>
+    <p>&copy; 2026 台帳屋</p>
+  </div>
+</footer>
+</body>
+</html>

@@ -87,7 +87,7 @@
       var kind = KIND_LABELS[p.t] || p.t;
       if (left >= 0) {
         if (p.t === 'demo') return { ok: true, state: 'valid', payload: p, daysLeft: left, message: 'デモ用（見本データでお試しいただけます）' };
-        return { ok: true, state: 'valid', payload: p, daysLeft: left, message: kind + '・' + p.e + 'まで有効' };
+        return { ok: true, state: 'valid', payload: p, daysLeft: left, message: kind + '・' + p.e + 'まで有効' + (p.a ? '（アプリ' + p.a + '個までのプラン）' : '') };
       }
       if (-left <= GRACE_DAYS) {
         return { ok: true, state: 'grace', payload: p, daysLeft: left, message: kind + '・' + p.e + 'で期限が切れました。新しいキーを設定してください（' + (GRACE_DAYS + left) + '日後に使えなくなります）' };

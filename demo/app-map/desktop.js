@@ -441,13 +441,16 @@
     return el('table', { class: P + '-table' }, [thead, tbody]);
   }
 
-  // 有料版のご案内（画面の下に小さく1行）
+  // 有料版のご案内（画面の下に小さく1行）。アプリの一覧を読んだら、この環境のアプリの数を入れる
+  var moreText = null;
   function moreLink() {
+    moreText = document.createTextNode('すべてのアプリを、まとめて無料で点検できます：');
     return el('p', { class: P + '-more' }, [
-      'すべてのアプリをまとめて点検するなら：',
-      el('a', { href: 'https://daichoya.github.io/pro.html', target: '_blank', rel: 'noopener', text: '棚卸し・変更監視パック（有料版・30日間の無料試用あり）' })
+      moreText,
+      el('a', { href: 'https://daichoya.github.io/pro.html#free', target: '_blank', rel: 'noopener', text: '棚卸し・変更監視パック（件数の点検は無料。一覧とExcelは30日間無料で試せます）' })
     ]);
   }
+  function moreCount(n) { if (moreText && n > 1) moreText.textContent = 'この環境の' + n + '個のアプリを、まとめて無料で点検できます：'; }
 
   function openModal() {
     if (document.getElementById(P + '-overlay')) return;
@@ -541,6 +544,7 @@
     document.body.appendChild(overlay);
     status.textContent = 'アプリの一覧を読み込み中…';
     getAllApps().then(function (apps) {
+      moreCount(apps.length);
       var thisApp = String(kintone.app.getId());
       apps.forEach(function (app) {
         names[String(app.appId)] = app.name;
