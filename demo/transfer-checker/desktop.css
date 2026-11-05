@@ -1,0 +1,73 @@
+/* 台帳屋 異動・退職チェッカー：kintone本体の見た目に干渉しないよう、すべて dcy-tc- で始まるクラス名を使う */
+.dcy-tc-btn {
+  height: 48px;
+  padding: 0 16px;
+  margin-left: 8px;
+  border: 1px solid #e3e7e8;
+  border-radius: 0;
+  vertical-align: top;
+  font-family: inherit;
+  background: #f7f9fa;
+  color: #3498db;
+  font-size: 14px;
+  cursor: pointer;
+}
+.dcy-tc-btn:hover { background: #eef3f6; }
+.dcy-tc-btn[disabled] { color: #a8a8a8; cursor: not-allowed; }
+.dcy-tc-btn:focus-visible, .dcy-tc-close:focus-visible, .dcy-tc-select:focus-visible { outline: 2px solid #3498db; outline-offset: 1px; }
+.dcy-tc-primary { background: #3498db; border-color: #3498db; color: #fff; }
+.dcy-tc-primary[disabled] { background: #a8cbe8; border-color: #a8cbe8; color: #fff; }
+.dcy-tc-primary:hover { background: #217dbb; }
+
+.dcy-tc-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 16px;
+  background: rgba(0, 0, 0, 0.5);
+  overflow-y: auto;
+}
+.dcy-tc-dialog {
+  width: 100%;
+  max-width: 1100px;
+  padding: 0 0 24px;
+  border-radius: 0;
+  background: #fff;
+  color: #333;
+  box-sizing: border-box;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+.dcy-tc-dialog > :not(.dcy-tc-head) { margin-left: 24px; margin-right: 24px; }
+.dcy-tc-head { display: flex; align-items: center; justify-content: space-between; min-height: 64px; padding-left: 24px; border-bottom: 1px solid #e3e7e8; }
+.dcy-tc-head h2 { margin: 0; padding: 0; border: none; font-size: 20px; font-weight: bold; line-height: 1.4; color: #333; }
+.dcy-tc-close { width: 64px; height: 64px; border: none; background: none; font-size: 28px; line-height: 1; cursor: pointer; color: #a8a8a8; }
+.dcy-tc-close:hover { color: #333; }
+.dcy-tc-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 20px; margin-bottom: 8px; }
+.dcy-tc-controls .dcy-tc-btn { margin-left: 0; }
+.dcy-tc-select { height: 48px; min-width: 320px; max-width: 100%; padding: 0 12px; border: 1px solid #e3e7e8; border-radius: 0; background: #fff; color: #333; font-size: 14px; font-family: inherit; }
+.dcy-tc-status { min-height: 20px; margin-top: 8px; margin-bottom: 8px; color: #666; font-size: 14px; }
+.dcy-tc-result h3 { margin: 24px 0 8px; padding: 0; border: none; font-size: 16px; font-weight: bold; line-height: 1.4; color: #333; }
+.dcy-tc-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.dcy-tc-table th,
+.dcy-tc-table td { padding: 6px 8px; border: 1px solid #e3e7e8; text-align: left; vertical-align: top; }
+.dcy-tc-table th { background: #f5f5f5; font-weight: bold; white-space: nowrap; }
+.dcy-tc-yes { color: #1a7f37; text-align: center !important; }
+.dcy-tc-no { color: #b0b0b0; text-align: center !important; }
+.dcy-tc-empty { color: #888; text-align: center !important; }
+.dcy-tc-more { margin: 24px 0 0; padding-top: 12px; border-top: 1px solid #e3e7e8; color: #666; font-size: 13px; }
+.dcy-tc-more a { color: #3498db; }
+.dcy-tc-lead { margin-top: 16px; font-size: 14px; line-height: 1.7; }
+.dcy-tc-filter { height: 40px; min-width: 280px; max-width: 100%; padding: 0 12px; border: 1px solid #e3e7e8; border-radius: 0; font-size: 14px; font-family: inherit; box-sizing: border-box; }
+.dcy-tc-filter:focus-visible { outline: 2px solid #3498db; outline-offset: 1px; }
+.dcy-tc-summary { margin: 16px 0 8px; padding: 12px 16px; background: #f7f9fa; border-left: 4px solid #3498db; font-size: 14px; line-height: 1.7; }
+.dcy-tc-summary p { margin: 0; }
+.dcy-tc-summary .dcy-tc-alert { color: #c0392b; font-weight: bold; }
+.dcy-tc-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 16px 0 8px; }
+.dcy-tc-state-2 { color: #c0392b; font-weight: bold; white-space: nowrap; }
+.dcy-tc-state-1 { color: #b9770e; font-weight: bold; white-space: nowrap; }
+.dcy-tc-state-0 { color: #1a7f37; white-space: nowrap; }
+.dcy-tc-table td.dcy-tc-detail { color: #555; word-break: break-all; }
+.dcy-tc-note { margin-top: 12px; color: #666; font-size: 13px; line-height: 1.7; }

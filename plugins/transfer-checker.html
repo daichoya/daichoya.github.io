@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>異動・退職チェッカー｜台帳屋</title>
+<meta name="description" content="kintoneアプリの設定に出てくるユーザー・組織・グループを一覧にし、退職した人や削除された組織の指定を見つける無料プラグイン。異動・退職・組織変更の前の確認に。">
+<link rel="canonical" href="https://daichoya.github.io/plugins/transfer-checker.html">
+<meta property="og:title" content="異動・退職チェッカー｜台帳屋">
+<meta property="og:description" content="kintoneアプリの設定に出てくるユーザー・組織・グループを一覧にし、退職した人や削除された組織の指定を見つける無料プラグイン。異動・退職・組織変更の前の確認に。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://daichoya.github.io/plugins/transfer-checker.html">
+<meta property="og:site_name" content="台帳屋">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:image" content="https://daichoya.github.io/images/ogp.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="google-site-verification" content="J1TnZ6bD5c5EjVGtQBBk2eRmLsDje0VapbpwCEnbA6M">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="../index.html"><span class="brand-name">台帳屋</span><span class="brand-sub">kintone管理者向けプラグイン</span></a>
+    <nav class="site-nav" aria-label="サイト内のページ"><a href="../index.html#plugins" aria-current="page">プラグイン</a><a href="../demo.html">デモ</a><a href="../index.html#price">料金</a><a href="../guide/index.html">ガイド</a><a href="../security.html">セキュリティ</a><a href="../index.html#faq">よくある質問</a></nav>
+  </div>
+</header>
+<main>
+<div class="page">
+  <div class="wrap">
+    <p class="breadcrumb"><a href="../index.html">台帳屋</a> ／ プラグイン</p>
+    <div class="page-head"><img src="../images/icons/transfer-checker.png" alt="" width="44" height="44"><h1>異動・退職チェッカー</h1></div>
+    <div class="lead prose">
+      <p>アプリの設定に出てくるユーザー・組織・グループを、1つの表にまとめるプラグインです。</p>
+      <p>退職した人や、なくなった組織が設定に残っていれば、印を付けて先頭に並べます。<br>異動・退職・組織変更の前後に、見直す場所を確かめられます。</p>
+    </div>
+    <div class="actions"><a class="btn btn-primary" href="../demo.html">デモで試す（登録不要）</a><a class="btn" href="#download">ダウンロード</a></div>
+    <figure class="shot">
+      <a href="../images/transfer-checker.webp" title="画像を大きく表示"><img src="../images/transfer-checker.webp" width="1100" height="788" alt="異動・退職チェッカーの画面。案件管理アプリの設定に出てくるユーザー・組織・グループが並び、見つからないユーザーと組織、利用停止中のユーザーが上に表示されている"></a>
+      <figcaption>見本のアプリで調べた例。退職した人の一覧の絞り込みや、名前の変わった組織の権限が残っている</figcaption>
+    </figure>
+
+    <h2>こんなときに</h2>
+    <ul class="prose">
+      <li>退職する人や異動する人が、どのアプリの権限・プロセス管理・通知に入っているかを、事前に確かめたい</li>
+      <li>組織変更やグループの整理の前に、その組織やグループがどこで使われているかを知りたい</li>
+      <li>退職した人がプロセス管理の作業者に残っていて、申請が止まってしまった</li>
+    </ul>
+
+    <h2>調べる設定</h2>
+    <div class="table-scroll">
+      <table class="facts">
+        <tbody>
+          <tr><th scope="row">アクセス権</th><td>アプリ・レコード・フィールドのアクセス権の対象と、レコードのアクセス権の条件</td></tr>
+          <tr><th scope="row">プロセス管理</th><td>ステータスの作業者、アクションの実行者、アクションの条件</td></tr>
+          <tr><th scope="row">通知</th><td>アプリの条件通知、レコードの条件通知、リマインダーの条件通知の通知先と条件</td></tr>
+          <tr><th scope="row">フィールド</th><td>ユーザー選択・組織選択・グループ選択の初期値と、選べる候補</td></tr>
+          <tr><th scope="row">一覧・グラフ</th><td>絞り込みの条件（例：担当者 in ("yamamoto")）</td></tr>
+          <tr><th scope="row">アクション</th><td>アクションを使えるユーザー</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note prose">プラグインの設定や、JavaScriptのカスタマイズの中は調べません。<br>「ログインユーザー」「作成者」などの指定は、特定の人ではないため数えません。</p>
+
+    <h2>主な機能</h2>
+    <ul class="prose">
+      <li>設定に出てくるユーザー・組織・グループを、名前・コード・設定の場所と一緒に一覧で表示</li>
+      <li>いまのcybozu.comのユーザー・組織・グループと照らし合わせ、「見つかりません」「利用停止中」を表示</li>
+      <li>アプリ管理の権限がユーザー1人だけに付いているアプリをお知らせ</li>
+      <li>名前やコードで絞り込み（例：異動する人の名前を入れる）</li>
+      <li>Excelで開いても文字化けしない形式でCSVを出力（ファイル名：ユーザーの指定_アプリ名_日付.csv）</li>
+    </ul>
+    <p class="prose">すべてのアプリをまとめて調べるには、有料版の<a href="../pro.html">棚卸し・変更監視パック</a>をお使いください。点検台帳（Excel）の「ユーザーの指定」と「注意点」のシートに、全アプリの結果が入ります。</p>
+
+    <h2>動作環境</h2>
+    <div class="table-scroll">
+      <table class="facts">
+        <tbody>
+          <tr><th scope="row">対応コース</th><td>スタンダードコース・ワイドコース</td></tr>
+          <tr><th scope="row">導入する人</th><td>kintoneシステム管理者</td></tr>
+          <tr><th scope="row">利用する人</th><td>調べたいアプリの管理権限を持つユーザー</td></tr>
+          <tr><th scope="row">画面</th><td>パソコン版の一覧画面（動作確認はGoogle Chrome）</td></tr>
+          <tr><th scope="row">通信と書き込み</th><td>kintone環境（cybozu.com）とのみ通信し、設定やレコードは変更しません（<a href="../security.html">導入前の確認事項</a>）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>導入方法</h2>
+    <ol class="prose">
+      <li>下の「ダウンロード」から、プラグインのファイル（zip）を保存します。zipは展開せず、そのまま使います。</li>
+      <li>kintoneの歯車アイコンから「kintoneシステム管理」を開き、「プラグイン」の「読み込む」でファイルを読み込みます。</li>
+      <li>利用するアプリの「アプリの設定」→「プラグイン」で、「台帳屋 異動・退職チェッカー」を追加します。</li>
+      <li>「アプリを更新」をクリックします。</li>
+      <li>アプリの一覧画面の上部に「異動・退職チェック」ボタンが表示されます。</li>
+    </ol>
+    <p class="note prose">1つのアプリに追加すれば、そのアプリの画面から、ほかのアプリも調べられます。</p>
+
+    <h2 id="download">ダウンロード</h2>
+    <div class="download">
+      <a class="btn btn-primary" href="../downloads/daichoya-transfer-checker-1.0.0.zip" download>ダウンロード（v1.0.0・zip・17KB）</a><p class="note hash">ファイルの確認用（SHA-256）：<code>f0088796b563368c0e00e049a10c6cbed40a1ad5cb015b579eea00a12642203f</code></p>
+      <p class="note">ご利用の前に<a href="../terms.html">利用規約</a>をお読みください。</p>
+    </div>
+
+    <h2>更新履歴</h2>
+    <ul class="prose">
+      <li>1.0.0（2026年11月5日）：最初の公開版</li>
+    </ul>
+
+    <h2>困ったときは</h2>
+    <ul class="prose">
+      <li>「そのアプリの管理権限が必要です」と表示される場合は、そのアプリの管理権限を持つユーザーが操作してください。</li>
+      <li>ゲストスペースのアプリと、ゲストユーザーの確認には、現在対応していません。</li>
+      <li>「見つかりません」は、いまのcybozu.comに同じコードのユーザー・組織・グループがないことを表します。削除されたほか、コードを変えた場合にも表示されます。</li>
+      <li>そのほかの不具合やご要望は、<a href="mailto:daichoya.plugins@gmail.com">daichoya.plugins@gmail.com</a> までお知らせください。</li>
+    </ul>
+    <div class="related prose"><p>関連するガイド：<a href="../guide/user-references.html">kintoneで、退職者や異動者が設定されているアプリを探す方法</a></p></div>
+  </div>
+</div>
+
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <nav aria-label="規約とお問い合わせ">
+      <a href="../privacy.html">プライバシーポリシー</a>
+      <a href="../terms.html">利用規約</a>
+      <span>お問い合わせ：<a href="mailto:daichoya.plugins@gmail.com">daichoya.plugins@gmail.com</a></span>
+    </nav>
+    <p>kintoneはサイボウズ株式会社の登録商標です。台帳屋は、サイボウズ株式会社とは関係のない個人の開発者が提供しています。</p>
+    <p>&copy; 2026 台帳屋</p>
+  </div>
+</footer>
+</body>
+</html>

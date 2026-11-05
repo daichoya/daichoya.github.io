@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>台帳屋｜kintoneの権限一覧・設計書・関係図を自動で作成するプラグイン</title>
-<meta name="description" content="kintoneの権限の一覧表・アプリの設計書・アプリの関係図を、設定から自動で作成するプラグイン。無料・登録不要。データは外部に送信しません。">
+<meta name="description" content="kintoneの権限の一覧表・アプリの設計書・アプリの関係図・異動や退職の前の確認を、設定から自動で行うプラグイン。無料・登録不要。データは外部に送信しません。">
 <link rel="canonical" href="https://daichoya.github.io/">
 <meta property="og:title" content="台帳屋｜kintoneの権限一覧・設計書・関係図を自動で作成するプラグイン">
-<meta property="og:description" content="kintoneの権限の一覧表・アプリの設計書・アプリの関係図を、設定から自動で作成するプラグイン。無料・登録不要。データは外部に送信しません。">
+<meta property="og:description" content="kintoneの権限の一覧表・アプリの設計書・アプリの関係図・異動や退職の前の確認を、設定から自動で行うプラグイン。無料・登録不要。データは外部に送信しません。">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://daichoya.github.io/">
 <meta property="og:site_name" content="台帳屋">
@@ -31,14 +31,14 @@
     <p class="badge">無料・登録不要のkintoneプラグイン</p>
     <h1><span class="phrase">kintoneの点検・引き継ぎの資料を、</span><span class="phrase">設定から自動で作成</span></h1>
     <div class="lead">
-      <p>権限の一覧表、アプリの設計書、アプリの関係図。</p>
-      <p>管理者が手作業でまとめていた資料を、3つのプラグインで作成できます。</p>
+      <p>権限の一覧表、アプリの設計書、アプリの関係図、異動・退職の前の確認。</p>
+      <p>管理者が手作業でまとめていた資料を、4つのプラグインで作成できます。</p>
     </div>
     <div class="actions">
       <a class="btn btn-primary btn-large" href="demo.html">デモを試す（登録不要）</a>
       <a class="btn btn-large" href="#plugins">プラグインの一覧を見る</a>
     </div>
-    <p class="assure"><span>3本とも無料でダウンロードできます</span><span>利用人数・アプリ数の制限なし</span><span>データは外部に送信しません</span></p>
+    <p class="assure"><span>4本とも無料でダウンロードできます</span><span>利用人数・アプリ数の制限なし</span><span>データは外部に送信しません</span></p>
   </div>
 </section>
 
@@ -79,6 +79,17 @@
       <figure class="pain-shot"><a href="plugins/app-map.html"><img src="images/app-map-thumb.webp" alt="アプリ相関マップで表示したアプリの関係図" width="800" height="500" loading="lazy"></a></figure>
     </article>
 
+    <article class="pain">
+      <div class="pain-text">
+        <p class="pain-q">退職者が出るたびに、その人が入っていそうなアプリの設定画面を1つずつ開いて確かめている。</p>
+        <div class="pain-a">
+          <p class="pain-by"><img src="images/icons/transfer-checker.png" alt="" width="24" height="24"><a href="plugins/transfer-checker.html">異動・退職チェッカー</a>なら</p>
+          <p>アクセス権・プロセス管理・通知・一覧の条件などに出てくる人を一覧にします。退職した人や、なくなった組織の指定には印が付きます。</p>
+        </div>
+      </div>
+      <figure class="pain-shot"><a href="plugins/transfer-checker.html"><img src="images/transfer-checker.webp" alt="異動・退職チェッカーで調べた、ユーザー・組織・グループの一覧" width="1100" height="788" loading="lazy"></a></figure>
+    </article>
+
     <p class="note prose">サイボウズの「<a href="https://kintone.cybozu.co.jp/material/pdf/kintone_governance_guideline.pdf" rel="noopener">kintoneガバナンスガイドライン</a>」でも、アプリの定期的な棚卸しや、重要なアプリの設計資料の作成がすすめられています。</p>
   </div>
 </section>
@@ -97,7 +108,7 @@
       </div>
       <div>
         <h3>無料で使える</h3>
-        <p>3本とも無料です。利用人数やアプリ数の制限もありません。</p>
+        <p>4本とも無料です。利用人数やアプリ数の制限もありません。</p>
       </div>
     </div>
   </div>
@@ -109,7 +120,7 @@
       <h2>登録不要のデモで、すぐに試せます</h2>
       <div class="prose">
         <p>架空の会社のアプリ（案件管理・顧客マスタなど）を使ったデモです。</p>
-        <p>kintoneの環境がなくても、ブラウザで3つのプラグインを操作できます。</p>
+        <p>kintoneの環境がなくても、ブラウザで4つのプラグインを操作できます。</p>
       </div>
       <div class="actions"><a class="btn btn-primary btn-large" href="demo.html">デモを試す</a></div>
     </div>
@@ -140,6 +151,12 @@
             <td><a class="name" href="plugins/app-map.html"><img src="images/icons/app-map.png" alt="" width="28" height="28">アプリ相関マップ</a></td>
             <td>ルックアップ・関連レコード・アクションでつながるアプリを図で表示</td>
             <td class="out">PNG・CSV</td>
+            <td class="state">無料</td>
+          </tr>
+          <tr>
+            <td><a class="name" href="plugins/transfer-checker.html"><img src="images/icons/transfer-checker.png" alt="" width="28" height="28">異動・退職チェッカー</a></td>
+            <td>設定に出てくるユーザー・組織・グループを一覧にし、退職者やなくなった組織の指定を見つける</td>
+            <td class="out">CSV</td>
             <td class="state">無料</td>
           </tr>
           <tr>
@@ -176,7 +193,7 @@
           <tr>
             <th scope="row">無料版</th>
             <td>特定のアプリの権限や設計を、資料にまとめたい方</td>
-            <td>3つのプラグイン。アプリを1つずつ確認・出力します。<br>公開中</td>
+            <td>4つのプラグイン。アプリを1つずつ確認・出力します。<br>公開中</td>
             <td><strong>0円</strong><br>利用人数・アプリ数の制限なし</td>
           </tr>
           <tr>
@@ -214,6 +231,7 @@
       <li><a href="guide/permission-list.html">kintoneのアクセス権を一覧で確認する方法</a></li>
       <li><a href="guide/design-doc.html">kintoneアプリの設計書の作り方</a></li>
       <li><a href="guide/app-references.html">kintoneでアプリの参照元を調べる方法</a></li>
+      <li><a href="guide/user-references.html">kintoneで、退職者や異動者が設定されているアプリを探す方法</a></li>
     </ul>
   </div>
 </section>
@@ -223,7 +241,7 @@
     <h2>よくあるご質問</h2>
     <dl class="qa prose">
       <dt>本当に無料ですか？</dt>
-      <dd>はい。3本とも無料で、機能や期間の制限はありません。有料版の提供開始後も、無料版は引き続き提供します。</dd>
+      <dd>はい。4本とも無料で、機能や期間の制限はありません。有料版の提供開始後も、無料版は引き続き提供します。</dd>
       <dt>利用人数やアプリ数に制限はありますか？</dt>
       <dd>ありません。無料版・有料版とも、利用人数やアプリ数が増えても料金は変わりません。</dd>
       <dt>アプリの管理者でなくても使えますか？</dt>
@@ -245,7 +263,7 @@
 <section class="final">
   <div class="wrap">
     <h2>まずはデモで、使い心地を確かめてください</h2>
-    <p class="prose">登録は不要です。見本のアプリで、3つのプラグインをすべて試せます。</p>
+    <p class="prose">登録は不要です。見本のアプリで、4つのプラグインをすべて試せます。</p>
     <div class="actions">
       <a class="btn btn-primary btn-large" href="demo.html">デモを試す</a>
       <a class="btn btn-large" href="pro.html">有料版の先行登録</a>

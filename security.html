@@ -32,7 +32,7 @@
     <h1>導入前の確認事項</h1>
     <div class="lead prose">
       <p>社内のkintoneにプラグインを導入する前の確認にお使いください。</p>
-      <p>無料の3つのプラグイン（権限チェッカー・設計書ジェネレーター・アプリ相関マップ）は、同じ仕組みで動作します。<br>有料版（棚卸し・変更監視パック）の違いは、<a href="#pro">ページの下</a>にまとめています。</p>
+      <p>無料の4つのプラグイン（権限チェッカー・設計書ジェネレーター・アプリ相関マップ・異動・退職チェッカー）は、同じ仕組みで動作します。<br>有料版（棚卸し・変更監視パック）の違いは、<a href="#pro">ページの下</a>にまとめています。</p>
     </div>
 
     <h2>動作の仕組み</h2>
@@ -58,6 +58,7 @@
           <tr><th scope="row">権限チェッカー</th><td><ul class="api"><li><code>/k/v1/apps.json</code></li><li><code>/k/v1/app/form/fields.json</code></li><li><code>/k/v1/app/acl.json</code>・<code>/k/v1/record/acl.json</code>・<code>/k/v1/field/acl.json</code></li></ul></td></tr>
           <tr><th scope="row">設計書ジェネレーター</th><td><ul class="api"><li><code>/k/v1/apps.json</code>・<code>/k/v1/app.json</code></li><li><code>/k/v1/app/form/fields.json</code>・<code>/k/v1/app/form/layout.json</code>・<code>/k/v1/app/views.json</code>・<code>/k/v1/app/status.json</code></li><li><code>/k/v1/app/notifications/general.json</code>・<code>perRecord.json</code>・<code>reminder.json</code></li><li><code>/k/v1/app/acl.json</code>・<code>/k/v1/record/acl.json</code>・<code>/k/v1/field/acl.json</code></li><li><code>/k/v1/app/plugins.json</code>・<code>/k/v1/app/customize.json</code></li></ul></td></tr>
           <tr><th scope="row">アプリ相関マップ</th><td><ul class="api"><li><code>/k/v1/apps.json</code></li><li><code>/k/v1/app/form/fields.json</code>・<code>/k/v1/app/actions.json</code></li></ul></td></tr>
+          <tr><th scope="row">異動・退職チェッカー</th><td><ul class="api"><li><code>/k/v1/apps.json</code></li><li><code>/k/v1/app/acl.json</code>・<code>/k/v1/record/acl.json</code>・<code>/k/v1/field/acl.json</code></li><li><code>/k/v1/app/status.json</code></li><li><code>/k/v1/app/notifications/general.json</code>・<code>perRecord.json</code>・<code>reminder.json</code></li><li><code>/k/v1/app/form/fields.json</code>・<code>/k/v1/app/views.json</code>・<code>/k/v1/app/reports.json</code>・<code>/k/v1/app/actions.json</code></li><li>cybozu.comのUser API：<code>/v1/users.json</code>・<code>/v1/organizations.json</code>・<code>/v1/groups.json</code>（設定に出てきたコードが、いまもあるかの確認だけ）</li></ul></td></tr>
         </tbody>
       </table>
     </div>
@@ -76,7 +77,7 @@
       <table class="facts">
         <thead><tr><th scope="col">プラグイン</th><th scope="col">kintone REST API（すべて読み取り専用のGET）</th></tr></thead>
         <tbody>
-          <tr><th scope="row">棚卸し・変更監視パック</th><td><ul class="api"><li><code>/k/v1/apps.json</code></li><li><code>/k/v1/app/form/fields.json</code>・<code>/k/v1/app/actions.json</code></li><li><code>/k/v1/app/acl.json</code>・<code>/k/v1/record/acl.json</code>・<code>/k/v1/field/acl.json</code></li><li><code>/k/v1/app/plugins.json</code>・<code>/k/v1/app/customize.json</code></li><li><code>/k/v1/records.json</code>（件数と最終更新日時のみ。チェックを外すと使いません）</li></ul></td></tr>
+          <tr><th scope="row">棚卸し・変更監視パック</th><td><ul class="api"><li><code>/k/v1/apps.json</code></li><li><code>/k/v1/app/form/fields.json</code>・<code>/k/v1/app/actions.json</code></li><li><code>/k/v1/app/acl.json</code>・<code>/k/v1/record/acl.json</code>・<code>/k/v1/field/acl.json</code></li><li><code>/k/v1/app/plugins.json</code>・<code>/k/v1/app/customize.json</code></li><li><code>/k/v1/app/status.json</code>・<code>/k/v1/app/views.json</code>・<code>/k/v1/app/reports.json</code></li><li><code>/k/v1/app/notifications/general.json</code>・<code>perRecord.json</code>・<code>reminder.json</code></li><li><code>/k/v1/records.json</code>（件数と最終更新日時のみ。チェックを外すと使いません）</li><li>cybozu.comのUser API：<code>/v1/users.json</code>・<code>/v1/organizations.json</code>・<code>/v1/groups.json</code></li></ul></td></tr>
         </tbody>
       </table>
     </div>

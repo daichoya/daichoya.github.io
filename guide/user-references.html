@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>kintoneで、退職者や異動者が設定されているアプリを探す方法｜台帳屋</title>
+<meta name="description" content="kintoneのアクセス権・プロセス管理・通知・一覧の条件などに、退職者や異動者、なくなった組織やグループが残っていないかを調べる方法。標準の画面、REST API、プラグインでの調べ方と、残さないための設定の考え方。">
+<link rel="canonical" href="https://daichoya.github.io/guide/user-references.html">
+<meta property="og:title" content="kintoneで、退職者や異動者が設定されているアプリを探す方法｜台帳屋">
+<meta property="og:description" content="kintoneのアクセス権・プロセス管理・通知・一覧の条件などに、退職者や異動者、なくなった組織やグループが残っていないかを調べる方法。標準の画面、REST API、プラグインでの調べ方と、残さないための設定の考え方。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://daichoya.github.io/guide/user-references.html">
+<meta property="og:site_name" content="台帳屋">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:image" content="https://daichoya.github.io/images/ogp.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="google-site-verification" content="J1TnZ6bD5c5EjVGtQBBk2eRmLsDje0VapbpwCEnbA6M">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="../index.html"><span class="brand-name">台帳屋</span><span class="brand-sub">kintone管理者向けプラグイン</span></a>
+    <nav class="site-nav" aria-label="サイト内のページ"><a href="../index.html#plugins">プラグイン</a><a href="../demo.html">デモ</a><a href="../index.html#price">料金</a><a href="../guide/index.html" aria-current="page">ガイド</a><a href="../security.html">セキュリティ</a><a href="../index.html#faq">よくある質問</a></nav>
+  </div>
+</header>
+<main>
+<div class="page">
+  <div class="wrap">
+    <p class="breadcrumb"><a href="../index.html">台帳屋</a> ／ <a href="../guide/index.html">使い方ガイド</a></p>
+    <h1>kintoneで、退職者や異動者が設定されているアプリを探す方法</h1>
+    <p class="updated">2026年11月5日</p>
+    <div class="lead prose">
+      <p>退職者が出るたびに、関係しそうなアプリの設定画面を1つずつ開いて確かめている。それでも見落としがある。<br>kintoneの管理者から、よく聞く悩みです。</p>
+      <p>このページでは、ユーザー・組織・グループが設定されうる場所と、その調べ方をまとめます。</p>
+    </div>
+
+    <h2>ユーザー・組織・グループが設定される場所</h2>
+    <div class="prose">
+      <p>アクセス権だけではありません。1つのアプリの中でも、次のように多くの画面に分かれています。</p>
+    </div>
+    <div class="table-scroll">
+      <table class="facts">
+        <thead><tr><th scope="col">設定</th><th scope="col">ユーザー・組織・グループが入る場所</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">アクセス権</th><td>アプリ・レコード・フィールドのアクセス権の対象。レコードのアクセス権の条件（例：担当者が○○さん）</td></tr>
+          <tr><th scope="row">プロセス管理</th><td>ステータスごとの作業者、アクションを実行できる人、アクションの条件</td></tr>
+          <tr><th scope="row">通知</th><td>アプリの条件通知・レコードの条件通知・リマインダーの条件通知の通知先と条件</td></tr>
+          <tr><th scope="row">フォーム</th><td>ユーザー選択・組織選択・グループ選択フィールドの初期値と、選べる候補</td></tr>
+          <tr><th scope="row">一覧・グラフ</th><td>絞り込みの条件（例：「山本さんの担当」という一覧）</td></tr>
+          <tr><th scope="row">アクション</th><td>アクションを使えるユーザー</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="prose">
+      <p>このほか、プラグインの設定や、JavaScriptのカスタマイズの中にユーザーのコードが書かれていることもあります。</p>
+    </div>
+
+    <h2>退職や組織変更のあとに、設定が残ることがある</h2>
+    <div class="prose">
+      <p>ユーザーを削除したり、組織やグループを整理したりしても、アプリの設定から自動できれいに消えるとは限りません。<br>削除したグループがアクセス権に残っていないか確かめ、手で消す作業が必要になる場合があります。一覧の絞り込みにグループを使っていると、グループを消したあとにエラーになることもあります。</p>
+      <p>プロセス管理の作業者が退職者のままだと、申請が止まってしまいます。<br>アプリ管理の権限を持つのが1人だけだと、その人の異動や退職のあと、kintoneのシステム管理者しか設定を変えられなくなります。</p>
+      <p>そのため、異動や退職の<strong>前</strong>に、その人がどこに設定されているかを確かめておくのが安全です。</p>
+    </div>
+
+    <h2>標準の画面で調べる手順</h2>
+    <ol class="prose">
+      <li>kintoneシステム管理の「アプリ管理」で、アプリの一覧を確かめます。</li>
+      <li>アプリを1つずつ開き、「アプリの設定」の「アクセス権」（アプリ・レコード・フィールドの3つ）、「プロセス管理」、「通知」（3種類）、「一覧」「グラフ」「アクション」を順に開いて、対象の人・組織・グループを探します。</li>
+      <li>「フォーム」で、ユーザー選択などのフィールドの初期値と、選べる候補も確かめます。</li>
+      <li>見つかった場所を表に書き留め、異動や退職の日までに直します。</li>
+    </ol>
+    <div class="prose">
+      <p>1つのアプリで10か所近くの画面を開くことになるため、アプリが多いほど時間がかかり、見落としも起きやすくなります。</p>
+    </div>
+
+    <h2>REST APIで調べる</h2>
+    <div class="prose">
+      <p>上の設定は、すべてkintoneのREST APIで取得できます（そのアプリの管理権限が必要です）。</p>
+      <ul>
+        <li>アクセス権：<code>/k/v1/app/acl.json</code>・<code>/k/v1/record/acl.json</code>・<code>/k/v1/field/acl.json</code></li>
+        <li>プロセス管理：<code>/k/v1/app/status.json</code></li>
+        <li>通知：<code>/k/v1/app/notifications/general.json</code>・<code>perRecord.json</code>・<code>reminder.json</code></li>
+        <li>フォーム・一覧・グラフ・アクション：<code>/k/v1/app/form/fields.json</code>・<code>/k/v1/app/views.json</code>・<code>/k/v1/app/reports.json</code>・<code>/k/v1/app/actions.json</code></li>
+      </ul>
+      <p>取得した設定から、ユーザー・組織・グループのコードを取り出します。<br>条件の文字列（例：<code>担当者 in ("yamamoto")</code>）の中にもコードが入るので、忘れずに調べます。</p>
+      <p>取り出したコードが、いまもあるかは、cybozu.comのUser API（<code>/v1/users.json</code>・<code>/v1/organizations.json</code>・<code>/v1/groups.json</code>）で確かめられます。<br>ユーザーの <code>valid</code> が false なら、利用停止中です。</p>
+    </div>
+
+    <h2>プラグインで調べる</h2>
+    <div class="prose">
+      <p>台帳屋の<a href="../plugins/transfer-checker.html">異動・退職チェッカー</a>（無料）は、上のAPIを使って、選んだアプリの設定に出てくるユーザー・組織・グループを一覧にするプラグインです。<br>いまのcybozu.comと照らし合わせ、見つからない指定や利用停止中のユーザーの指定を先頭に並べます。名前で絞り込めば、異動する人が出てくる場所だけを確かめられます。</p>
+    </div>
+    <figure class="shot">
+      <a href="../images/transfer-checker.webp" title="画像を大きく表示"><img src="../images/transfer-checker.webp" width="1100" height="788" alt="異動・退職チェッカーの画面。見つからないユーザーと組織、利用停止中のユーザーの指定が先頭に並んでいる" loading="lazy"></a>
+      <figcaption>見本のアプリで調べた例</figcaption>
+    </figure>
+    <div class="actions"><a class="btn btn-primary" href="../demo.html">異動・退職チェッカーをデモで試す</a></div>
+    <div class="prose">
+      <p>すべてのアプリをまとめて調べる場合は、有料版の<a href="../pro.html">棚卸し・変更監視パック</a>で、全アプリの結果をExcelの点検台帳にできます。</p>
+    </div>
+
+    <h2>残さないための設定の考え方</h2>
+    <ul class="prose">
+      <li>アクセス権や通知、プロセス管理の作業者は、できるだけ個人ではなく組織やグループで指定します。異動のときは、組織やグループのメンバーを入れ替えるだけで済みます。</li>
+      <li>アプリ管理の権限は、2人以上か、グループに付けておきます。</li>
+      <li>年度末や人事異動の時期に、定期的に点検します。点検の記録を残しておくと、次の担当者に引き継げます。</li>
+    </ul>
+
+    <h2>参考</h2>
+    <ul class="prose refs">
+      <li><a href="https://kincom.cybozu.co.jp/chats/sd7r3t0qq1jlrhpe" rel="noopener">ユーザーが登録されているプロセスやアクセス権を把握したい（キンコミ）</a></li>
+      <li><a href="https://www.joyzo.co.jp/blog/19868" rel="noopener">アクセス権は、組織、あるいはグループで設定しよう（ジョイゾー）</a></li>
+      <li><a href="https://smartat.jp/blog/7583/" rel="noopener">kintoneグループと組織の違いは？管理者が知るべき基礎知識と設定手順（スマートat）</a></li>
+      <li><a href="https://cybozu.dev/ja/kintone/tips/best-practices/security/app-for-permissions/" rel="noopener">アプリのアクセス権を一覧で管理する（cybozu developer network）</a></li>
+      <li><a href="https://cybozu.dev/ja/common/docs/user-api/users/get-users/" rel="noopener">User API：ユーザー情報を取得する（cybozu developer network）</a></li>
+    </ul>
+  </div>
+</div>
+
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <nav aria-label="規約とお問い合わせ">
+      <a href="../privacy.html">プライバシーポリシー</a>
+      <a href="../terms.html">利用規約</a>
+      <span>お問い合わせ：<a href="mailto:daichoya.plugins@gmail.com">daichoya.plugins@gmail.com</a></span>
+    </nav>
+    <p>kintoneはサイボウズ株式会社の登録商標です。台帳屋は、サイボウズ株式会社とは関係のない個人の開発者が提供しています。</p>
+    <p>&copy; 2026 台帳屋</p>
+  </div>
+</footer>
+</body>
+</html>

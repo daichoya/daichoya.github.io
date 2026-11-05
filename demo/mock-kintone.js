@@ -62,7 +62,8 @@
     '/k/v1/app.json': { 12: { appId: '12', name: '案件管理', description: '<div>営業部の案件を管理するアプリです。<br />受注確度は毎週月曜に見直します。</div>', createdAt: '2025-04-01T00:30:00Z', creator: { code: 'kanri', name: '情報システム課' }, modifiedAt: '2026-10-28T06:12:00Z', modifier: { code: 'kanri', name: '情報システム課' } } },
     '/k/v1/app/views.json': { 12: { views: {
       すべての案件: { type: 'LIST', name: 'すべての案件', index: '0', fields: ['案件名', '顧客名', '受注確度', '担当者', '金額'], filterCond: '', sort: 'レコード番号 desc' },
-      今月の受注予定: { type: 'LIST', name: '今月の受注予定', index: '1', fields: ['案件名', '顧客名', '受注予定日', '金額'], filterCond: '受注予定日 = THIS_MONTH()', sort: '受注予定日 asc' }
+      今月の受注予定: { type: 'LIST', name: '今月の受注予定', index: '1', fields: ['案件名', '顧客名', '受注予定日', '金額'], filterCond: '受注予定日 = THIS_MONTH()', sort: '受注予定日 asc' },
+      山本さんの担当: { type: 'LIST', name: '山本さんの担当', index: '2', fields: ['案件名', '顧客名', '受注確度', '金額'], filterCond: '担当者 in ("yamamoto")', sort: 'レコード番号 desc' }
     } } },
     '/k/v1/app/status.json': { 12: { enable: true, states: {
       商談中: { name: '商談中', index: '0', assignee: { type: 'ONE', entities: [{ entity: { type: 'FIELD_ENTITY', code: '担当者' } }] } },
@@ -70,7 +71,7 @@
       受注: { name: '受注', index: '2', assignee: { type: 'ONE', entities: [] } }
     }, actions: [
       { name: '確認を依頼', from: '商談中', to: '上長確認', filterCond: '金額 > 0' },
-      { name: '承認する', from: '上長確認', to: '受注', filterCond: '' },
+      { name: '承認する', from: '上長確認', to: '受注', filterCond: '', executableUser: { entities: [{ entity: { type: 'USER', code: 'kimura' }, includeSubs: false }, { entity: { type: 'ORGANIZATION', code: '営業部' }, includeSubs: false }] } },
       { name: '差し戻す', from: '上長確認', to: '商談中', filterCond: '' }
     ] } },
     '/k/v1/app/notifications/general.json': { 12: { notifications: [{ entity: { type: 'FIELD_ENTITY', code: '担当者' }, includeSubs: false, recordAdded: false, recordEdited: true, commentAdded: true, fileImported: false }], notifyToCommenter: true } },
@@ -119,6 +120,15 @@
     var props = data['/k/v1/app/form/fields.json'][id].properties;
     if (!props.更新日時) props.更新日時 = { type: 'UPDATED_TIME', code: '更新日時', label: '更新日時' };
   });
+  // cybozu.com のユーザー・組織・グループ（User API の見本）。木村さんは利用停止中、山本さんと「経理部」はもういない
+  var directory = {
+    users: [
+      { code: 'kanri', name: '情報システム課', valid: true }, { code: 'sato', name: '佐藤', valid: true }, { code: 'suzuki', name: '鈴木', valid: true },
+      { code: 'tanaka', name: '田中', valid: true }, { code: 'keiri', name: '経理課', valid: true }, { code: 'kimura', name: '木村', valid: false }
+    ],
+    organizations: [{ code: '営業部', name: '営業部' }, { code: '経理課', name: '経理課' }, { code: '情報システム課', name: '情報システム課' }],
+    groups: [{ code: 'Administrators', name: 'Administrators' }, { code: 'everyone', name: 'Everyone' }]
+  };
   // 見本データのないアプリには、設定が空の応答を返す
   function emptyFor(path, appId) {
     var app = apps.filter(function (a) { return a.appId === String(appId); })[0] || { appId: String(appId), name: 'アプリ' };
@@ -136,6 +146,7 @@
       case '/k/v1/field/acl.json': return { rights: [] };
       case '/k/v1/app/plugins.json': return { plugins: [] };
       case '/k/v1/app/actions.json': return { actions: {} };
+      case '/k/v1/app/reports.json': return { reports: {} };
       case '/k/v1/records.json': return null;
       case '/k/v1/app/customize.json': return { scope: 'ALL', desktop: { js: [], css: [] }, mobile: { js: [], css: [] } };
       default: return null;
@@ -155,6 +166,13 @@
       return new Promise(function (resolve, reject) {
         setTimeout(function () {
           if (path === '/k/v1/apps.json') { resolve({ apps: apps }); return; }
+          if (/^\/v1\//.test(path)) {
+            var key = path.replace('/v1/', '').replace('.json', '');
+            var out = {};
+            out[key] = (directory[key] || []).filter(function (x) { return !params.codes || params.codes.indexOf(x.code) >= 0; });
+            resolve(JSON.parse(JSON.stringify(out)));
+            return;
+          }
           if (path === '/k/v1/records.json') {
             var activity = { 11: ['2026-11-02T09:00:00Z', 318], 12: ['2026-11-04T08:30:00Z', 105], 13: ['2026-11-04T05:10:00Z', 1240], 14: ['2025-12-18T02:00:00Z', 57], 15: ['2026-10-31T07:00:00Z', 96], 16: ['2026-01-20T00:00:00Z', 24] }[String(params.app)];
             var rec = {};

@@ -2,10 +2,13 @@
  * 台帳屋 棚卸し・変更監視パック for kintone
  * 一覧画面に「棚卸し」ボタンを追加し、すべてのアプリの設定を読み取って点検台帳（Excel）を作る。
  * 前回の点検台帳を選ぶと、変わったところも一覧にする。
- * 通信するのはkintoneだけで、読み取るのはアプリの設定だけ（レコードは読まない）。
+ * 通信するのはkintone（cybozu.com）だけ。読み取るのはアプリの設定と、レコードの件数・最終更新日時だけ（レコードの中身は読まない）。
  */
 (function (PLUGIN_ID) {
   'use strict';
+
+  // 共通部品：設定に出てくるユーザー・組織・グループを集める（js/refs.js）
+  var Refs = typeof module !== 'undefined' && module.exports ? require('../../../common/js/refs.js') : window.DaichoyaRefs;
 
   // ===== 1. Excel（xlsx）の書き出し =====
   // xlsxは「XMLファイルをまとめたzip」。無圧縮のzipを自前で作る（設計書ジェネレーターと同じ方式）。
@@ -441,6 +444,8 @@
       customize: val('customize') ? { scope: val('customize').scope, files: customizeFiles(val('customize')) } : null,
       links: properties ? extractLinks(app.appId, properties, val('actions')) : [],
       records: recordActivity(val('records')),
+      refs: Refs.collect({ appAcl: val('appAcl'), recordAcl: val('recordAcl'), fieldAcl: val('fieldAcl'), status: val('status'), general: val('general'), perRecord: val('perRecord'), reminder: val('reminder'), fields: val('fields'), views: val('views'), reports: val('reports'), actions: val('actions') }),
+      soleManager: Refs.soleManager(val('appAcl')),
       warnings: warningsFor(val('appAcl'), val('recordAcl'), val('fieldAcl'), labels),
       errors: errors
     };
@@ -468,6 +473,26 @@
     var days = Number(daysSince(r.lastUpdated, now));
     if (r.lastUpdated && days >= DORMANT_DAYS) return item('レコードが' + days + '日間更新されていません。使われていないアプリかもしれません。');
     return [];
+  }
+
+  // dir：User API で確かめた結果（Refs.lookup）。ないときは状態を判定しない
+  function refWarnings(a, dir) {
+    var out = [];
+    var byCode = {};
+    Refs.rows(a.refs || [], dir).forEach(function (r) {
+      if (!r.level) return;
+      var key = r.type + '\n' + r.code;
+      if (!byCode[key]) { byCode[key] = { r: r, places: [] }; }
+      if (byCode[key].places.indexOf(r.place) < 0) byCode[key].places.push(r.place);
+    });
+    Object.keys(byCode).forEach(function (key) {
+      var x = byCode[key];
+      var target = x.r.typeLabel + '：' + x.r.code;
+      if (x.r.level === 2) out.push({ level: '要確認', kind: 'ユーザーの指定', order: '', target: target, text: 'もういない' + x.r.typeLabel + 'が指定されています（' + x.places.join('、') + '）。' });
+      else out.push({ level: '確認', kind: 'ユーザーの指定', order: '', target: target, text: '利用停止中のユーザーが指定されています（' + x.places.join('、') + '）。' });
+    });
+    if (a.soleManager) out.push({ level: '確認', kind: 'アプリ', order: '', target: 'ユーザー：' + a.soleManager, text: 'アプリ管理の権限が、このユーザー1人だけに付いています。異動や退職の前に、ほかの人やグループにも付けておくと安心です。' });
+    return out;
   }
 
   function referencedApps(apps) {
@@ -604,14 +629,15 @@
 
   var SNAPSHOT_CHUNK = 30000; // Excelの1つのセルに入る文字数（32,767）より少なくする
 
-  function buildSheets(snapshot, prev, now, licenseText) {
+  function buildSheets(snapshot, prev, now, licenseText, dir) {
     var apps = Object.keys(snapshot.apps).map(function (id) { return snapshot.apps[id]; })
       .sort(function (a, b) { return Number(a.id) - Number(b.id); });
     var names = {};
     apps.forEach(function (a) { names[a.id] = a.name; });
     var warnings = [];
     var referencedBy = referencedApps(apps);
-    apps.forEach(function (a) { a.warnings.concat(usageWarnings(a, now, referencedBy)).forEach(function (w) { warnings.push([w.level, a.id, a.name, w.kind, String(w.order), w.target, w.text]); }); });
+    var noteOf = function (a) { return a.warnings.concat(usageWarnings(a, now, referencedBy), refWarnings(a, dir)); };
+    apps.forEach(function (a) { noteOf(a).forEach(function (w) { warnings.push([w.level, a.id, a.name, w.kind, String(w.order), w.target, w.text]); }); });
     var diff = prev ? diffSnapshots(prev, snapshot) : null;
     var withErrors = apps.filter(function (a) { return Object.keys(a.errors).length; });
 
@@ -620,7 +646,7 @@
       ['kintone環境', snapshot.host],
       ['点検したアプリ', apps.length + '個'],
       ['読み取れなかった項目があるアプリ', withErrors.length + '個' + (withErrors.length ? '（「アプリ一覧」シートの右端の列を参照）' : '')],
-      ['注意点（権限・利用状況）', warnings.length + '件'],
+      ['注意点（権限・利用状況・ユーザーの指定）', warnings.length + '件'],
       ['前回の点検', prev ? dateText(prev.takenAt) + '（' + (prev.host || '') + '）' : '比較していません'],
       ['前回からの変更', diff ? diff.length + '件' : '－'],
       ['ライセンス', licenseText || '']
@@ -629,7 +655,7 @@
       return [a.id, a.name, a.spaceId, a.creator, dateText(a.createdAt), a.modifier, dateText(a.modifiedAt), daysSince(a.modifiedAt, now),
         a.fields ? String(Object.keys(a.fields).length) : '', a.plugins ? String(a.plugins.length) : '', a.customize ? String(a.customize.files.length) : '',
         a.records ? String(a.records.count) : '', a.records ? dateText(a.records.lastUpdated) : '', a.records ? daysSince(a.records.lastUpdated, now) : '',
-        String(a.warnings.length + usageWarnings(a, now, referencedBy).length), Object.keys(a.errors).map(function (k) { return ERROR_KEYS[k] + '（' + a.errors[k] + '）'; }).join('、')];
+        String(noteOf(a).length), Object.keys(a.errors).map(function (k) { return ERROR_KEYS[k] + '（' + a.errors[k] + '）'; }).join('、')];
     });
     var aclRows = [];
     apps.forEach(function (a) {
@@ -648,6 +674,9 @@
       if (!a.customize) return;
       a.customize.files.forEach(function (f) { customRows.push([a.id, a.name, SCOPE_TEXT[a.customize.scope] || a.customize.scope, f.screen, f.kind, String(f.order), f.form, f.name]); });
     });
+    var refRows = [];
+    apps.forEach(function (a) { Refs.rows(a.refs || [], dir).forEach(function (r) { refRows.push([r.state, r.typeLabel, r.name, r.code, a.id, a.name, r.place, r.detail]); }); });
+    refRows.sort(function (x, y) { var lv = { 見つかりません: 0, 利用停止中: 1 }; return ((x[0] in lv ? lv[x[0]] : 2) - (y[0] in lv ? lv[y[0]] : 2)) || (x[3] < y[3] ? -1 : x[3] > y[3] ? 1 : 0) || (Number(x[4]) - Number(y[4])); });
     var linkRows = [];
     apps.forEach(function (a) { a.links.forEach(function (l) { linkRows.push([l.from, names[l.from] || '', l.kind, l.to, names[l.to] || '（見られないアプリ）', l.place]); }); });
 
@@ -664,6 +693,7 @@
       { name: '変更点', widths: [8, 8, 24, 18, 36, 40, 40], blocks: [diffBlock] },
       { name: '注意点', widths: [8, 8, 24, 10, 6, 24, 60], blocks: [{ title: null, header: ['重要度', 'アプリID', 'アプリ名', '種類', '順', '対象', '内容'], rows: warnings, styles: warnings.map(function (w) { return w[0] === '要確認' ? STYLE.warn : STYLE.body; }), note: warnings.length ? null : '注意点は見つかりませんでした。' }] },
       { name: '権限一覧', widths: [8, 24, 10, 6, 30, 28, 40], blocks: [{ title: null, header: ['アプリID', 'アプリ名', '種類', '順', '条件・フィールド', '対象', '権限'], rows: aclRows }] },
+      { name: 'ユーザーの指定', widths: [12, 10, 16, 24, 8, 24, 24, 60], blocks: [{ title: null, header: ['状態', '種類', '名前', 'コード', 'アプリID', 'アプリ名', '設定の場所', '内容'], rows: refRows, styles: refRows.map(function (r) { return r[0] === '見つかりません' ? STYLE.warn : STYLE.body; }), note: refRows.length ? null : 'ユーザー・組織・グループを指定している設定はありません。' }] },
       { name: 'プラグイン', widths: [8, 24, 36, 36, 8], blocks: [{ title: null, header: ['アプリID', 'アプリ名', 'プラグイン名', 'プラグインID', '状態'], rows: pluginRows, note: pluginRows.length ? null : 'プラグインを追加しているアプリはありません。' }] },
       { name: 'カスタマイズ', widths: [8, 24, 18, 10, 12, 6, 8, 60], blocks: [{ title: null, header: ['アプリID', 'アプリ名', '適用するユーザー', '画面', '種類', '順', '形式', 'ファイル名・URL'], rows: customRows, note: customRows.length ? null : 'JavaScript・CSSによるカスタマイズはありません。' }] },
       { name: 'つながり', widths: [10, 24, 16, 10, 24, 36], blocks: [{ title: null, header: ['元のアプリID', '元のアプリ', 'つながりの種類', '相手のアプリID', '相手のアプリ', '設定のある場所'], rows: linkRows, note: linkRows.length ? null : 'ルックアップ・関連レコード一覧・アクションでつながっているアプリはありません。' }] },
@@ -671,7 +701,7 @@
     ];
   }
 
-  var ERROR_KEYS = { records: 'レコードの件数', fields: 'フィールド', appAcl: 'アプリのアクセス権', recordAcl: 'レコードのアクセス権', fieldAcl: 'フィールドのアクセス権', plugins: 'プラグイン', customize: 'カスタマイズ', actions: 'アクション' };
+  var ERROR_KEYS = { records: 'レコードの件数', status: 'プロセス管理', general: 'アプリの条件通知', perRecord: 'レコードの条件通知', reminder: 'リマインダーの条件通知', views: '一覧', reports: 'グラフ', fields: 'フィールド', appAcl: 'アプリのアクセス権', recordAcl: 'レコードのアクセス権', fieldAcl: 'フィールドのアクセス権', plugins: 'プラグイン', customize: 'カスタマイズ', actions: 'アクション' };
 
   function summaryText(snapshot, sheets, compared) {
     var count = Object.keys(snapshot.apps).length;
@@ -704,6 +734,8 @@
   }
 
   function api(path, params) { return kintone.api(kintone.api.url(path, true), 'GET', params); }
+  // cybozu.com の User API（ユーザー・組織・グループがいまもあるか）
+  function userApi(path, params) { return kintone.api(path, 'GET', params); }
   function settle(promise) {
     return promise.then(function (value) { return { ok: true, value: value }; }, function (error) { return { ok: false, error: error }; });
   }
@@ -735,7 +767,13 @@
       fieldAcl: api('/k/v1/field/acl.json', { app: appId }),
       plugins: api('/k/v1/app/plugins.json', { app: appId }),
       customize: api('/k/v1/app/customize.json', { app: appId }),
-      actions: api('/k/v1/app/actions.json', { app: appId })
+      actions: api('/k/v1/app/actions.json', { app: appId }),
+      status: api('/k/v1/app/status.json', { app: appId }),
+      general: api('/k/v1/app/notifications/general.json', { app: appId }),
+      perRecord: api('/k/v1/app/notifications/perRecord.json', { app: appId }),
+      reminder: api('/k/v1/app/notifications/reminder.json', { app: appId }),
+      views: api('/k/v1/app/views.json', { app: appId }),
+      reports: api('/k/v1/app/reports.json', { app: appId })
     };
     var keys = Object.keys(requests);
     return Promise.all(keys.map(function (k) { return settle(requests[k]); })).then(function (list) {
@@ -846,9 +884,15 @@
       }).then(function (apps) {
         return scanAll(apps, recordsBox.checked, function (done, total) { status.textContent = 'アプリの設定を読み込み中…（' + done + ' / ' + total + '）'; });
       }).then(function (apps) {
+        status.textContent = '設定に出てくるユーザー・組織・グループを確認中…';
+        var all = [];
+        Object.keys(apps).forEach(function (id) { all = all.concat(apps[id].refs || []); });
+        return Refs.lookup(userApi, all).then(function (dir) { return { apps: apps, dir: dir }; });
+      }).then(function (scan) {
+        var apps = scan.apps;
         var now = new Date();
         var snapshot = { v: 1, host: window.DaichoyaLicense.normalizeDomain(location.hostname), takenAt: now.toISOString(), apps: apps };
-        var sheets = buildSheets(snapshot, prev, now, licenseText);
+        var sheets = buildSheets(snapshot, prev, now, licenseText, scan.dir);
         var stamp = dateText(now).slice(0, 10).replace(/-/g, '');
         download(buildXlsx(sheets), '点検台帳_' + stamp + '.xlsx');
         status.textContent = summaryText(snapshot, sheets, !!prev) + 'ファイルは次回の点検で「前回の点検台帳」として使えます。';
