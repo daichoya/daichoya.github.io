@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>設計書ジェネレーター｜台帳屋</title>
-<meta name="description" content="kintoneアプリのフィールド・一覧・プロセス管理・通知・アクセス権・プラグインを、Excelの設計書にまとめる無料プラグイン。">
+<meta name="description" content="kintoneアプリのフィールド・一覧・プロセス管理・通知・アクセス権・プラグイン・カスタマイズを、Excelの設計書にまとめる無料プラグイン。">
 <link rel="canonical" href="https://daichoya.github.io/plugins/design-doc.html">
 <meta property="og:title" content="設計書ジェネレーター｜台帳屋">
-<meta property="og:description" content="kintoneアプリのフィールド・一覧・プロセス管理・通知・アクセス権・プラグインを、Excelの設計書にまとめる無料プラグイン。">
+<meta property="og:description" content="kintoneアプリのフィールド・一覧・プロセス管理・通知・アクセス権・プラグイン・カスタマイズを、Excelの設計書にまとめる無料プラグイン。">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://daichoya.github.io/plugins/design-doc.html">
 <meta property="og:site_name" content="台帳屋">
@@ -51,13 +51,14 @@
           <tr><th scope="row">通知</th><td>アプリの条件通知、レコードの条件通知、リマインダー</td></tr>
           <tr><th scope="row">アクセス権</th><td>アプリ・レコード・フィールドのアクセス権</td></tr>
           <tr><th scope="row">プラグイン</th><td>追加されているプラグインと、有効・無効の状態</td></tr>
+          <tr><th scope="row">カスタマイズ</th><td>JavaScript・CSSのファイル名やURLと読み込む順番、適用するユーザーの範囲</td></tr>
         </tbody>
       </table>
     </div>
     <p class="note prose">読み取るのは運用中の設定です。<br>設定画面で保存しただけで、まだ「アプリを更新」していない変更は含まれません。</p>
 
     <figure class="shot dialog-shot">
-      <a href="../images/design-doc-dialog.webp" title="画像を大きく表示"><img src="../images/design-doc-dialog.webp" width="720" height="206" alt="設計書ジェネレーターの画面。アプリを選んでExcelで設計書を作成するボタンがある" loading="lazy"></a>
+      <a href="../images/design-doc-dialog.webp" title="画像を大きく表示"><img src="../images/design-doc-dialog.webp" width="720" height="249" alt="設計書ジェネレーターの画面。アプリを選んでExcelで設計書を作成するボタンがある" loading="lazy"></a>
       <figcaption>アプリを選んでボタンを押すと、Excelファイルが保存されます</figcaption>
     </figure>
 
@@ -97,7 +98,7 @@
     <h2>困ったときは</h2>
     <ul class="prose">
       <li>「アプリの管理権限が必要です」と書かれたシートがある場合は、そのアプリの管理権限を持つユーザーが作成し直してください。</li>
-      <li>JavaScriptやCSSによるカスタマイズの内容には、まだ対応していません。</li>
+      <li>JavaScriptやCSSによるカスタマイズは、読み込んでいるファイルの一覧だけを載せます。ファイルの中で何をしているかは、手で書き足してください。</li>
       <li>ゲストスペースのアプリには、現在対応していません。</li>
       <li>そのほかの不具合やご要望は、<a href="mailto:daichoya.plugins@gmail.com">daichoya.plugins@gmail.com</a> までお知らせください。</li>
     </ul>

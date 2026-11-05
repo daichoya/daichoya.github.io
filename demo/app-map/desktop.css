@@ -1,10 +1,12 @@
 /* 台帳屋 アプリ相関マップ：kintone本体の見た目に干渉しないよう、すべて dcy-am- で始まるクラス名を使う */
 .dcy-am-btn {
-  height: 40px;
+  height: 48px;
   padding: 0 16px;
   margin-left: 8px;
   border: 1px solid #e3e7e8;
-  border-radius: 4px;
+  border-radius: 0;
+  vertical-align: top;
+  font-family: inherit;
   background: #f7f9fa;
   color: #3498db;
   font-size: 14px;
@@ -12,7 +14,9 @@
 }
 .dcy-am-btn:hover { background: #eef3f6; }
 .dcy-am-btn[disabled] { color: #a8a8a8; cursor: not-allowed; }
+.dcy-am-btn:focus-visible, .dcy-am-close:focus-visible, .dcy-am-select:focus-visible { outline: 2px solid #3498db; outline-offset: 1px; }
 .dcy-am-primary { background: #3498db; border-color: #3498db; color: #fff; }
+.dcy-am-primary[disabled] { background: #a8cbe8; border-color: #a8cbe8; color: #fff; }
 .dcy-am-primary:hover { background: #217dbb; }
 
 .dcy-am-overlay {
@@ -23,34 +27,37 @@
   align-items: flex-start;
   justify-content: center;
   padding: 40px 16px;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.5);
   overflow-y: auto;
 }
 .dcy-am-dialog {
   width: 100%;
   max-width: 1100px;
-  padding: 24px;
-  border-radius: 6px;
+  padding: 0 0 24px;
+  border-radius: 0;
   background: #fff;
   color: #333;
   box-sizing: border-box;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
 }
-.dcy-am-head { display: flex; align-items: center; justify-content: space-between; }
-.dcy-am-head h2 { margin: 0; font-size: 20px; }
-.dcy-am-close { border: none; background: none; font-size: 24px; cursor: pointer; color: #666; }
-.dcy-am-lead { margin: 12px 0 0; color: #555; font-size: 14px; }
-.dcy-am-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 16px 0 8px; }
+.dcy-am-dialog > :not(.dcy-am-head) { margin-left: 24px; margin-right: 24px; }
+.dcy-am-head { display: flex; align-items: center; justify-content: space-between; min-height: 64px; padding-left: 24px; border-bottom: 1px solid #e3e7e8; }
+.dcy-am-head h2 { margin: 0; padding: 0; border: none; font-size: 20px; font-weight: bold; line-height: 1.4; color: #333; }
+.dcy-am-close { width: 64px; height: 64px; border: none; background: none; font-size: 28px; line-height: 1; cursor: pointer; color: #a8a8a8; }
+.dcy-am-close:hover { color: #333; }
+.dcy-am-lead { margin-top: 16px; margin-bottom: 0; color: #555; font-size: 14px; }
+.dcy-am-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 20px; margin-bottom: 8px; }
 .dcy-am-controls .dcy-am-btn { margin-left: 0; }
-.dcy-am-select { height: 40px; min-width: 320px; max-width: 100%; padding: 0 8px; font-size: 14px; }
-.dcy-am-status { min-height: 20px; margin: 8px 0; color: #666; }
-.dcy-am-map { overflow-x: auto; border: 1px solid #e3e7e8; border-radius: 4px; }
+.dcy-am-select { height: 48px; min-width: 320px; max-width: 100%; padding: 0 12px; border: 1px solid #e3e7e8; border-radius: 0; background: #fff; color: #333; font-size: 14px; font-family: inherit; }
+.dcy-am-status { min-height: 20px; margin-top: 8px; margin-bottom: 8px; color: #666; font-size: 14px; }
+.dcy-am-map { overflow-x: auto; border: 1px solid #e3e7e8; }
 /* 画面の幅に合わせて縮める。文字が読めなくならないよう、640pxより狭い時は横に動かして見る */
 .dcy-am-map svg { display: block; width: 100%; height: auto; min-width: 640px; }
 .dcy-am-clickable { cursor: pointer; }
 .dcy-am-clickable:hover rect,
 .dcy-am-clickable:focus rect { stroke: #3498db; stroke-width: 2.5; }
 .dcy-am-clickable:focus { outline: none; }
-.dcy-am-list h3 { margin: 24px 0 8px; font-size: 16px; }
+.dcy-am-list h3 { margin: 24px 0 8px; padding: 0; border: none; font-size: 16px; font-weight: bold; line-height: 1.4; color: #333; }
 .dcy-am-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .dcy-am-table th,
 .dcy-am-table td { padding: 6px 8px; border: 1px solid #e3e7e8; text-align: left; vertical-align: top; }

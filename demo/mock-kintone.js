@@ -97,7 +97,11 @@
       { id: 'pnihnmdhjnomgnnfhibjgpkefifmpbbi', name: '台帳屋 設計書ジェネレーター', enabled: true },
       { id: 'gnncoaohinigebkngpnpekmpapfnebfn', name: '台帳屋 権限チェッカー', enabled: true },
       { id: 'oengaljieegejcfdbmbkijobeodheoah', name: '台帳屋 アプリ相関マップ', enabled: true }
-    ] } }
+    ] } },
+    '/k/v1/app/customize.json': { 12: { scope: 'ALL', desktop: {
+      js: [{ type: 'FILE', file: { name: '金額の入力チェック.js', fileKey: 'demo1', contentType: 'text/javascript', size: '2048' } }],
+      css: [{ type: 'FILE', file: { name: '一覧の見た目.css', fileKey: 'demo2', contentType: 'text/css', size: '512' } }]
+    }, mobile: { js: [], css: [] }, revision: '5' } }
   };
   // 見本データのないアプリには、設定が空の応答を返す
   function emptyFor(path, appId) {
@@ -116,6 +120,7 @@
       case '/k/v1/field/acl.json': return { rights: [] };
       case '/k/v1/app/plugins.json': return { plugins: [] };
       case '/k/v1/app/actions.json': return { actions: {} };
+      case '/k/v1/app/customize.json': return { scope: 'ALL', desktop: { js: [], css: [] }, mobile: { js: [], css: [] } };
       default: return null;
     }
   }

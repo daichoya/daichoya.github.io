@@ -406,6 +406,26 @@
     ];
   }
 
+  // JavaScript・CSSによるカスタマイズ（/k/v1/app/customize.json）。中身ではなく、読み込んでいるファイルの一覧を書く
+  var SCOPE_TEXT = { ALL: 'すべてのユーザー', ADMIN: 'アプリの管理者だけ', NONE: '適用しない' };
+  function customizeBlocks(customize) {
+    var c = customize || {};
+    var rows = [];
+    [['desktop', 'PC'], ['mobile', 'モバイル']].forEach(function (screen) {
+      var part = c[screen[0]] || {};
+      [['js', 'JavaScript'], ['css', 'CSS']].forEach(function (kind) {
+        (part[kind[0]] || []).forEach(function (item, i) {
+          var isUrl = item.type === 'URL';
+          rows.push([screen[1], kind[1], String(i + 1), isUrl ? 'URL' : 'ファイル', isUrl ? (item.url || '') : ((item.file && item.file.name) || '')]);
+        });
+      });
+    });
+    return [
+      { title: '適用範囲', header: ['項目', '内容'], rows: [['カスタマイズを適用するユーザー', SCOPE_TEXT[c.scope] || c.scope || '不明']] },
+      { title: '読み込んでいるファイル（同じ画面・種類の中では、順の小さいものから読み込まれます）', header: ['画面', '種類', '順', '形式', 'ファイル名・URL'], rows: rows, note: rows.length ? 'ファイルの中身は設計書に含めていません。' : 'JavaScript・CSSによるカスタマイズはありません。' }
+    ];
+  }
+
   function labelMap(properties) {
     var map = {};
     Object.keys(properties || {}).forEach(function (code) {
@@ -475,7 +495,8 @@
       { name: 'プロセス管理', widths: [6, 24, 28, 40, 40], blocks: withError(processBlocks(val('status')), 'status') },
       { name: '通知', widths: [30, 30, 30, 30, 16], blocks: notify },
       { name: 'アクセス権', widths: [22, 30, 20, 16, 10, 10, 10, 10, 10, 10], blocks: permission },
-      { name: 'プラグイン', widths: [40, 36, 10], blocks: withError([{ title: null, header: ['プラグイン名', 'プラグインID', '状態'], rows: plugins }], 'plugins') }
+      { name: 'プラグイン', widths: [40, 36, 10], blocks: withError([{ title: null, header: ['プラグイン名', 'プラグインID', '状態'], rows: plugins }], 'plugins') },
+      { name: 'カスタマイズ', widths: [30, 14, 6, 10, 70], blocks: err('customize') ? [{ title: null, header: [], rows: [], note: err('customize') }] : customizeBlocks(val('customize')) }
     ];
   }
 
@@ -498,7 +519,10 @@
       var s = sheets.filter(function (x) { return x.name === name; })[0];
       return s ? s.blocks.reduce(function (n, b) { return n + (b.rows ? b.rows.length : 0); }, 0) : 0;
     };
-    return 'フィールド' + count('フィールド') + '件、一覧' + count('一覧') + '件、プラグイン' + count('プラグイン') + '件を設計書にまとめました。';
+    var custom = sheets.filter(function (x) { return x.name === 'カスタマイズ'; })[0];
+    var files = custom && custom.blocks[1] ? custom.blocks[1].rows.length : 0;
+    return 'フィールド' + count('フィールド') + '件、一覧' + count('一覧') + '件、プラグイン' + count('プラグイン') + '件' +
+      (files ? '、カスタマイズのファイル' + files + '件' : '') + 'を設計書にまとめました。';
   }
 
   var Core = {
@@ -513,6 +537,7 @@
     notificationBlocks: notificationBlocks,
     timingText: timingText,
     permissionBlocks: permissionBlocks,
+    customizeBlocks: customizeBlocks,
     buildSheets: buildSheets,
     stripHtml: stripHtml,
     safeFileName: safeFileName,
@@ -575,7 +600,8 @@
       appAcl: api('/k/v1/app/acl.json', { app: appId }),
       recordAcl: api('/k/v1/record/acl.json', { app: appId }),
       fieldAcl: api('/k/v1/field/acl.json', { app: appId }),
-      plugins: api('/k/v1/app/plugins.json', { app: appId })
+      plugins: api('/k/v1/app/plugins.json', { app: appId }),
+      customize: api('/k/v1/app/customize.json', { app: appId })
     };
     var keys = Object.keys(requests);
     return Promise.all(keys.map(function (k) { return settle(requests[k]); })).then(function (list) {
@@ -608,7 +634,7 @@
     var status = el('p', { class: P + '-status', role: 'status' });
     var dialog = el('div', { class: P + '-dialog', role: 'dialog', 'aria-modal': 'true', 'aria-label': '設計書ジェネレーター' }, [
       el('div', { class: P + '-head' }, [el('h2', { text: '設計書ジェネレーター' }), closeBtn]),
-      el('p', { class: P + '-lead', text: 'フィールド・一覧・プロセス管理・通知・アクセス権・プラグインを、1つのExcelファイルにまとめます。' }),
+      el('p', { class: P + '-lead', text: 'フィールド・一覧・プロセス管理・通知・アクセス権・プラグイン・カスタマイズを、1つのExcelファイルにまとめます。' }),
       el('div', { class: P + '-controls' }, [select, runBtn]),
       status
     ]);
