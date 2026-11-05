@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="10" fill="#2b2b2b"/>
+  <path d="M10 0h44a10 10 0 0 1 10 10v44a10 10 0 0 1-10 10H4a4 4 0 0 1-4-4V10A10 10 0 0 1 10 0z" fill="#1f3a5f"/>
   <text x="32" y="45" text-anchor="middle" font-size="38" font-weight="700" fill="#ffffff"
         font-family="'BIZ UDPGothic','Hiragino Sans','Yu Gothic','Meiryo','Noto Sans CJK JP',sans-serif">台</text>
 </svg>

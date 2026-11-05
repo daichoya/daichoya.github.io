@@ -22,6 +22,7 @@
 <header class="site-head">
   <div class="wrap">
     <a class="brand" href="index.html"><span class="brand-name">台帳屋</span><span class="brand-sub">kintone管理者向けプラグイン</span></a>
+    <a class="head-cta" href="pro.html#trial">30日間無料で試す</a>
     <nav class="site-nav" aria-label="サイト内のページ"><a href="index.html#plugins">プラグイン</a><a href="demo.html" aria-current="page">デモ</a><a href="index.html#price">料金</a><a href="guide/index.html">ガイド</a><a href="security.html">セキュリティ</a><a href="index.html#faq">よくある質問</a><a class="nav-cta" href="pro.html#trial">30日間無料で試す</a></nav>
   </div>
 </header>
@@ -31,22 +32,35 @@
     <p class="breadcrumb"><a href="index.html">台帳屋</a> ／ デモ</p>
     <h1>デモ（登録不要）</h1>
     <div class="lead prose">
-      <p>見本のデータで、7本のプラグインをブラウザでそのまま試せます。下の画面は、kintoneの「案件管理」アプリの一覧画面を再現したものです。上に並ぶボタンを押すと、プラグインが開きます。</p>
+      <p>架空の会社の見本データで、7本のプラグインをそのまま試せます。下の画面は、kintoneの「案件管理」アプリの一覧画面を再現したものです。kintoneには接続せず、データがどこかに送信されることもありません。</p>
     </div>
-    <ul class="demo-legend">
-      <li><span class="plan plan-free">無料</span>1つのアプリずつ調べる6本（ずっと無料）</li>
-      <li><span class="plan plan-paid">有料</span>全アプリをまとめて点検する「棚卸し」（<span class="trial-pill">30日間 無料で試せる</span>）</li>
-    </ul>
-    <fieldset class="demo-mode">
-      <legend><span class="plan plan-paid">有料</span>「棚卸し」の見え方を切り替える</legend>
-      <label><input type="radio" name="demo-mode" value="paid" checked> ご契約後・30日間の無料試用中（すべての機能）</label>
-      <label><input type="radio" name="demo-mode" value="free"> 申し込む前（件数だけの無料点検）</label>
-    </fieldset>
-    <p class="demo-note prose">このデモは、架空のアプリの見本データで動いています。kintoneには接続しておらず、データがどこかに送信されることもありません。書き出したファイルの中身も見本データです。</p>
+    <ol class="demo-steps-bar" aria-label="試し方">
+      <li><span>下の画面のボタンを押す</span></li>
+      <li><span>開いた画面で、調べる・保存する（使い方は<a href="#try">下に</a>）</span></li>
+      <li><span>Excelなどが保存されます（中身は見本データ）</span></li>
+    </ol>
 
     <div class="demo-screen" aria-label="kintoneの一覧画面の再現">
+      <div class="demo-chrome" aria-hidden="true"><span>sample.cybozu.com　／　案件管理（デモのための再現）</span></div>
       <div class="demo-title"><span class="demo-app">案件管理</span><span class="demo-view">一覧：すべての案件</span></div>
-      <div class="demo-bar"><div id="header-space"></div></div>
+      <div class="demo-bar">
+        <div class="demo-group demo-group-free">
+          <span class="tab tab-free">無料<small>1つのアプリずつ調べる6本</small></span>
+          <div id="header-space"></div>
+        </div>
+        <div class="demo-group demo-group-paid">
+          <span class="tab tab-paid">有料<small>全アプリをまとめて点検</small></span>
+          <div id="header-paid"></div>
+          <fieldset class="demo-mode">
+            <legend>見え方<small>（デモだけの切り替え）</small></legend>
+            <div class="seg">
+              <label><input type="radio" name="demo-mode" value="paid" checked>30日間の無料試用中・ご契約後</label>
+              <label><input type="radio" name="demo-mode" value="free">申し込む前</label>
+            </div>
+            <p class="demo-mode-hint" id="demo-mode-hint" aria-live="polite">「棚卸し」で、点検台帳（Excel）と報告書まで作れます</p>
+          </fieldset>
+        </div>
+      </div>
       <div class="table-scroll">
         <table class="demo-list">
           <thead><tr><th>レコード番号</th><th>案件名</th><th>顧客名</th><th>受注確度</th><th>担当者</th><th>金額</th></tr></thead>
@@ -60,42 +74,47 @@
         </table>
       </div>
     </div>
-    <p class="note">実際のkintoneでは、一覧画面の上部に、ほかのボタンと並んで表示されます。ボタンの「無料」「有料」の札は、このデモだけの目印です。</p>
+    <p class="demo-note">実際のkintoneでは、ボタンは一覧画面の上部に、ほかのボタンと並んで出ます。「無料」「有料」の札と「見え方」の切り替えは、このデモだけのものです。</p>
 
-    <h2>試してみてください</h2>
-    <h3 class="group-head"><span class="plan plan-free">無料</span>1つのアプリずつ調べる（6本・ずっと無料）</h3>
-    <ul class="prose demo-steps">
-      <li><strong>権限チェッカー</strong>：「権限を表示」を押すと、アプリ・レコード・フィールドの権限が1つの表に出ます。「Excelで保存」もできます。</li>
-      <li><strong>設計書を作成</strong>：「Excelで設計書を作成」を押すと、見本アプリの設計書（Excel）が保存されます。</li>
-      <li><strong>相関マップ</strong>：「相関マップを表示」を押すと、つながっているアプリが図で出ます。図のアプリを押すと、中心が切り替わります。</li>
-      <li><strong>異動・退職チェック</strong>：「ユーザーの指定を調べる」を押すと、設定に出てくる人の一覧が出ます。もういない人には印が付きます。</li>
-      <li><strong>フィールドの影響</strong>：フィールドを選んで「影響を調べる」を押すと、そのフィールドが使われている場所の一覧が出ます。</li>
-      <li><strong>設定の比較</strong>：比べるアプリに「案件管理（検証）」を選んで「比べる」を押すと、違うところだけが出ます。</li>
-    </ul>
-
-    <h3 class="group-head"><span class="plan plan-paid">有料</span>全アプリをまとめて点検する（棚卸し・<span class="trial-pill">30日間 無料で試せる</span>）</h3>
-    <div class="table-scroll">
-      <table class="facts demo-compare">
-        <thead><tr><th scope="col">「棚卸し」でできること</th><th scope="col"><span class="plan plan-free">無料</span>申し込む前</th><th scope="col"><span class="plan plan-paid">有料</span>ご契約後・30日間の無料試用中</th></tr></thead>
-        <tbody>
-          <tr><th scope="row">無料で点検する（件数だけ）</th><td class="center">○</td><td class="center">○</td></tr>
-          <tr><th scope="row">点検台帳を作成（Excel・すべての一覧）</th><td class="center">－</td><td class="center">○</td></tr>
-          <tr><th scope="row">画面の結果のまとめ（前回からの増減・要確認の項目）</th><td class="center">－</td><td class="center">○</td></tr>
-          <tr><th scope="row">点検の報告書を開く（印刷・PDF）</th><td class="center">－</td><td class="center">○</td></tr>
-          <tr><th scope="row">前回の点検台帳と比べる（変更点・推移）</th><td class="center">－</td><td class="center">○</td></tr>
-        </tbody>
-      </table>
+    <h2 id="try">試してみてください</h2>
+    <div class="demo-try">
+      <div class="tabbed is-free">
+        <span class="tab tab-free">無料<small>6本・ずっと無料</small></span>
+        <h3>1つのアプリずつ調べる</h3>
+        <ul class="try-list">
+          <li><b><img src="images/icons/permission-checker.png" alt="" width="20" height="20">権限チェッカー</b><span>「権限を表示」を押すと、アプリ・レコード・フィールドの権限が1つの表に出ます。「Excelで保存」もできます。</span></li>
+          <li><b><img src="images/icons/design-doc.png" alt="" width="20" height="20">設計書を作成</b><span>「Excelで設計書を作成」を押すと、見本アプリの設計書（Excel）が保存されます。</span></li>
+          <li><b><img src="images/icons/app-map.png" alt="" width="20" height="20">相関マップ</b><span>「相関マップを表示」を押すと、つながっているアプリが図で出ます。図のアプリを押すと、中心が切り替わります。</span></li>
+          <li><b><img src="images/icons/transfer-checker.png" alt="" width="20" height="20">異動・退職チェック</b><span>「ユーザーの指定を調べる」を押すと、設定に出てくる人の一覧が出ます。もういない人には印が付きます。</span></li>
+          <li><b><img src="images/icons/field-impact.png" alt="" width="20" height="20">フィールドの影響</b><span>フィールドを選んで「影響を調べる」を押すと、そのフィールドが使われている場所の一覧が出ます。</span></li>
+          <li><b><img src="images/icons/app-diff.png" alt="" width="20" height="20">設定の比較</b><span>比べるアプリに「案件管理（検証）」を選んで「比べる」を押すと、違うところだけが出ます。</span></li>
+        </ul>
+      </div>
+      <div class="tabbed is-paid">
+        <span class="tab tab-paid">有料<small>棚卸し</small></span>
+        <h3>全アプリをまとめて点検する</h3>
+        <ol class="demo-steps">
+          <li>「見え方」を<strong>申し込む前</strong>にして「棚卸し」を押し、「無料で点検する」を押します。見直したほうがよい設定の件数と例が出ます。</li>
+          <li>「見え方」を<strong>30日間の無料試用中・ご契約後</strong>に戻して「棚卸し」を押し、「点検台帳を作成」を押します。見本の7つのアプリをまとめた点検台帳（Excel）が保存され、画面に結果のまとめが出ます。</li>
+          <li>続けて「点検の報告書を開く」を押すと、印刷やPDFにできる1枚の報告書が新しいタブに開きます。</li>
+        </ol>
+        <div class="table-scroll">
+          <table class="facts demo-compare">
+            <thead><tr><th scope="col">「棚卸し」でできること</th><th scope="col" class="col-free">申し込む前</th><th scope="col" class="col-paid">試用中・ご契約後</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">件数だけの点検</th><td class="center"><span class="mark-yes">○</span></td><td class="center"><span class="mark-yes">○</span></td></tr>
+              <tr><th scope="row">点検台帳（Excel・すべての一覧）</th><td class="center"><span class="mark-no">－</span></td><td class="center"><span class="mark-yes">○</span></td></tr>
+              <tr><th scope="row">結果のまとめ（前回からの増減・要確認）</th><td class="center"><span class="mark-no">－</span></td><td class="center"><span class="mark-yes">○</span></td></tr>
+              <tr><th scope="row">点検の報告書（印刷・PDF）</th><td class="center"><span class="mark-no">－</span></td><td class="center"><span class="mark-yes">○</span></td></tr>
+              <tr><th scope="row">前回の点検台帳との比較</th><td class="center"><span class="mark-no">－</span></td><td class="center"><span class="mark-yes">○</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="rule-try"><span class="trial-pill">30日間 無料</span>　お使いのkintoneでも、ご契約後と同じ機能を30日間無料で試せます。カードの登録は不要で、自動で課金されることはありません。</p>
+        <div class="actions"><a class="btn btn-trial" href="pro.html#trial">30日間無料で試す</a><a class="btn" href="pro.html">くわしく見る</a></div>
+      </div>
     </div>
-    <ol class="prose demo-steps">
-      <li>上の「見え方を切り替える」で「申し込む前」を選び、「棚卸し」を押します。「無料で点検する（件数だけ）」だけが使え、見直したほうがよい設定の件数と例が出ます。</li>
-      <li>「ご契約後・30日間の無料試用中」に戻して「棚卸し」を押すと、「点検台帳を作成」が使えます。押すと、見本の7つのアプリをまとめた点検台帳（Excel）が保存され、画面にも結果のまとめが出ます。</li>
-      <li>続けて「点検の報告書を開く」を押すと、印刷やPDFにできる1枚の報告書が新しいタブに開きます。</li>
-    </ol>
-    <div class="trial-box">
-      <p class="trial-lead"><span class="trial-pill">30日間 無料</span>　お使いのkintoneでも、ご契約後と同じ機能を30日間無料で試せます。カードの登録は不要で、自動で課金されることはありません。</p>
-      <div class="actions"><a class="btn btn-trial" href="pro.html#trial">30日間無料で試す</a><a class="btn" href="pro.html">有料のプラグインのくわしい内容</a></div>
-    </div>
-    <p class="prose">各プラグインの詳しい説明は、<a href="index.html#plugins">プラグイン一覧</a>からご覧ください。</p>
+    <p class="prose demo-more">各プラグインの詳しい説明は、<a href="index.html#plugins">プラグイン一覧</a>からご覧ください。</p>
   </div>
 </div>
 <link rel="stylesheet" href="demo/permission-checker/desktop.css">
@@ -120,9 +139,12 @@
 <script src="demo/inventory-pack/desktop.js"></script>
 <script>window.__fire();</script>
 <script>
-// デモだけの目印：ボタンに「無料」「有料」の札を付け、有料のプラグインの見え方（申し込む前・ご契約後）を切り替える
+// デモだけの仕掛け：有料の「棚卸し」ボタンを有料の組に移し、画面の中のボタンに「無料」「有料」の札を付け、見え方（申し込む前・ご契約後）を切り替える
 (function () {
   var DEMO_KEY = window.__dcyConfig.license;
+  var paidBox = document.getElementById('header-paid');
+  var ip = document.getElementById('dcy-ip-open');
+  if (ip && paidBox) paidBox.appendChild(ip);
   function mark(btn, paid) {
     if (!btn || btn.querySelector('.plan')) return;
     var tag = document.createElement('span');
@@ -131,7 +153,6 @@
     btn.appendChild(tag);
   }
   function markAll() {
-    document.querySelectorAll('#header-space button[id$="-open"]').forEach(function (b) { mark(b, b.id === 'dcy-ip-open'); });
     document.querySelectorAll('.dcy-ip-dialog button').forEach(function (b) {
       var t = b.textContent;
       if (/^点検台帳を作成|^点検の報告書を開く/.test(t)) mark(b, true);
@@ -145,6 +166,8 @@
   document.querySelectorAll('input[name="demo-mode"]').forEach(function (r) {
     r.addEventListener('change', function () {
       window.__dcyConfig.license = r.value === 'paid' ? DEMO_KEY : '';
+      var hint = document.getElementById('demo-mode-hint');
+      if (hint) hint.textContent = r.value === 'paid' ? '「棚卸し」で、点検台帳（Excel）と報告書まで作れます' : '「棚卸し」で、件数だけの無料点検が使えます（申し込み不要）';
       var close = document.querySelector('.dcy-ip-close');
       if (close) close.click();
     });
