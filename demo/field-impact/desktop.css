@@ -1,0 +1,78 @@
+/* 台帳屋 フィールド影響チェッカー：kintone本体の見た目に干渉しないよう、すべて dcy-fi- で始まるクラス名を使う */
+.dcy-fi-btn {
+  height: 48px;
+  padding: 0 16px;
+  margin-left: 8px;
+  border: 1px solid #e3e7e8;
+  border-radius: 0;
+  vertical-align: top;
+  font-family: inherit;
+  background: #f7f9fa;
+  color: #3498db;
+  font-size: 14px;
+  cursor: pointer;
+}
+.dcy-fi-btn:hover { background: #eef3f6; }
+.dcy-fi-btn[disabled] { color: #a8a8a8; cursor: not-allowed; }
+.dcy-fi-btn:focus-visible, .dcy-fi-close:focus-visible, .dcy-fi-select:focus-visible { outline: 2px solid #3498db; outline-offset: 1px; }
+.dcy-fi-primary { background: #3498db; border-color: #3498db; color: #fff; }
+.dcy-fi-primary[disabled] { background: #a8cbe8; border-color: #a8cbe8; color: #fff; }
+.dcy-fi-primary:hover { background: #217dbb; }
+
+.dcy-fi-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 16px;
+  background: rgba(0, 0, 0, 0.5);
+  overflow-y: auto;
+}
+.dcy-fi-dialog {
+  width: 100%;
+  max-width: 1100px;
+  padding: 0 0 24px;
+  border-radius: 0;
+  background: #fff;
+  color: #333;
+  box-sizing: border-box;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+.dcy-fi-dialog > :not(.dcy-fi-head) { margin-left: 24px; margin-right: 24px; }
+.dcy-fi-head { display: flex; align-items: center; justify-content: space-between; min-height: 64px; padding-left: 24px; border-bottom: 1px solid #e3e7e8; }
+.dcy-fi-head h2 { margin: 0; padding: 0; border: none; font-size: 20px; font-weight: bold; line-height: 1.4; color: #333; }
+.dcy-fi-close { width: 64px; height: 64px; border: none; background: none; font-size: 28px; line-height: 1; cursor: pointer; color: #a8a8a8; }
+.dcy-fi-close:hover { color: #333; }
+.dcy-fi-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 20px; margin-bottom: 8px; }
+.dcy-fi-controls .dcy-fi-btn { margin-left: 0; }
+.dcy-fi-select { height: 48px; min-width: 320px; max-width: 100%; padding: 0 12px; border: 1px solid #e3e7e8; border-radius: 0; background: #fff; color: #333; font-size: 14px; font-family: inherit; }
+.dcy-fi-status { min-height: 20px; margin-top: 8px; margin-bottom: 8px; color: #666; font-size: 14px; }
+.dcy-fi-result h3 { margin: 24px 0 8px; padding: 0; border: none; font-size: 16px; font-weight: bold; line-height: 1.4; color: #333; }
+.dcy-fi-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.dcy-fi-table th,
+.dcy-fi-table td { padding: 6px 8px; border: 1px solid #e3e7e8; text-align: left; vertical-align: top; }
+.dcy-fi-table th { background: #f5f5f5; font-weight: bold; white-space: nowrap; }
+.dcy-fi-yes { color: #1a7f37; text-align: center !important; }
+.dcy-fi-no { color: #b0b0b0; text-align: center !important; }
+.dcy-fi-empty { color: #888; text-align: center !important; }
+.dcy-fi-more { margin: 24px 0 0; padding-top: 12px; border-top: 1px solid #e3e7e8; color: #666; font-size: 13px; }
+.dcy-fi-more a { color: #3498db; }
+.dcy-fi-lead { margin-top: 16px; font-size: 14px; line-height: 1.7; }
+.dcy-fi-filter { height: 40px; min-width: 280px; max-width: 100%; padding: 0 12px; border: 1px solid #e3e7e8; border-radius: 0; font-size: 14px; font-family: inherit; box-sizing: border-box; }
+.dcy-fi-filter:focus-visible { outline: 2px solid #3498db; outline-offset: 1px; }
+.dcy-fi-summary { margin: 16px 0 8px; padding: 12px 16px; background: #f7f9fa; border-left: 4px solid #3498db; font-size: 14px; line-height: 1.7; }
+.dcy-fi-summary p { margin: 0; }
+.dcy-fi-summary .dcy-fi-alert { color: #c0392b; font-weight: bold; }
+.dcy-fi-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 16px 0 8px; }
+.dcy-fi-state-2 { color: #c0392b; font-weight: bold; white-space: nowrap; }
+.dcy-fi-state-1 { color: #b9770e; font-weight: bold; white-space: nowrap; }
+.dcy-fi-state-0 { color: #1a7f37; white-space: nowrap; }
+.dcy-fi-table td.dcy-fi-detail { color: #555; word-break: break-all; }
+.dcy-fi-note { margin-top: 12px; color: #666; font-size: 13px; line-height: 1.7; }
+.dcy-fi-options { display: flex; flex-direction: column; gap: 6px; margin: 4px 0 8px; font-size: 14px; }
+.dcy-fi-options label { display: flex; align-items: flex-start; gap: 8px; }
+.dcy-fi-options input { margin-top: 4px; }
+.dcy-fi-star { color: #c0392b; font-weight: bold; }
+.dcy-fi-select-field { min-width: 280px; }

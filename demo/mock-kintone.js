@@ -59,6 +59,8 @@
       14: { actions: { 受注にする: { name: '受注にする', id: '2', index: '0', destApp: { app: '12', code: '' }, mappings: [{ srcType: 'FIELD', srcField: '見積番号', destField: '案件名' }], entities: [], filterCond: '' } } }
     },
     '/k/v1/app/form/layout.json': { 12: layout12 },
+    '/k/v1/app/settings.json': { 12: { name: '案件管理', titleField: { selectionMode: 'MANUAL', code: '案件名' } } },
+    '/k/v1/app/reports.json': { 12: { reports: { 担当者別の受注見込み: { name: '担当者別の受注見込み', index: '0', chartType: 'BAR', groups: [{ code: '担当者' }], aggregations: [{ type: 'SUM', code: '金額' }], filterCond: '受注確度 in ("A", "B")', sorts: [] } } } },
     '/k/v1/app.json': { 12: { appId: '12', name: '案件管理', description: '<div>営業部の案件を管理するアプリです。<br />受注確度は毎週月曜に見直します。</div>', createdAt: '2025-04-01T00:30:00Z', creator: { code: 'kanri', name: '情報システム課' }, modifiedAt: '2026-10-28T06:12:00Z', modifier: { code: 'kanri', name: '情報システム課' } } },
     '/k/v1/app/views.json': { 12: { views: {
       すべての案件: { type: 'LIST', name: 'すべての案件', index: '0', fields: ['案件名', '顧客名', '受注確度', '担当者', '金額'], filterCond: '', sort: 'レコード番号 desc' },
@@ -147,6 +149,7 @@
       case '/k/v1/app/plugins.json': return { plugins: [] };
       case '/k/v1/app/actions.json': return { actions: {} };
       case '/k/v1/app/reports.json': return { reports: {} };
+      case '/k/v1/app/settings.json': return { name: app.name, titleField: { selectionMode: 'AUTO' } };
       case '/k/v1/records.json': return null;
       case '/k/v1/app/customize.json': return { scope: 'ALL', desktop: { js: [], css: [] }, mobile: { js: [], css: [] } };
       default: return null;

@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>kintoneでフィールドを削除・変更する前に、使われている場所を調べる方法｜台帳屋</title>
+<meta name="description" content="kintoneのフィールドが削除できない（ルックアップや関連レコード一覧から参照されている）ときの原因の探し方と、フィールドを削除・フィールドコードを変更する前に確かめたい場所の一覧。">
+<link rel="canonical" href="https://daichoya.github.io/guide/field-usage.html">
+<meta property="og:title" content="kintoneでフィールドを削除・変更する前に、使われている場所を調べる方法｜台帳屋">
+<meta property="og:description" content="kintoneのフィールドが削除できない（ルックアップや関連レコード一覧から参照されている）ときの原因の探し方と、フィールドを削除・フィールドコードを変更する前に確かめたい場所の一覧。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://daichoya.github.io/guide/field-usage.html">
+<meta property="og:site_name" content="台帳屋">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:image" content="https://daichoya.github.io/images/ogp.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="google-site-verification" content="J1TnZ6bD5c5EjVGtQBBk2eRmLsDje0VapbpwCEnbA6M">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="../index.html"><span class="brand-name">台帳屋</span><span class="brand-sub">kintone管理者向けプラグイン</span></a>
+    <nav class="site-nav" aria-label="サイト内のページ"><a href="../index.html#plugins">プラグイン</a><a href="../demo.html">デモ</a><a href="../index.html#price">料金</a><a href="../guide/index.html" aria-current="page">ガイド</a><a href="../security.html">セキュリティ</a><a href="../index.html#faq">よくある質問</a></nav>
+  </div>
+</header>
+<main>
+<div class="page">
+  <div class="wrap">
+    <p class="breadcrumb"><a href="../index.html">台帳屋</a> ／ <a href="../guide/index.html">使い方ガイド</a></p>
+    <h1>kintoneでフィールドを削除・変更する前に、使われている場所を調べる方法</h1>
+    <p class="updated">2026年11月5日</p>
+    <div class="lead prose">
+      <p>使っていないように見えるフィールドを消したい。フィールドコードを分かりやすく直したい。<br>そのとき気になるのが、「このフィールドは、どこで使われているのか」です。</p>
+      <p>このページでは、フィールドが使われうる場所と、調べ方をまとめます。</p>
+    </div>
+
+    <h2>フィールドを削除できないとき</h2>
+    <div class="prose">
+      <p>kintoneでは、次の設定で使われているフィールドは、削除しようとするとエラーになります。</p>
+      <ul>
+        <li>ほかのアプリのルックアップから参照されている</li>
+        <li>ほかのアプリの関連レコード一覧から参照されている</li>
+        <li>プロセス管理の作業者の指定に使われている</li>
+      </ul>
+      <p>エラーの画面には、どのアプリのどのフィールドが参照しているかまでは出ません。<br>参照しているアプリは、アプリの設定の「設定」タブ →「運用管理」→「このアプリを参照しているアプリ」で分かります（2026年4月から）。そのあと、相手のアプリのフォームを開いて、ルックアップや関連レコード一覧の設定を1つずつ確かめます。</p>
+    </div>
+
+    <h2>フィールドが使われうる場所</h2>
+    <div class="table-scroll">
+      <table class="facts">
+        <thead><tr><th scope="col">場所</th><th scope="col">確かめる画面</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">計算式</th><td>フォーム：計算フィールドと、自動計算を使う文字列（1行）フィールド</td></tr>
+          <tr><th scope="row">ルックアップ・関連レコード一覧</th><td>フォーム：このアプリと、ほかのアプリの両方（キー、コピーするフィールド、絞り込みや並び順）</td></tr>
+          <tr><th scope="row">一覧・グラフ</th><td>一覧の表示項目・絞り込み・並び順、グラフの分類・集計・絞り込み</td></tr>
+          <tr><th scope="row">アクセス権</th><td>レコードのアクセス権の条件、フィールドのアクセス権、ユーザー選択などのフィールドで指定した人</td></tr>
+          <tr><th scope="row">プロセス管理</th><td>ステータスの作業者、アクションの条件</td></tr>
+          <tr><th scope="row">通知</th><td>レコードの条件通知・リマインダーの条件通知の条件と日時、フィールドで指定した通知先</td></tr>
+          <tr><th scope="row">アプリアクション</th><td>このアプリから、またはほかのアプリから、値をコピーするフィールド</td></tr>
+          <tr><th scope="row">そのほか</th><td>レコードのタイトル、JavaScriptのカスタマイズ、プラグインの設定</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>フィールドコードを変えるときの注意</h2>
+    <div class="prose">
+      <p>フィールドコードを変えると、計算式の中のフィールドコードは自動で変わります（計算式が正しくない場合を除く）。<br>一方で、JavaScriptのカスタマイズやプラグインの設定の中に書かれたフィールドコードは変わりません。そのままだと、カスタマイズが動かなくなることがあります。</p>
+      <p>REST APIや外部のサービスとつないでいる場合も、フィールドコードを使っていることが多いので、あわせて確かめてください。</p>
+    </div>
+
+    <h2>REST APIで調べる</h2>
+    <div class="prose">
+      <p>上の設定は、kintoneのREST APIで取得できます（そのアプリの管理権限が必要です）。</p>
+      <ul>
+        <li>フォーム：<code>/k/v1/app/form/fields.json</code>（計算式、ルックアップ、関連レコード一覧）</li>
+        <li>一覧・グラフ：<code>/k/v1/app/views.json</code>・<code>/k/v1/app/reports.json</code></li>
+        <li>アクセス権・プロセス管理・通知：<code>/k/v1/record/acl.json</code>・<code>/k/v1/field/acl.json</code>・<code>/k/v1/app/status.json</code>・<code>/k/v1/app/notifications/perRecord.json</code>・<code>reminder.json</code></li>
+        <li>アクション・タイトル：<code>/k/v1/app/actions.json</code>・<code>/k/v1/app/settings.json</code></li>
+      </ul>
+      <p>条件の文字列（例：<code>金額 &gt;= 1000000</code>）の中では、フィールドコードが名前のまま出てきます。似た名前のフィールド（「金額」と「金額税込」など）を取り違えないように気をつけてください。<br>ほかのアプリからの参照は、すべてのアプリのフォームとアクションを取得して、参照先がこのアプリになっているものを探します。</p>
+    </div>
+
+    <h2>プラグインで調べる</h2>
+    <div class="prose">
+      <p>台帳屋の<a href="../plugins/field-impact.html">フィールド影響チェッカー</a>（無料）は、上のAPIを使って、選んだフィールドが使われている場所を一覧にするプラグインです。<br>ほかのアプリのルックアップ・関連レコード一覧・アクションも調べ、使われている間は削除できない設定に★を付けます。JavaScriptのカスタマイズの中も探せます。</p>
+    </div>
+    <figure class="shot">
+      <a href="../images/field-impact.webp" title="画像を大きく表示"><img src="../images/field-impact.webp" width="1100" height="629" alt="フィールド影響チェッカーの画面。レコード番号が使われている場所が一覧になり、ほかのアプリのルックアップのキーに★が付いている" loading="lazy"></a>
+      <figcaption>見本のアプリで調べた例</figcaption>
+    </figure>
+    <div class="actions"><a class="btn btn-primary" href="../demo.html">フィールド影響チェッカーをデモで試す</a></div>
+
+    <h2>参考</h2>
+    <ul class="prose refs">
+      <li><a href="https://jp.kintone.help/k/ja/app/form/autocalc/ref_data/fieldcode" rel="noopener">フィールドコードとは（kintone ヘルプ）</a></li>
+      <li><a href="https://jp.kintone.help/k/ja/app/manage/reference" rel="noopener">このアプリを参照しているアプリを確認する（kintone ヘルプ）</a></li>
+      <li><a href="https://jp.kintone.help/k/en/trouble_shooting/app_trouble/delete_field_error" rel="noopener">An error message appears and I cannot delete a field（kintone ヘルプ）</a></li>
+    </ul>
+  </div>
+</div>
+
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <nav aria-label="規約とお問い合わせ">
+      <a href="../privacy.html">プライバシーポリシー</a>
+      <a href="../terms.html">利用規約</a>
+      <a href="../tokushoho.html">特定商取引法に基づく表記</a>
+      <span>お問い合わせ：<a href="mailto:daichoya.plugins@gmail.com">daichoya.plugins@gmail.com</a></span>
+    </nav>
+    <p>kintoneはサイボウズ株式会社の登録商標です。台帳屋は、サイボウズ株式会社とは関係のない個人の開発者が提供しています。</p>
+    <p>&copy; 2026 台帳屋</p>
+  </div>
+</footer>
+</body>
+</html>

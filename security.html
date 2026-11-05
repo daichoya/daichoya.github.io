@@ -32,7 +32,7 @@
     <h1>導入前の確認事項</h1>
     <div class="lead prose">
       <p>社内のkintoneにプラグインを導入する前の確認にお使いください。</p>
-      <p>無料の4つのプラグイン（権限チェッカー・設計書ジェネレーター・アプリ相関マップ・異動・退職チェッカー）は、同じ仕組みで動作します。<br>有料版（棚卸し・変更監視パック）の違いは、<a href="#pro">ページの下</a>にまとめています。</p>
+      <p>無料の5つのプラグイン（権限チェッカー・設計書ジェネレーター・アプリ相関マップ・異動・退職チェッカー・フィールド影響チェッカー）は、同じ仕組みで動作します。<br>有料版（棚卸し・変更監視パック）の違いは、<a href="#pro">ページの下</a>にまとめています。</p>
     </div>
 
     <h2>動作の仕組み</h2>
@@ -40,7 +40,7 @@
       <table class="facts">
         <tbody>
           <tr><th scope="row">通信先</th><td>kintone環境のみです。台帳屋のサーバーや外部サービスとは通信しません。</td></tr>
-          <tr><th scope="row">読み取る情報</th><td>アプリの設定のみです（下表のAPI）。レコードのデータは読み取りません。</td></tr>
+          <tr><th scope="row">読み取る情報</th><td>アプリの設定のみです（下表のAPI）。レコードのデータは読み取りません。<br>フィールド影響チェッカーは、アプリに読み込まれたJavaScriptのファイルの中身も読みます（フィールドコードを探すためだけで、保存や送信はしません）。</td></tr>
           <tr><th scope="row">書き込み</th><td>ありません。kintoneの設定やレコードは変更しません。</td></tr>
           <tr><th scope="row">データの保存</th><td>読み取った情報は画面の表示にだけ使い、保存しません。<br>ファイルは、利用者が書き出しボタンを押したときだけ、その人のパソコンに保存されます。</td></tr>
           <tr><th scope="row">設定・認証</th><td>プラグインの設定画面はありません。<br>APIトークンやパスワードも不要で、ログイン中のユーザーの権限で動作します。</td></tr>
@@ -59,6 +59,7 @@
           <tr><th scope="row">設計書ジェネレーター</th><td><ul class="api"><li><code>/k/v1/apps.json</code>・<code>/k/v1/app.json</code></li><li><code>/k/v1/app/form/fields.json</code>・<code>/k/v1/app/form/layout.json</code>・<code>/k/v1/app/views.json</code>・<code>/k/v1/app/status.json</code></li><li><code>/k/v1/app/notifications/general.json</code>・<code>perRecord.json</code>・<code>reminder.json</code></li><li><code>/k/v1/app/acl.json</code>・<code>/k/v1/record/acl.json</code>・<code>/k/v1/field/acl.json</code></li><li><code>/k/v1/app/plugins.json</code>・<code>/k/v1/app/customize.json</code></li></ul></td></tr>
           <tr><th scope="row">アプリ相関マップ</th><td><ul class="api"><li><code>/k/v1/apps.json</code></li><li><code>/k/v1/app/form/fields.json</code>・<code>/k/v1/app/actions.json</code></li></ul></td></tr>
           <tr><th scope="row">異動・退職チェッカー</th><td><ul class="api"><li><code>/k/v1/apps.json</code></li><li><code>/k/v1/app/acl.json</code>・<code>/k/v1/record/acl.json</code>・<code>/k/v1/field/acl.json</code></li><li><code>/k/v1/app/status.json</code></li><li><code>/k/v1/app/notifications/general.json</code>・<code>perRecord.json</code>・<code>reminder.json</code></li><li><code>/k/v1/app/form/fields.json</code>・<code>/k/v1/app/views.json</code>・<code>/k/v1/app/reports.json</code>・<code>/k/v1/app/actions.json</code></li><li>cybozu.comのUser API：<code>/v1/users.json</code>・<code>/v1/organizations.json</code>・<code>/v1/groups.json</code>（設定に出てきたコードが、いまもあるかの確認だけ）</li></ul></td></tr>
+          <tr><th scope="row">フィールド影響チェッカー</th><td><ul class="api"><li><code>/k/v1/apps.json</code></li><li><code>/k/v1/app/form/fields.json</code>・<code>/k/v1/app/views.json</code>・<code>/k/v1/app/reports.json</code>・<code>/k/v1/app/settings.json</code></li><li><code>/k/v1/record/acl.json</code>・<code>/k/v1/field/acl.json</code>・<code>/k/v1/app/status.json</code></li><li><code>/k/v1/app/notifications/general.json</code>・<code>perRecord.json</code>・<code>reminder.json</code>・<code>/k/v1/app/actions.json</code></li><li><code>/k/v1/app/customize.json</code>・<code>/k/v1/file.json</code>（アプリに読み込まれたJavaScriptのファイルの中身。チェックを外すと使いません）</li></ul></td></tr>
         </tbody>
       </table>
     </div>
