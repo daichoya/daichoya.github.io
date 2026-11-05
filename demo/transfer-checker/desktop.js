@@ -49,7 +49,7 @@
   function summaryLines(list, sole, errors) {
     var sum = Refs.summary(list);
     var lines = [];
-    if (!list.length) lines.push({ alert: false, text: 'このアプリの設定には、ユーザー・組織・グループを指定しているところがありません。' });
+    if (!list.length) lines.push({ alert: false, text: ((errors && errors.length) ? '読み取れた設定' : 'このアプリの設定') + 'には、ユーザー・組織・グループを指定しているところがありません。' });
     else {
       var count = function (n) { return n < 10 ? n + 'つ' : n + '個'; };
       var parts = [];

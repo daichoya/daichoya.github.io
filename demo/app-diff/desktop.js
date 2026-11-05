@@ -201,7 +201,7 @@
     });
 
     byIndex(s.actions && s.actions.actions).forEach(function (a) {
-      add('アプリアクション', a.name, join(['作成先：' + appRef(a.destApp && a.destApp.app, names),
+      add('アプリアクション', a.name, join(['作成先：' + (a.destApp && a.destApp.app ? appRef(a.destApp.app, names) : '（見られないアプリ）'),
         (a.mappings || []).length ? 'コピー：' + a.mappings.map(function (m) { return (m.srcType === 'FIELD' ? m.srcField : m.srcType === 'RECORD_URL' ? 'レコードのURL' : m.srcType) + '→' + m.destField; }).join('、') : '',
         a.filterCond ? '条件：' + a.filterCond : '',
         (a.entities || []).length ? '使える人：' + a.entities.map(function (e) { return entityText(e); }).join('、') : '']));

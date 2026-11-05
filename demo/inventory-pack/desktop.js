@@ -402,7 +402,9 @@
     visit(properties, null);
     Object.keys((actions && actions.actions) || {}).forEach(function (name) {
       var a = actions.actions[name];
-      if (a && a.destApp && a.destApp.app) links.push({ from: String(appId), to: String(a.destApp.app), kind: 'アクション', place: a.name || name });
+      if (!a) return;
+      // 作成先のアプリを見る権限がないと、kintoneは destApp を null で返す。つながりは残して「見られないアプリ」と書く
+      links.push({ from: String(appId), to: a.destApp && a.destApp.app ? String(a.destApp.app) : '', kind: 'アクション', place: a.name || name });
     });
     return links;
   }
@@ -769,7 +771,7 @@
     var cover = [
       ['点検日時', dateText(now)],
       ['kintone環境', snapshot.host],
-      ['点検したアプリ', apps.length + '個'],
+      ['点検したアプリ', apps.length + '個（点検した人が見られるアプリだけです。見られないアプリは含みません）'],
       ['読み取れなかった項目があるアプリ', withErrors.length + '個' + (withErrors.length ? '（「アプリ一覧」シートの右端の列を参照）' : '')],
       ['注意点（権限・利用状況・ユーザーの指定）', warnings.length + '件'],
       ['前回の点検', prev ? dateText(prev.takenAt) + '（' + (prev.host || '') + '）' : '比較していません'],
@@ -827,7 +829,7 @@
       { name: 'フィールドの使われ方', widths: [8, 24, 24, 20, 14, 26, 40, 50, 44], blocks: [{ title: null, header: ['アプリID', 'アプリ名', 'フィールド名', 'フィールドコード', '種類', '判定', 'このアプリでの使われ方', 'ほかのアプリからの使われ方', '確かめること'], rows: use.rows,
         styles: use.rows.map(function (r) { return /★/.test(r[7]) ? STYLE.warn : STYLE.body; }),
         note: use.rows.length
-          ? '★は、使われている間はkintoneがフィールドの削除を止める設定です。「設定では使われていません」は、計算式・一覧・グラフ・アクセス権・プロセス管理・通知・アクション・レコードのタイトルと、ほかのアプリのルックアップ・関連レコード一覧・アクションのどれにも出てこない、という意味です。利用者が値を入力して使っている場合や、JavaScript・プラグインの設定の中で使っている場合があるため、削除の前に確かめてください。'
+          ? '★は、使われている間はkintoneがフィールドの削除を止める設定です。「設定では使われていません」は、計算式・一覧・グラフ・アクセス権・プロセス管理・通知・アクション・レコードのタイトルと、ほかのアプリのルックアップ・関連レコード一覧・アクションのどれにも出てこない、という意味です。利用者が値を入力して使っている場合や、JavaScript・プラグインの設定の中で使っている場合があるため、削除の前に確かめてください。点検した人が見られないアプリで使われているフィールドは、ここに出ません。kintoneシステム管理者でない人が点検したときは、特に注意してください。'
           : 'フィールドの設定を読み取れたアプリがありません。' }] },
       { name: RECORD_SHEET, hidden: true, widths: [20], blocks: [{ title: null, header: [], rows: chunks }] }
     ];

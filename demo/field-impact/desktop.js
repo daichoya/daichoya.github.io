@@ -59,13 +59,16 @@
       var parts = [];
       if (here) parts.push('このアプリの' + here + 'か所');
       if (there) parts.push('ほかのアプリ（' + Object.keys(otherApps).length + '個）の' + there + 'か所');
-      var note = !here ? '（このアプリの中では使われていません）' : (info.others && !there ? '（ほかのアプリでは使われていません）' : '');
+      var note = !here ? '（このアプリの中では使われていません）' : (info.others && !there ? '（調べたほかのアプリでは使われていません）' : '');
       lines.push({ alert: false, text: name + 'は、' + parts.join('と、') + 'で使われています' + note + '。' });
     }
     if (list.some(function (r) { return r.blocks; })) lines.push({ alert: true, text: '★の付いた場所で使われている間は、kintoneでこのフィールドを削除できません。先にその設定を直してください。' });
     if (list.length) lines.push({ alert: false, text: 'フィールドコードを変えると、計算式の中のコードは自動で変わります。JavaScriptのカスタマイズやプラグインの設定の中は変わらないため、合わせて直す必要があります。' });
     if (!info.others) lines.push({ alert: false, text: 'ほかのアプリは調べていません。' });
-    else if (info.otherErrors) lines.push({ alert: false, text: '設定を読み取れなかったアプリが' + info.otherErrors + '個あります（閲覧や管理の権限がないため）。' });
+    else {
+      lines.push({ alert: false, text: 'ほかのアプリは、操作した人が見られるアプリだけを調べています。kintoneシステム管理者でない人が調べたときは、見られないアプリで使われていても、ここには出ません（その場合も、kintoneが削除を止めることがあります）。' });
+      if (info.otherErrors) lines.push({ alert: false, text: '設定を読み取れなかったアプリが' + info.otherErrors + '個あります（閲覧や管理の権限がないため）。' });
+    }
     if (info.errors.length) lines.push({ alert: false, text: '読み取れなかった設定：' + info.errors.join('、') });
     if (info.urls.length) lines.push({ alert: false, text: 'URLで読み込んでいるJavaScript（' + info.urls.length + '件）の中は調べていません。' });
     return lines;

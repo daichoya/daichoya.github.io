@@ -309,7 +309,7 @@
 
   function scanNote(scan) {
     var notes = [];
-    notes.push(scan.total + '個のアプリを調べました。');
+    notes.push(scan.total + '個のアプリを調べました（操作した人が見られるアプリだけです。見られないアプリは図に入りません）。');
     if (scan.fieldErrors) notes.push('フィールドを読めなかったアプリが' + scan.fieldErrors + '個あります（閲覧の権限がないため）。');
     if (scan.actionErrors) notes.push('アクションを読めなかったアプリが' + scan.actionErrors + '個あります（アクションはアプリの管理権限が必要です）。');
     return notes.join('');

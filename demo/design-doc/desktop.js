@@ -519,10 +519,16 @@
       var s = sheets.filter(function (x) { return x.name === name; })[0];
       return s ? s.blocks.reduce(function (n, b) { return n + (b.rows ? b.rows.length : 0); }, 0) : 0;
     };
+    var failed = [];
+    sheets.forEach(function (s) {
+      if (s.blocks.some(function (b) { return /^この項目を取得できませんでした/.test(b.note || ''); })) failed.push(s.name);
+    });
+    var part = function (name) { return failed.indexOf(name) >= 0 ? name + '（読み取れませんでした）' : name + count(name) + '件'; };
     var custom = sheets.filter(function (x) { return x.name === 'カスタマイズ'; })[0];
     var files = custom && custom.blocks[1] ? custom.blocks[1].rows.length : 0;
-    return 'フィールド' + count('フィールド') + '件、一覧' + count('一覧') + '件、プラグイン' + count('プラグイン') + '件' +
-      (files ? '、カスタマイズのファイル' + files + '件' : '') + 'を設計書にまとめました。';
+    return part('フィールド') + '、' + part('一覧') + '、' + part('プラグイン') +
+      (files ? '、カスタマイズのファイル' + files + '件' : '') + 'を設計書にまとめました。' +
+      (failed.length ? '権限がないため読み取れなかった項目があります（' + failed.join('・') + 'のシートに書いてあります）。' : '');
   }
 
   var Core = {
