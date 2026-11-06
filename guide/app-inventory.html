@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>kintoneのアプリを棚卸しする方法（ガバナンスガイドラインの点検項目）｜台帳屋</title>
+<meta name="description" content="サイボウズの「kintoneガバナンスガイドライン」と「アプリ運用ルール策定ガイド 拡張機能編」にある、アプリ・プラグイン・カスタマイズの棚卸しの点検項目と、kintoneシステム管理の画面で手作業で確かめる手順。">
+<link rel="canonical" href="https://daichoya.github.io/guide/app-inventory.html">
+<meta property="og:title" content="kintoneのアプリを棚卸しする方法（ガバナンスガイドラインの点検項目）｜台帳屋">
+<meta property="og:description" content="サイボウズの「kintoneガバナンスガイドライン」と「アプリ運用ルール策定ガイド 拡張機能編」にある、アプリ・プラグイン・カスタマイズの棚卸しの点検項目と、kintoneシステム管理の画面で手作業で確かめる手順。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://daichoya.github.io/guide/app-inventory.html">
+<meta property="og:site_name" content="台帳屋">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:image" content="https://daichoya.github.io/images/ogp.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="google-site-verification" content="J1TnZ6bD5c5EjVGtQBBk2eRmLsDje0VapbpwCEnbA6M">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/style.css?v=e3c81c8694">
+</head>
+<body>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="../index.html"><span class="brand-name">台帳屋</span><span class="brand-sub">kintone管理者向けプラグイン</span></a>
+    <a class="head-cta" href="../pro.html#trial">30日間無料で試す</a>
+    <nav class="site-nav" aria-label="サイト内のページ"><a href="../index.html#plugins">プラグイン</a><a href="../demo.html">デモ</a><a href="../index.html#price">料金</a><a href="../guide/index.html" aria-current="page">ガイド</a><a href="../security.html">セキュリティ</a><a href="../index.html#faq">よくある質問</a><a class="nav-cta" href="../pro.html#trial">30日間無料で試す</a></nav>
+  </div>
+</header>
+<main>
+<div class="page">
+  <div class="wrap">
+    <p class="breadcrumb"><a href="../index.html">台帳屋</a> ／ <a href="../guide/index.html">使い方ガイド</a></p>
+    <h1>kintoneのアプリを棚卸しする方法（ガバナンスガイドラインの点検項目）</h1>
+    <p class="updated">2026年11月6日</p>
+    <div class="lead prose">
+      <p>kintoneを長く使うと、アプリやプラグインが増えていきます。誰が何のために作ったのか、分からないものも出てきます。<br>そこで、ときどき全体を見直す「棚卸し」をします。</p>
+      <p>このページでは、サイボウズの資料にある点検の項目と、手作業で確かめる手順をまとめます。</p>
+    </div>
+
+    <h2>サイボウズの資料にある棚卸し</h2>
+    <div class="prose">
+      <p>サイボウズの2つの資料が、棚卸しをすすめています。</p>
+      <ul>
+        <li><strong>kintoneガバナンスガイドライン</strong>：作られたアプリの一覧とプラグインの一覧を定期的に出し、推進する組織が知らない高リスクのアプリや、管理のルールに合わないものがないかを確かめる。棚卸しのときに、アプリ管理者も確かめ直す。</li>
+        <li><strong>アプリ運用ルール策定ガイド 拡張機能編</strong>：kintone全体の拡張機能の管理者を中心に、追加した機能の棚卸しを、半年に1回行うのがおすすめ。</li>
+      </ul>
+    </div>
+
+    <h2>点検する項目</h2>
+    <div class="prose">
+      <p>2つの資料にある項目を、表にまとめます。機密性の高いアプリは、アクセス権も棚卸しします。各ユーザーに要らない権限が残っていないかを確かめます（手順は「<a href="../guide/permission-list.html">kintoneのアクセス権を一覧で確認する方法</a>」）。</p>
+    </div>
+    <div class="table-scroll">
+      <table class="facts">
+        <thead><tr><th scope="col">項目</th><th scope="col">確かめること</th><th scope="col">確かめる画面</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">アプリの一覧</th><td>推進する組織が知らないアプリや、管理のルールに合わないアプリがないか</td><td>kintoneシステム管理 →［アプリ管理］</td></tr>
+          <tr><th scope="row">アプリ管理者</th><td>アプリ管理者が、いまの担当者になっているか</td><td>kintoneシステム管理 →［アプリ管理］（アプリ管理者の数）</td></tr>
+          <tr><th scope="row">スペースに入っていないアプリ</th><td>ガイドラインは、スペースに所属しないアプリを作らせない運用を例に挙げています</td><td>REST APIのアプリの一覧（スペースID）</td></tr>
+          <tr><th scope="row">プラグイン</th><td>用途の分からないプラグイン、使われていないプラグインがないか</td><td>kintoneシステム管理 →「プラグイン」</td></tr>
+          <tr><th scope="row">アプリのカスタマイズ</th><td>カスタマイズを使っているアプリの数と、用途の分からないカスタマイズがないか</td><td>kintoneシステム管理 →［アプリ管理］</td></tr>
+          <tr><th scope="row">kintone全体のカスタマイズ</th><td>kintone全体に入れたカスタマイズがないか、あれば用途が分かるか</td><td>kintoneシステム管理 →「JavaScript / CSSでカスタマイズ」</td></tr>
+          <tr><th scope="row">REST API</th><td>APIのリクエストが多いアプリと、用途の分からないリクエストがないか</td><td>kintoneシステム管理 →［アプリ管理］</td></tr>
+          <tr><th scope="row">連携サービス</th><td>用途の分からない接続や、使われていない設定が残っていないか</td><td>連携サービスの設定画面</td></tr>
+          <tr><th scope="row">初期の管理者アカウント</th><td>最初からある「Administrator」を、業務で使わないのに使える状態にしていないか</td><td>cybozu.com共通管理者が確かめる</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>手作業で棚卸しする手順</h2>
+    <ol class="steps steps-4">
+      <li><strong>一覧を出す</strong><span>kintoneシステム管理の［アプリ管理］で、アプリの一覧をCSV形式でダウンロードします。「プラグイン」の画面からも、プラグインの一覧をCSV形式でダウンロードできます。</span></li>
+      <li><strong>プラグインの使われ方を見る</strong><span>「プラグイン」の画面で、プラグインごとの利用状況を確かめます。どのアプリにも追加されていないものは、使われていない候補です。</span></li>
+      <li><strong>1つずつ確かめる</strong><span>上の表の項目を、アプリごとに確かめます。用途が分からないものは、作った人やアプリ管理者に聞きます。</span></li>
+      <li><strong>結果と理由を残す</strong><span>確かめた日と対応（残す・直す・消す）を表に残します。機能を足した理由は「アプリ管理者用メモ」に書くと、次の棚卸しで迷いません。</span></li>
+    </ol>
+    <div class="prose">
+      <p>アプリを消す前に、ほかのアプリから参照されていないかも確かめてください（手順は「<a href="../guide/app-references.html">kintoneでアプリの参照元を調べる方法</a>」）。</p>
+    </div>
+
+    <h2>見落としやすいところ</h2>
+    <div class="prose">
+      <p>kintoneシステム管理者でも、閲覧の権限がないアプリは、アプリの一覧（REST APIの <code>/k/v1/apps.json</code> など）に出ません。この一覧で数えると、見えないアプリが漏れます。<br>棚卸しの前に、点検する人がすべてのアプリを閲覧できるかを確かめてください。</p>
+      <p>REST APIでは、アプリの一覧から作成日時・作成者・更新日時・所属するスペースが取れます。アプリ管理者用メモは、アプリごとに取得できます（そのアプリの管理権限が必要です）。</p>
+    </div>
+
+    <h2>プラグインで点検する</h2>
+    <div class="related tabbed is-paid"><span class="tab tab-paid">有料<small>全アプリをまとめて</small></span><p class="related-head">上の項目を、全アプリまとめて点検するなら</p><p>台帳屋の有料のプラグイン「<a href="../pro.html">棚卸し・変更監視パック</a>」（年額33,000円から、税込）は、上の項目の多くを全アプリまとめて点検します（<a href="../pro.html#items">点検する項目</a>）。結果は点検台帳（Excel）と1枚の報告書になります。閲覧の権限がなく一覧に出ないアプリは、アプリIDから見つけて「点検の対象に入らなかったアプリ」として書きます。</p><p>件数だけなら、申し込みなしで<a href="../pro.html#free">無料で点検できます</a>。30日間の無料試用は、kintoneの環境ごとに1回です。試用で作った資料には「試用版」と入ります。</p><div class="actions"><a class="btn btn-trial" href="../pro.html#trial">30日間無料で試す</a><a class="btn" href="../demo.html">デモで試す</a></div></div>
+
+    <h2>参考</h2>
+    <ul class="prose refs">
+      <li><a href="https://kintone.cybozu.co.jp/material/pdf/kintone_governance_guideline.pdf" rel="noopener">kintoneガバナンスガイドライン（サイボウズ、PDF）</a></li>
+      <li><a href="https://kintone.cybozu.co.jp/kintone-signpost/assets/pdf/operation_rules_advanced.pdf" rel="noopener">アプリ運用ルール策定ガイド 拡張機能編（サイボウズ、PDF）</a></li>
+      <li><a href="https://jp.kintone.help/k/ja/admin/app_admin/confirm_app_list" rel="noopener">［アプリ管理］画面でアプリの一覧を確認する（kintone ヘルプ）</a></li>
+      <li><a href="https://jp.kintone.help/k/ja/app/plugin/manage/confirm_plugin" rel="noopener">プラグインの利用状況を確認する（kintone ヘルプ）</a></li>
+      <li><a href="https://cybozu.dev/ja/kintone/docs/rest-api/apps/get-apps/" rel="noopener">複数のアプリの情報を取得する（cybozu developer network）</a></li>
+      <li><a href="https://cybozu.dev/ja/kintone/docs/rest-api/apps/get-app-admin-notes/" rel="noopener">アプリ管理者用メモを取得する（cybozu developer network）</a></li>
+    </ul>
+  </div>
+</div>
+
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <nav aria-label="規約とお問い合わせ">
+      <a href="../privacy.html">プライバシーポリシー</a>
+      <a href="../terms.html">利用規約</a>
+      <a href="../tokushoho.html">特定商取引法に基づく表記</a>
+      <span>お問い合わせ：<a href="mailto:daichoya.plugins@gmail.com">daichoya.plugins@gmail.com</a></span>
+    </nav>
+    <p>kintoneはサイボウズ株式会社の登録商標です。台帳屋は、サイボウズ株式会社とは関係のない個人の開発者が提供しています。</p>
+    <p>&copy; 2026 台帳屋</p>
+  </div>
+</footer>
+</body>
+</html>
