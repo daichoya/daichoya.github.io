@@ -589,7 +589,7 @@
   // 点検台帳の記録に、これまでの点検の件数を残す（前回の点検台帳を選んで作るたびに1行ずつ増える）
 
   var HISTORY_MAX = 24;
-  var VERSION = '1.7.0'; // manifest.json の version と同じにする（テストで確かめる）
+  var VERSION = '1.7.1'; // manifest.json の version と同じにする（テストで確かめる）
 
   // 判定の基準（点検台帳の「判定の基準」シートと、報告書の別紙1に載せる）。[区分, 重要度, 判定, 基準・出典]
   var CRITERIA = [
@@ -714,33 +714,51 @@
 
   function clip(text, max) { text = String(text || ''); return text.length > max ? text.slice(0, max - 1) + '…' : text; }
 
-  var REPORT_CSS = '@page{size:A4 portrait;margin:12mm}' +
-    'body{margin:0;color:#222;font-family:"BIZ UDPGothic","Yu Gothic","Hiragino Sans","Meiryo",sans-serif;font-size:9.5pt;line-height:1.45;background:#fff}' +
+  // 報告書の見た目：監査や社内の提出に出す正式な書類として、白黒で印刷しても読める、飾りの少ない形にする
+  // （見出しは明朝、表はゴシック。色は要確認の赤だけ。上に機密区分・管理番号・承認欄、最後に「以上」）
+  var REPORT_MINCHO = '"BIZ UDPMincho","Yu Mincho","YuMincho","Hiragino Mincho ProN","Noto Serif JP","Noto Serif CJK JP","MS PMincho",serif';
+  var REPORT_CSS = '@page{size:A4 portrait;margin:12mm 12mm 14mm}' +
+    'body{margin:0;color:#111;font-family:"BIZ UDPGothic","Yu Gothic","Hiragino Sans","Meiryo","Noto Sans CJK JP",sans-serif;font-size:9.5pt;line-height:1.45;background:#fff}' +
     '.bar{position:sticky;top:0;display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:10px 16px;background:#f5f6f7;border-bottom:1px solid #ccc}' +
     '.bar button{height:40px;padding:0 18px;border:none;background:#1f77b4;color:#fff;font:inherit;font-size:11pt;cursor:pointer}' +
-    '.sheet{max-width:186mm;margin:0 auto;padding:8mm 4mm 12mm}' +
-    'h1{margin:0;padding-top:2mm;font-size:16pt;text-align:center;letter-spacing:.15em;color:#1f3a5f}' +
-    '.sheet{position:relative}.date{position:absolute;top:0;right:0;margin:0;font-size:9pt}' +
-    '.parties{display:flex;justify-content:space-between;gap:8mm;margin:3mm 0 2mm}.parties div{flex:1}' +
-    '.fill{display:inline-block;min-width:52mm;border-bottom:1px solid #666;padding:0 2px}.fill:empty::before{content:attr(data-placeholder);color:#aaa}' +
-    '.summary{margin:1.5mm 0 1mm;padding:2mm 3mm;border:1px solid #1f3a5f;border-left:5px solid #1f3a5f;background:#f4f7fb;font-size:9.5pt}' +
-    '.summary b{color:#1f3a5f}.scope{margin:1mm 0 0;font-size:8.5pt;color:#444}' +
-    'h2{margin:2.5mm 0 1mm;padding-left:6px;border-left:4px solid #1f3a5f;font-size:10.5pt;color:#1f3a5f}' +
-    'table{width:100%;border-collapse:collapse}th,td{padding:1.5px 5px;border:1px solid #999;text-align:left;vertical-align:top}tr{break-inside:avoid}' +
-    'th{background:#1f3a5f;color:#fff;border-color:#1f3a5f}.n{text-align:right;white-space:nowrap}.total td{font-weight:bold;background:#eef2f6}.imp{color:#b42318;font-weight:bold}' +
-    '.meta td{padding:1px 0;border:none}.note{margin:1.5mm 0 0;font-size:8pt;color:#555}' +
+    '.sheet{position:relative;max-width:186mm;margin:0 auto;padding:8mm 4mm 12mm}' +
+    '.doc-head{display:flex;justify-content:space-between;align-items:flex-start;gap:6mm;font-size:8.5pt}' +
+    '.secret{display:inline-block;min-width:16mm;padding:.5mm 2.5mm;border:1px solid #111;font-weight:bold;text-align:center;letter-spacing:.1em}' +
+    '.docno{margin:0;text-align:right;line-height:1.5}' +
+    'h1{margin:1.5mm 0 0;font-family:' + REPORT_MINCHO + ';font-size:16.5pt;font-weight:bold;text-align:center;letter-spacing:.25em}' +
+    '.parties{display:flex;justify-content:space-between;align-items:flex-end;gap:6mm;margin:1.5mm 0 1.2mm}' +
+    '.who p{margin:0 0 1.2mm}.fill{display:inline-block;min-width:58mm;border-bottom:1px solid #111;padding:0 2px}.fill:empty::before{content:attr(data-placeholder);color:#aaa}' +
+    '.stamp{width:auto;border-collapse:collapse;flex:none}.stamp th,.stamp td{width:17mm;border:1px solid #111;text-align:center;padding:0}' +
+    '.stamp th{height:4.5mm;background:#fff;color:#111;font-weight:normal;font-size:8pt;letter-spacing:.3em}.stamp td{height:12mm}' +
+    '.lead{margin:0 0 1mm;font-size:9pt}' +
+    '.summary{margin:0 0 1.5mm;padding:1.8mm 3mm;border:1px solid #111;font-size:9.5pt}.summary b{font-weight:bold}' +
+    'h2{margin:2mm 0 .8mm;padding-bottom:.3mm;border-bottom:1px solid #111;font-family:' + REPORT_MINCHO + ';font-size:10.5pt;font-weight:bold;color:#111}' +
+    'table{width:100%;border-collapse:collapse}th,td{padding:1px 4px;border:1px solid #555;text-align:left;vertical-align:top}tr{break-inside:avoid}' +
+    'th{background:#ececec;color:#111;font-weight:bold}.n{text-align:right;white-space:nowrap}.total td{font-weight:bold;background:#f5f5f5}.imp{color:#a8071a;font-weight:bold}' +
+    '.meta td{padding:1px 0;border:none}.note{margin:1.2mm 0 0;font-size:8pt;color:#333}' +
     '.two{display:flex;gap:5mm}.two>section{flex:1;min-width:0}.items td{font-size:8pt}' +
-    '.end{display:flex;gap:4mm;align-items:stretch}.memo{flex:1;min-height:12mm;padding:4px 6px;border:1px solid #999;white-space:pre-wrap}.memo:empty::before{content:attr(data-placeholder);color:#999}' +
-    '.sign{display:flex;flex:none}.sign div{width:22mm;margin-left:-1px;border:1px solid #999;text-align:center}' +
-    '.sign span{display:block;border-bottom:1px solid #999;background:#eef1f3;font-size:8.5pt}.sign i{display:block;height:12mm}' +
-    '.foot{margin-top:3mm;font-size:8pt;color:#666}.sheet>table th,.sheet>table td,.two th,.two td{font-size:8.5pt;line-height:1.3}.h2note{margin-left:3mm;font-weight:normal;font-size:8.5pt;color:#444}' +
-    '.overview{margin:1.5mm 0 0;font-size:8pt}.overview th{width:24mm;background:#eef2f6;color:#1f3a5f;border-color:#999;font-weight:bold}.overview td,.overview th{padding:1px 4px}' +
-    '.hash{font-family:Consolas,Menlo,monospace;font-size:7.5pt;word-break:break-all}.fillin{display:inline-block;min-width:14mm;border-bottom:1px solid #666;text-align:center}' +
-    '.trial{margin:2mm 0 0;padding:1.5mm 3mm;border:1px solid #b42318;color:#b42318;font-weight:bold;font-size:9pt;text-align:center}' +
-    '.wm{position:fixed;top:42%;left:0;right:0;text-align:center;font-size:72pt;font-weight:bold;color:rgba(180,35,24,.13);transform:rotate(-24deg);pointer-events:none;z-index:10}' +
+    '.memo{min-height:10mm;padding:4px 6px;border:1px solid #555;white-space:pre-wrap}.memo:empty::before{content:attr(data-placeholder);color:#999}' +
+    '.end-mark{margin:1mm 0 0;text-align:right;font-size:9.5pt}' +
+    '.foot{margin-top:3mm;font-size:8pt;color:#333}.sheet>table th,.sheet>table td,.two th,.two td{font-size:8.5pt;line-height:1.25}.h2note{margin-left:3mm;font-family:"BIZ UDPGothic","Yu Gothic","Meiryo",sans-serif;font-weight:normal;font-size:8.5pt;color:#333}' +
+    '.overview{margin:0;font-size:8pt}.overview th{width:24mm;background:#f3f3f3;font-weight:bold}.overview td,.overview th{padding:1px 4px}' +
+    '.hash{font-family:Consolas,Menlo,monospace;font-size:7pt;word-break:break-all}.fillin{display:inline-block;min-width:14mm;border-bottom:1px solid #111;text-align:center}' +
+    '.trial{margin:2mm 0 0;padding:1.5mm 3mm;border:1px solid #a8071a;color:#a8071a;font-weight:bold;font-size:9pt;text-align:center}' +
+    '.wm{position:fixed;top:42%;left:0;right:0;text-align:center;font-size:72pt;font-weight:bold;color:rgba(168,7,26,.13);transform:rotate(-24deg);pointer-events:none;z-index:10}' +
     '.annex{break-before:page;page-break-before:always;padding-top:2mm}.annex h2{margin-top:0}.annex td{font-size:8pt}' +
-    '@media screen and (max-width:700px){.two{display:block}}' +
-    '@media print{.bar{display:none}.sheet{max-width:none;padding:0}.memo:empty::before{content:""}.fill:empty::before{content:""}.sheet{padding:0 1px}}';
+    '@media screen and (max-width:700px){.two{display:block}.parties{display:block}}' +
+    '@media print{.bar{display:none}.sheet{max-width:none;padding:0 1px}.memo:empty::before{content:""}.fill:empty::before{content:""}}';
+
+  // 印刷したときの各ページの下に、管理番号とページ番号を入れる（対応しないブラウザでは出ないだけ）
+  function reportPageCss(docNo) {
+    var safe = String(docNo || '').replace(/["\\]/g, '');
+    return '@page{@bottom-left{content:"kintoneアプリ 点検報告書　管理番号：' + safe + '";font-size:7.5pt;color:#333}@bottom-right{content:counter(page) " / " counter(pages);font-size:7.5pt;color:#333}}';
+  }
+
+  // 管理番号：作成日と、点検台帳の照合用の値の先頭8文字（報告書と点検台帳を結びつける）
+  function reportDocNo(d) {
+    var day = dateText(d.at).slice(0, 10).replace(/-/g, '');
+    return 'DCY-' + day + '-' + (d.trial ? 'TRIAL' : d.hash ? String(d.hash).slice(0, 8).toUpperCase() : dateText(d.at).slice(11, 16).replace(':', ''));
+  }
 
   // 報告書の冒頭に置く総評（数字は点検の結果だけから作る）
   function summarySentence(d) {
@@ -762,26 +780,31 @@
     var day = dateText(d.at).slice(0, 10);
     var h = [];
     var name = 'kintoneアプリ 点検報告書' + (d.trial ? '（試用版）' : '');
-    h.push('<!doctype html><html lang="ja"><head><meta charset="utf-8"><title>' + name + '（' + esc(day) + '）</title><style>' + REPORT_CSS + '</style></head><body>');
+    var docNo = reportDocNo(d);
+    var jday = day.replace(/^(\d+)-(\d+)-(\d+)$/, function (_, y, m, dd) { return y + '年' + Number(m) + '月' + Number(dd) + '日'; });
+    h.push('<!doctype html><html lang="ja"><head><meta charset="utf-8"><title>' + name + '（' + esc(day) + '）</title><style>' + REPORT_CSS + reportPageCss(docNo) + '</style></head><body>');
     if (d.trial) h.push('<div class="wm" aria-hidden="true">試用版</div>');
-    h.push('<div class="bar"><button type="button" id="dcy-print">印刷・PDFで保存</button><span class="note">「提出先」「報告者」「所見・対応」の欄は、この画面で書き込んでから印刷できます。印刷の画面で「PDFに保存」を選ぶとPDFになります。</span></div>');
-    h.push('<div class="sheet"><p class="date">' + esc(day.replace(/^(\d+)-(\d+)-(\d+)$/, function (_, y, m, dd) { return y + '年' + Number(m) + '月' + Number(dd) + '日'; })) + '</p><h1>' + name + '</h1>');
+    h.push('<div class="bar"><button type="button" id="dcy-print">印刷・PDFで保存</button><span class="note">「機密区分」「提出先」「報告者」「所見・対応」の欄は、この画面で書き込んでから印刷できます。印刷の画面で「PDFに保存」を選ぶとPDFになります。</span></div>');
+    h.push('<div class="sheet"><div class="doc-head"><span class="secret" contenteditable="true">社外秘</span>' +
+      '<p class="docno">管理番号：' + esc(docNo) + '<br>作成日：' + esc(jday) + '</p></div>');
+    h.push('<h1>' + name + '</h1>');
     if (d.trial) h.push('<p class="trial">' + esc(TRIAL_NOTE) + '</p>');
-    h.push('<div class="parties"><div>提出先：<span class="fill" contenteditable="true" data-placeholder="（例）情報システム部長 様"></span></div>' +
-      '<div style="text-align:right">報告者：<span class="fill" contenteditable="true" data-placeholder="部署・氏名">' + esc(d.user) + '</span></div></div>');
+    h.push('<div class="parties"><div class="who"><p>提出先：<span class="fill" contenteditable="true" data-placeholder="（例）情報システム部長 様"></span></p>' +
+      '<p>報告者：<span class="fill" contenteditable="true" data-placeholder="部署・氏名">' + esc(d.user) + '</span></p></div>' +
+      '<table class="stamp" aria-label="承認の欄"><tr><th>承認</th><th>確認</th><th>点検</th></tr><tr><td></td><td></td><td></td></tr></table></div>');
+    h.push('<p class="lead">下記のとおり、kintone環境「' + esc(d.host) + '」のアプリの設定を点検しましたので、報告します。</p>');
     h.push('<div class="summary">' + summarySentence(d) + '</div>');
     h.push('<table class="overview">' +
       '<tr><th>点検の対象</th><td>kintone環境「' + esc(d.host) + '」の、' + esc(SCOPE_TEXT_BASE) + ' ' + d.apps + '個。点検していないものは別紙1</td></tr>' +
       '<tr><th>点検した人</th><td>' + esc(d.inspector || '－') + '。kintoneシステム管理者：' + esc(d.admin) + '</td></tr>' +
       '<tr><th>対象に入らなかったアプリ</th><td' + (d.unlistedCount ? ' class="imp"' : '') + '>' + esc(d.unlisted) + '</td></tr>' +
       (d.review ? '<tr><th>アクセス権の見直し</th><td>' + esc(d.review) + '</td></tr>' : '') +
-      '<tr><th>アプリの数の照合</th><td>kintoneシステム管理の「アプリ管理」に出るアプリの数：<span class="fillin" contenteditable="true"></span>個（上の2つの数の合計と同じかを確かめて記入）</td></tr>' +
+      '<tr><th>アプリの数の照合</th><td>kintoneシステム管理の「アプリ管理」に出るアプリの数：<span class="fillin" contenteditable="true"></span>個（上の2つの数の合計と照合）</td></tr>' +
       '<tr><th>点検日時・方法</th><td>' + esc(dateText(d.at)) + '（点検したパソコンの時計）。台帳屋 棚卸し・変更監視パック ' + esc(d.version) + 'で設定を読み取って点検（設定は変えていません。レコードの中身は読んでいません。判定の基準は別紙1）</td></tr>' +
-      '<tr><th>照合用の値</th><td>' + (d.hash
-        ? '今回の点検台帳「' + esc(d.fileName) + '」のSHA-256：<span class="hash">' + esc(d.hash) + '</span>'
+      '<tr><th>照合用の値<br>（SHA-256）</th><td>' + (d.hash
+        ? '今回「' + esc(d.fileName) + '」：<span class="hash">' + esc(d.hash) + '</span>'
         : (d.trial ? '試用版のため、付けていません。' : '－')) +
-        (d.prevFile && d.prevFile.hash ? '<br>前回の点検台帳「' + esc(d.prevFile.name) + '」のSHA-256：<span class="hash">' + esc(d.prevFile.hash) + '</span>' : '') +
-        (d.hash || (d.prevFile && d.prevFile.hash) ? '（確かめ方は別紙1）' : '') + '</td></tr>' +
+        (d.prevFile && d.prevFile.hash ? '<br>前回「' + esc(d.prevFile.name) + '」：<span class="hash">' + esc(d.prevFile.hash) + '</span>' : '') + '</td></tr>' +
       '</table>');
 
     h.push('<h2>1. 点検の結果</h2><table><tr><th>区分</th><th class="n">件数</th><th class="n">うち要確認</th><th class="n">前回</th><th class="n">増減</th></tr>');
@@ -825,8 +848,8 @@
       h.push('<p class="note">要確認の項目はありませんでした。確認の項目は、点検台帳の「注意点」シートにあります。</p>');
     }
 
-    h.push('<h2>5. 所見・対応' + (d.next ? '<span class="h2note">次回の点検の目安：' + esc(d.next) + '（半年ごと）</span>' : '') + '</h2><div class="end"><div class="memo" contenteditable="true" data-placeholder="対応したこと、対応の予定、担当などを書き込めます"></div>');
-    h.push('<div class="sign"><div><span>点検者</span><i></i></div><div><span>確認者</span><i></i></div><div><span>承認者</span><i></i></div></div></div>');
+    h.push('<h2>5. 所見・対応' + (d.next ? '<span class="h2note">次回の点検の目安：' + esc(d.next) + '（半年ごと）</span>' : '') + '</h2><div class="memo" contenteditable="true" data-placeholder="対応したこと、対応の予定、担当などを書き込めます"></div>');
+    h.push('<p class="end-mark">以上</p>');
 
     // 別紙1：判定の基準と、点検していないもの
     h.push('<section class="annex"><h2>別紙1　判定の基準</h2><table><tr><th style="width:14%">区分</th><th style="width:8%">重要度</th><th>判定</th><th style="width:34%">基準・出典</th></tr>');
