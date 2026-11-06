@@ -63,7 +63,7 @@ code { overflow-wrap: anywhere; word-break: normal; }
 /* 見出しと本文 */
 h1 { font-size: clamp(26px, 3.4vw, 34px); margin: 0 0 12px; letter-spacing: .02em; }
 h2 { font-size: clamp(22px, 2.6vw, 27px); margin: 0 0 22px; letter-spacing: .02em; }
-h2::after { content: ""; display: block; width: 40px; height: 4px; margin-top: 10px; border-radius: 2px; background: var(--ai); }
+h2::after { content: ""; display: block; width: 40px; height: 4px; margin-top: 10px; border-radius: 2px; background: var(--ink); }
 /* デモの中のプラグインの画面には、サイトの見出しの線を付けない（実際のkintoneと同じ見え方に） */
 [class*="dcy-"] h2::after, [class*="dcy-"] h3::after { display: none; }
 h3 { font-size: 18px; margin: 28px 0 8px; }
@@ -192,7 +192,7 @@ h2 + .tabbed, .section-lead + .tabbed { margin-top: 56px; }
 /* 最初の画面：左に言葉、右に見本の画面（台帳の罫線の台紙に、無料と有料の結果を重ねる） */
 .hero { padding: 56px 0 64px; background: var(--ledger); }
 .hero-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.02fr); gap: 40px; align-items: center; }
-.badge { display: inline-block; margin: 0 0 16px; padding: 4px 14px; border-radius: 999px; background: var(--paper); border: 1px solid var(--ai-line); color: var(--ai); font-size: 14px; font-weight: 700; }
+.badge { display: inline-block; margin: 0 0 16px; padding: 4px 14px; border-radius: 999px; background: var(--paper); border: 1px solid var(--rule); color: var(--ink); font-size: 14px; font-weight: 700; }
 .hero h1 { font-size: clamp(30px, 4.3vw, 44px); line-height: 1.38; margin-bottom: 20px; }
 .hero-rule { margin: 0 0 4px; font-size: 18px; line-height: 1.8; }
 .hero .actions { margin-top: 26px; }
@@ -238,6 +238,12 @@ h2 + .tabbed, .section-lead + .tabbed { margin-top: 56px; }
 
 .cards { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
 .cards li { margin: 0; }
+/* 無料の6本を、使う場面（仕事）ごとに3つに分ける */
+.jobs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.job { min-width: 0; padding: 0; }
+.job-head { margin: 0 0 12px; padding: 0 0 8px; border-bottom: 2px solid var(--take-line); font-size: 17px; line-height: 1.5; }
+.job-head small { display: block; margin-top: 2px; color: var(--ink-2); font-size: 13.5px; font-weight: 400; }
+.cards.cards-col { grid-template-columns: minmax(0, 1fr); gap: 14px; }
 .card { display: flex; flex-direction: column; height: 100%; border: 1px solid var(--take-line); border-radius: var(--r-m); background: var(--paper); color: var(--ink); text-decoration: none; overflow: hidden; }
 .card:hover { border-color: var(--take); box-shadow: 0 0 0 1px var(--take); }
 .card-thumb { display: block; padding: 14px 14px 0; background: var(--ledger); }
@@ -287,8 +293,8 @@ h2 + .tabbed, .section-lead + .tabbed { margin-top: 56px; }
 /* 使い始めるまで：番号の丸を線でつなぐ */
 .steps { list-style: none; counter-reset: step; padding: 0; margin: 0 0 12px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
 .steps li { position: relative; counter-increment: step; margin: 0; padding: 20px 20px 22px; border-radius: var(--r-m); background: var(--paper); border: 1px solid var(--rule); }
-.steps li::before { content: counter(step); display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; margin-bottom: 10px; border-radius: 50%; background: var(--ai); color: #fff; font-weight: 700; font-size: 16px; }
-.steps li:not(:last-child)::after { content: ""; position: absolute; top: 36px; left: calc(100% + 1px); width: 19px; border-top: 2px dashed var(--ai-line); }
+.steps li::before { content: counter(step); display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; margin-bottom: 10px; border-radius: 50%; background: var(--ink); color: #fff; font-weight: 700; font-size: 16px; }
+.steps li:not(:last-child)::after { content: ""; position: absolute; top: 36px; left: calc(100% + 1px); width: 19px; border-top: 2px dashed var(--rule); }
 .steps strong { display: block; font-size: 17px; margin-bottom: 4px; }
 .steps span { display: block; font-size: 14px; line-height: 1.75; }
 .steps-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
@@ -309,7 +315,7 @@ h2 + .tabbed, .section-lead + .tabbed { margin-top: 56px; }
 .qa details { margin: 0 0 10px; border: 1px solid var(--rule); border-radius: var(--r-m); background: var(--paper); }
 .qa summary { position: relative; display: block; padding: 14px 48px 14px 52px; font-weight: 700; cursor: pointer; list-style: none; }
 .qa summary::-webkit-details-marker { display: none; }
-.qa summary::before { content: "Q"; position: absolute; left: 16px; top: 14px; display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: var(--ai); color: #fff; font-size: 14px; }
+.qa summary::before { content: "Q"; position: absolute; left: 16px; top: 14px; display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: var(--ink); color: #fff; font-size: 14px; }
 .qa summary::after { content: ""; position: absolute; right: 20px; top: 22px; width: 9px; height: 9px; border-right: 2px solid var(--ink-2); border-bottom: 2px solid var(--ink-2); transform: rotate(45deg); transition: transform .15s; }
 .qa details[open] summary::after { transform: rotate(-135deg); top: 26px; }
 .qa details > div { padding: 0 20px 16px 52px; }
@@ -363,7 +369,7 @@ h2 + .tabbed, .section-lead + .tabbed { margin-top: 56px; }
 .history ul { margin-top: 8px; }
 .page-toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 26px 0 0; padding: 0; font-size: 14px; }
 .page-toc a { padding: 5px 14px; border-radius: 999px; background: var(--ledger); color: var(--ink); text-decoration: none; white-space: nowrap; }
-.page-toc a:hover { background: var(--ai-tint); color: var(--ai); }
+.page-toc a:hover { background: var(--ledger); color: var(--ink); }
 .download { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; padding: 20px 22px; border-radius: var(--r-l); background: var(--ledger); }
 .download p { margin: 0; }
 .download .hash { flex-basis: 100%; font-size: 12px; color: var(--ink-2); }
@@ -414,7 +420,7 @@ h2 + .tabbed, .section-lead + .tabbed { margin-top: 56px; }
 /* ============ デモ ============ */
 .demo-steps-bar { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 22px 0 0; padding: 0; list-style: none; counter-reset: dstep; }
 .demo-steps-bar li { position: relative; display: flex; align-items: center; gap: 12px; margin: 0; padding: 12px 16px; border-radius: var(--r-m); background: var(--ledger); counter-increment: dstep; font-size: 15px; line-height: 1.6; }
-.demo-steps-bar li::before { content: counter(dstep); flex: none; display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%; background: var(--ai); color: #fff; font-weight: 700; }
+.demo-steps-bar li::before { content: counter(dstep); flex: none; display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%; background: var(--ink); color: #fff; font-weight: 700; }
 .demo-mode { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; min-width: 0; margin: 4px 0 0; padding: 8px 0 0; border: none; border-top: 1px dashed var(--ai-line); }
 .demo-mode legend { float: left; width: 100%; margin: 0; padding: 0; font-size: 13px; font-weight: 700; color: var(--ai); }
 .demo-mode legend small { margin-left: 2px; font-weight: 400; color: var(--ink-2); font-size: 12px; }
@@ -422,6 +428,13 @@ h2 + .tabbed, .section-lead + .tabbed { margin-top: 56px; }
 .seg label { position: relative; display: inline-flex; align-items: center; min-height: 32px; padding: 0 14px; border-radius: 999px; font-size: 13px; cursor: pointer; }
 .seg input { position: absolute; opacity: 0; width: 1px; height: 1px; }
 .seg label:has(input:checked) { background: var(--ai); color: #fff; font-weight: 700; }
+/* 見え方の切り替え：件数だけの無料点検は若竹、試用・ご契約は藍（料金の色と同じ） */
+.seg label:has(input[value="free"]:checked) { background: var(--take); }
+/* デモの見え方の切り替えは、名前が長いので2段に並べる */
+.demo-mode .seg { display: grid; width: 100%; border-radius: var(--r-m); }
+.demo-mode .seg label { border-radius: 7px; }
+/* 30日間の無料試用の申し込みの手順は、試用の色（柿）の番号 */
+.trial-box + .steps li::before { background: var(--kaki); }
 .seg label:has(input:focus-visible) { outline: 3px solid var(--focus); outline-offset: 1px; }
 .demo-more { margin-top: 28px; }
 
@@ -481,6 +494,8 @@ h2 + .tabbed, .section-lead + .tabbed { margin-top: 56px; }
 /* ============ 画面の幅ごと ============ */
 @media (max-width: 960px) {
   .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .jobs { grid-template-columns: minmax(0, 1fr); gap: 26px; }
+  .cards.cards-col { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .steps-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .steps-4 li:nth-child(2)::after { display: none; }
 }
@@ -503,9 +518,9 @@ h2 + .tabbed, .section-lead + .tabbed { margin-top: 56px; }
   .site-head .wrap { min-height: 56px; padding-top: 8px; }
   .head-cta { display: inline-flex; align-items: center; min-height: 38px; padding: 0 16px; border-radius: 999px; background: var(--kaki); color: #fff; font-size: 14px; font-weight: 700; text-decoration: none; }
   /* スマートフォンでは、メニューを1行にして横に送れるようにし、押しやすい高さにする */
-  .site-nav { flex-basis: calc(100% + 32px); flex-wrap: nowrap; gap: 0; margin: 0 -16px; padding: 0 30px 4px 8px; overflow-x: auto; scrollbar-width: none; font-size: 14px; -webkit-mask-image: linear-gradient(90deg, #000 88%, transparent); mask-image: linear-gradient(90deg, #000 88%, transparent); }
+  .site-nav { flex-basis: calc(100% + 32px); flex-wrap: nowrap; gap: 0; margin: 0 -16px; padding: 0 8px 4px; overflow-x: auto; scrollbar-width: none; font-size: 13.5px; }
   .site-nav::-webkit-scrollbar { display: none; }
-  .site-nav a:not(.nav-cta) { display: inline-flex; flex: none; align-items: center; min-height: 42px; padding: 0 9px; white-space: nowrap; }
+  .site-nav a:not(.nav-cta) { display: inline-flex; flex: none; align-items: center; min-height: 42px; padding: 0 6px; white-space: nowrap; }
   .site-nav .nav-cta { display: none; }
   .badge { font-size: 13px; padding: 3px 12px; }
   .brand-sub { display: none; }
@@ -519,7 +534,7 @@ h2 + .tabbed, .section-lead + .tabbed { margin-top: 56px; }
   .assure { flex-direction: column; }
 }
 @media (max-width: 560px) {
-  .cards { grid-template-columns: 1fr; gap: 14px; }
+  .cards, .cards.cards-col { grid-template-columns: 1fr; gap: 14px; }
   .feature-card .fc-body { padding: 18px; }
   .hv-item .tab { height: 24px; font-size: 11px; padding: 0 8px; }
   .qa summary { padding-left: 48px; }
