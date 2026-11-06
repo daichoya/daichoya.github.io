@@ -16,7 +16,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="google-site-verification" content="J1TnZ6bD5c5EjVGtQBBk2eRmLsDje0VapbpwCEnbA6M">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="assets/style.css?v=0b216ee41e">
+<link rel="stylesheet" href="assets/style.css?v=e0e625f8e3">
 </head>
 <body>
 <header class="site-head">
@@ -77,44 +77,33 @@
     <p class="demo-note">実際のkintoneでは、ボタンは一覧画面の上部に、ほかのボタンと並んで出ます。「無料」「有料」の札と「見え方」の切り替えは、このデモだけのものです。</p>
 
     <h2 id="try">試してみてください</h2>
-    <p class="prose">無料の6本は1つのアプリずつ調べ、有料の「棚卸し」は同じことを全アプリまとめて行います（<a href="pro.html#relation">無料の6本と有料の1本の関係</a>）。</p>
-    <div class="demo-try">
-      <div class="tabbed is-free">
-        <span class="tab tab-free">無料<small>6本・ずっと無料</small></span>
-        <h3>1つのアプリずつ調べる</h3>
-        <ul class="try-list">
-          <li><b><img src="images/icons/permission-checker.png" alt="" width="20" height="20">権限チェッカー</b><span>「権限を表示」を押すと、アプリ・レコード・フィールドの権限が1つの表に出ます。「Excelで保存」もできます。</span></li>
-          <li><b><img src="images/icons/design-doc.png" alt="" width="20" height="20">設計書を作成</b><span>「Excelで設計書を作成」を押すと、見本アプリの設計書（Excel）が保存されます。</span></li>
-          <li><b><img src="images/icons/app-map.png" alt="" width="20" height="20">相関マップ</b><span>「相関マップを表示」を押すと、つながっているアプリが図で出ます。図のアプリを押すと、中心が切り替わります。</span></li>
-          <li><b><img src="images/icons/transfer-checker.png" alt="" width="20" height="20">異動・退職チェック</b><span>「ユーザーの指定を調べる」を押すと、設定に出てくる人の一覧が出ます。もういない人には印が付きます。</span></li>
-          <li><b><img src="images/icons/field-impact.png" alt="" width="20" height="20">フィールドの影響</b><span>フィールドを選んで「影響を調べる」を押すと、そのフィールドが使われている場所の一覧が出ます。</span></li>
-          <li><b><img src="images/icons/app-diff.png" alt="" width="20" height="20">設定の比較</b><span>「比べる」を押すと、名前の似ている「案件管理（検証）」との違うところだけが出ます（はじめから選んであります）。</span></li>
-        </ul>
+    <p class="prose">上の画面のボタンを押すと、プラグインの画面が開きます。開いた画面で押すボタンと、出てくるものは次のとおりです。</p>
+    <h3 class="try-head"><span class="plan plan-free">無料</span>1つのアプリずつ調べる6本</h3>
+    <ul class="try-grid">
+      <li><p class="try-name"><img src="images/icons/permission-checker.png" alt="" width="24" height="24">権限チェッカー</p><p class="try-flow"><span class="try-do">権限を表示</span><span class="try-get">3か所の権限が、1つの表に出ます</span></p></li>
+      <li><p class="try-name"><img src="images/icons/design-doc.png" alt="" width="24" height="24">設計書を作成</p><p class="try-flow"><span class="try-do">Excelで設計書を作成</span><span class="try-get">見本アプリの設計書（Excel）が保存されます</span></p></li>
+      <li><p class="try-name"><img src="images/icons/app-map.png" alt="" width="24" height="24">相関マップ</p><p class="try-flow"><span class="try-do">相関マップを表示</span><span class="try-get">つながっているアプリが、図で出ます</span></p></li>
+      <li><p class="try-name"><img src="images/icons/transfer-checker.png" alt="" width="24" height="24">異動・退職チェック</p><p class="try-flow"><span class="try-do">ユーザーの指定を調べる</span><span class="try-get">設定に出てくる人の一覧。もういない人に印</span></p></li>
+      <li><p class="try-name"><img src="images/icons/field-impact.png" alt="" width="24" height="24">フィールドの影響</p><p class="try-flow"><span class="try-do">影響を調べる</span><span class="try-get">そのフィールドが使われている場所の一覧</span></p></li>
+      <li><p class="try-name"><img src="images/icons/app-diff.png" alt="" width="24" height="24">設定の比較</p><p class="try-flow"><span class="try-do">比べる</span><span class="try-get">「案件管理（検証）」と違うところだけが出ます</span></p></li>
+    </ul>
+    <h3 class="try-head"><span class="plan plan-paid">有料</span>棚卸し（全アプリをまとめて点検）</h3>
+    <p class="prose">画面の右の「見え方」で、申し込む前と、試用中・ご契約後を切り替えてから「棚卸し」を押します。</p>
+    <div class="try-modes">
+      <div class="tm tm-free">
+        <p class="tm-mode">見え方</p>
+        <p class="tm-name">件数だけの無料点検（申し込む前）</p>
+        <p class="try-flow"><span class="try-do">無料で点検する</span><span class="try-get">何件あるかと、例が2つまで</span></p>
       </div>
-      <div class="tabbed is-paid">
-        <span class="tab tab-paid">有料<small>棚卸し</small></span>
-        <h3>全アプリをまとめて点検する</h3>
-        <ol class="demo-steps">
-          <li>「見え方」を<strong>件数だけの無料点検（申し込む前）</strong>にして「棚卸し」を押し、「無料で点検する」を押します。見直したほうがよい設定が「何件あるか」と、例が2つまで出ます。</li>
-          <li>「見え方」を<strong>30日間の無料試用中・ご契約後</strong>に戻して「棚卸し」を押し、「点検台帳を作成」を押します。見本の7つのアプリをまとめた点検台帳（Excel）が保存され、画面に結果のまとめが出ます。</li>
-          <li>続けて「点検の報告書を開く」を押すと、印刷やPDFにできる報告書（1枚目のまとめと、判定の基準・要確認の項目の別紙）が新しいタブに開きます。</li>
-        </ol>
-        <div class="table-scroll">
-          <table class="facts demo-compare">
-            <thead><tr><th scope="col">「棚卸し」でできること</th><th scope="col" class="col-free">件数だけの無料点検</th><th scope="col" class="col-paid">30日間の無料試用・ご契約</th></tr></thead>
-            <tbody>
-              <tr><th scope="row">全アプリの件数と、例を2つまで</th><td class="center"><span class="mark-yes">○</span></td><td class="center"><span class="mark-yes">○</span></td></tr>
-              <tr><th scope="row">点検台帳（Excel・すべての一覧）</th><td class="center"><span class="mark-no">－</span></td><td class="center"><span class="mark-yes">○</span></td></tr>
-              <tr><th scope="row">結果のまとめ（前回からの増減・要確認）</th><td class="center"><span class="mark-no">－</span></td><td class="center"><span class="mark-yes">○</span></td></tr>
-              <tr><th scope="row">点検の報告書（印刷・PDF）</th><td class="center"><span class="mark-no">－</span></td><td class="center"><span class="mark-yes">○</span></td></tr>
-              <tr><th scope="row">前回の点検台帳との比較</th><td class="center"><span class="mark-no">－</span></td><td class="center"><span class="mark-yes">○</span></td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p class="rule-try"><span class="trial-pill">30日間 無料</span>　お使いのkintoneでも、ご契約後と同じ機能を30日間無料で試せます。カードの登録は不要で、自動で課金されることはありません。</p>
-        <div class="actions"><a class="btn btn-trial" href="pro.html#trial">30日間無料で試す</a><a class="btn" href="pro.html">くわしく見る</a></div>
+      <div class="tm tm-paid">
+        <p class="tm-mode">見え方</p>
+        <p class="tm-name">30日間の無料試用中・ご契約後</p>
+        <p class="try-flow"><span class="try-do">点検台帳を作成</span><span class="try-get">7つのアプリの点検台帳（Excel）</span></p>
+        <p class="try-flow"><span class="try-do">点検の報告書を開く</span><span class="try-get">報告書（印刷・PDF）が新しいタブに</span></p>
       </div>
     </div>
+    <p class="price-line">2つの違いは、<a href="pro.html#compare">機能のページ</a>で見比べられます。お使いのkintoneでも、30日間すべての機能を無料で試せます（カード不要・自動で課金されません）。</p>
+    <div class="actions"><a class="btn btn-trial" href="pro.html#trial">30日間無料で試す</a><a class="btn" href="pro.html">機能をくわしく見る</a></div>
     <p class="prose demo-more">各プラグインの詳しい説明は、<a href="pro.html">棚卸し・変更監視パック</a>と<a href="index.html#free-plugins">無料のプラグイン</a>からご覧ください。</p>
   </div>
 </div>

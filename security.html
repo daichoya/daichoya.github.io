@@ -16,7 +16,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="google-site-verification" content="J1TnZ6bD5c5EjVGtQBBk2eRmLsDje0VapbpwCEnbA6M">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="assets/style.css?v=0b216ee41e">
+<link rel="stylesheet" href="assets/style.css?v=e0e625f8e3">
 </head>
 <body>
 <header class="site-head">
@@ -29,7 +29,7 @@
 <main>
 <div class="page">
   <div class="wrap">
-    <p class="breadcrumb"><a href="index.html">台帳屋</a> ／ セキュリティ</p>
+    <p class="breadcrumb"><a href="index.html">台帳屋</a> ／ 導入前の確認事項</p>
     <h1>導入前の確認事項</h1>
     <div class="lead prose">
       <p>社内のkintoneにプラグインを導入する前の確認にお使いください。情報システム部門の導入審査には、このページを印刷するか、PDFに保存して、そのまま出せます。</p>
@@ -39,7 +39,15 @@
     <p class="print-only">提供者：台帳屋（個人の開発者）　／　お問い合わせ：daichoya.plugins@gmail.com　／　https://daichoya.github.io/security.html</p>
 
     <h2>動作の仕組み</h2>
-    <div class="table-scroll">
+    <figure class="dataflow" aria-label="データの流れの図：お使いのkintoneの設定を、ブラウザの中のプラグインが読み取るだけで、表や資料にまとめ、利用者のパソコンに保存します。台帳屋のサーバーや外部のサービスには送りません。">
+      <p class="df-node"><b>お使いのkintone</b><small>アプリの設定（GETのみ）</small></p>
+      <p class="df-arrow"><span>読み取るだけ</span></p>
+      <p class="df-node df-main"><b>ブラウザの中のプラグイン</b><small>ログイン中のユーザーの権限で動く</small></p>
+      <p class="df-arrow"><span>保存</span></p>
+      <p class="df-node"><b>利用者のパソコン</b><small>Excel・CSV・PDF</small></p>
+      <p class="df-no"><b>台帳屋のサーバー・外部のサービス</b><br>とは、通信しません</p>
+    </figure>
+    <div class="table-scroll df-after">
       <table class="facts">
         <tbody>
           <tr><th scope="row">通信先</th><td>kintone環境のみです。台帳屋のサーバーや外部サービスとは通信しません。</td></tr>
@@ -55,7 +63,7 @@
 
     <h2>使用するAPI（すべて読み取り専用のGET）</h2>
     <div class="table-scroll">
-      <table class="facts">
+      <table class="facts api-table">
         <thead><tr><th scope="col">プラグイン</th><th scope="col">kintone REST API</th></tr></thead>
         <tbody>
           <tr><th scope="row">権限チェッカー</th><td><ul class="api"><li><code>/k/v1/apps.json</code></li><li><code>/k/v1/app/form/fields.json</code></li><li><code>/k/v1/app/acl.json</code>・<code>/k/v1/record/acl.json</code>・<code>/k/v1/field/acl.json</code></li></ul></td></tr>
@@ -80,7 +88,7 @@
       </table>
     </div>
     <div class="table-scroll">
-      <table class="facts">
+      <table class="facts api-table">
         <thead><tr><th scope="col">プラグイン</th><th scope="col">kintone REST API（すべて読み取り専用のGET）</th></tr></thead>
         <tbody>
           <tr><th scope="row">棚卸し・変更監視パック</th><td><ul class="api"><li><code>/k/v1/apps.json</code></li><li><code>/k/v1/app/form/fields.json</code>・<code>/k/v1/app/actions.json</code></li><li><code>/k/v1/app/acl.json</code>・<code>/k/v1/record/acl.json</code>・<code>/k/v1/field/acl.json</code></li><li><code>/k/v1/app/plugins.json</code>・<code>/k/v1/app/customize.json</code></li><li><code>/k/v1/app/status.json</code>・<code>/k/v1/app/views.json</code>・<code>/k/v1/app/reports.json</code>・<code>/k/v1/app/settings.json</code>・<code>/k/v1/app/adminNotes.json</code></li><li><code>/k/v1/app/notifications/general.json</code>・<code>perRecord.json</code>・<code>reminder.json</code></li><li><code>/k/v1/records.json</code>（件数と最終更新日時のみ。チェックを外すと使いません）</li><li>cybozu.comのUser API：<code>/v1/users.json</code>・<code>/v1/organizations.json</code>・<code>/v1/groups.json</code></li><li><code>/k/v1/plugins.json</code>（kintoneに読み込んであるプラグインの名前の一覧。使われていないプラグインを見つけるためと、設定画面で許可するプラグインを選ぶため）</li><li><code>/k/v1/app/acl.json</code> をアプリIDの順に（アプリの一覧に出ないアプリがないかを確かめるため。点検した人に閲覧の権限がないアプリは一覧に出ないので、あるかどうかだけを確かめます。1回の点検で最大2,000回）</li><li>JavaScript API <code>kintone.system.getPermissions()</code>（点検した人がkintoneシステム管理者かどうかを、点検台帳と報告書に書くため）</li></ul></td></tr>
