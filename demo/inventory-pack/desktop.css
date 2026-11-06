@@ -66,6 +66,7 @@
 .dcy-ip-license-invalid, .dcy-ip-license-domain, .dcy-ip-license-expired { border-left-color: #e74c3c; background: #fdf0ef; }
 .dcy-ip-prev { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 16px; font-size: 14px; }
 .dcy-ip-prev label { font-weight: bold; }
+.dcy-ip-prev-hint { flex-basis: 100%; margin: 0; color: #555; font-size: 13px; line-height: 1.6; }
 .dcy-ip-option { display: flex; align-items: flex-start; gap: 8px; margin-top: 12px; font-size: 14px; }
 .dcy-ip-option input { margin-top: 4px; }
 .dcy-ip-note { margin-top: 12px; margin-bottom: 0; color: #666; font-size: 13px; }

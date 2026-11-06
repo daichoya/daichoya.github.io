@@ -116,6 +116,46 @@
     return out;
   }
 
+  function colIndex(letters) {
+    var n = 0;
+    for (var i = 0; i < letters.length; i++) n = n * 26 + (letters.charCodeAt(i) - 64);
+    return n - 1;
+  }
+
+  // シートのすべての行を、列の位置どおりの配列にする（利用者が書き込んだ対応や見直しの結果を読むため）
+  function sheetRows(sheetXmlText, shared) {
+    var rows = [];
+    var rowRe = /<row\s([^>]*?)(?:\/>|>([\s\S]*?)<\/row>)/g;
+    var rm;
+    while ((rm = rowRe.exec(sheetXmlText))) {
+      var rn = /r="(\d+)"/.exec(rm[1]);
+      var row = [];
+      var re = /<c\s([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g;
+      var m;
+      while ((m = re.exec(rm[2] || ''))) {
+        var ref = /r="([A-Z]+)\d+"/.exec(m[1]);
+        if (!ref) continue;
+        var body = m[2] || '';
+        var type = (/t="([^"]+)"/.exec(m[1]) || [])[1];
+        var value;
+        if (type === 's') value = shared[Number((/<v>(\d+)<\/v>/.exec(body) || [])[1])] || '';
+        else if (type === 'inlineStr') value = textsOf(body);
+        else value = decodeXml((/<v>([\s\S]*?)<\/v>/.exec(body) || [])[1] || '');
+        row[colIndex(ref[1])] = value;
+      }
+      rows[rn ? Number(rn[1]) - 1 : rows.length] = row;
+    }
+    return rows;
+  }
+
+  function sheetPathOf(workbook, rels, name) {
+    var sheet = new RegExp('<sheet\\s[^>]*name="' + name + '"[^>]*>').exec(workbook);
+    if (!sheet) return null;
+    var rid = /r:id="([^"]+)"/.exec(sheet[0])[1];
+    var target = new RegExp('<Relationship\\s[^>]*Id="' + rid + '"[^>]*>').exec(rels);
+    return target ? 'xl/' + /Target="([^"]+)"/.exec(target[0])[1].replace(/^\/?(xl\/)?/, '') : null;
+  }
+
   function readSnapshot(bytes) {
     var entries;
     try { entries = readZip(bytes); } catch (e) { return Promise.reject(new Error('Excelファイルとして読み込めませんでした。')); }
@@ -123,21 +163,23 @@
       .then(function (r) {
         var workbook = r[0], rels = r[1], sst = r[2];
         if (!workbook || !rels) throw new Error('Excelファイルとして読み込めませんでした。');
-        var sheet = new RegExp('<sheet\\s[^>]*name="' + RECORD_SHEET + '"[^>]*>').exec(workbook);
-        if (!sheet) throw new Error('台帳屋の点検台帳ではないか、記録のシートが削除されています。');
-        var rid = /r:id="([^"]+)"/.exec(sheet[0])[1];
-        var target = new RegExp('<Relationship\\s[^>]*Id="' + rid + '"[^>]*>').exec(rels);
-        var path = /Target="([^"]+)"/.exec(target[0])[1].replace(/^\/?(xl\/)?/, '');
+        var path = sheetPathOf(workbook, rels, RECORD_SHEET);
+        if (!path) throw new Error('台帳屋の点検台帳ではないか、記録のシートが削除されています。');
         var shared = [];
         if (sst) {
           var re = /<si>([\s\S]*?)<\/si>/g;
           var m;
           while ((m = re.exec(sst))) shared.push(textsOf(m[1]));
         }
-        return readText(entries, 'xl/' + path).then(function (xml) {
-          var texts = columnATexts(xml || '', shared);
+        var notesPath = sheetPathOf(workbook, rels, '注意点');
+        var reviewPath = sheetPathOf(workbook, rels, '対象ごとの権限');
+        return Promise.all([readText(entries, path), notesPath ? readText(entries, notesPath) : null, reviewPath ? readText(entries, reviewPath) : null]).then(function (x) {
+          var texts = columnATexts(x[0] || '', shared);
           if (texts[0] !== RECORD_MARK) throw new Error('台帳屋の点検台帳ではないか、記録のシートが書き換えられています。');
-          return JSON.parse(texts.slice(1).join(''));
+          var snap = JSON.parse(texts.slice(1).join(''));
+          // 利用者が書き込んだ対応方針・見直しの結果（次の点検で、前回の対応状況を確かめるため）
+          snap.written = { notes: x[1] ? sheetRows(x[1], shared) : null, review: x[2] ? sheetRows(x[2], shared) : null };
+          return snap;
         });
       });
   }
@@ -339,7 +381,7 @@
       return rows.map(function (r) { return r.order + '｜' + (withCondition ? (r.condition || r.field) + '｜' : '') + r.target + '｜' + r.text; });
     }
     return {
-      id: String(app.appId), name: app.name, spaceId: app.spaceId || '',
+      id: String(app.appId), name: app.name, spaceId: app.spaceId || '', guest: !!app.guest,
       creator: app.creator ? (app.creator.name || app.creator.code) : '', createdAt: app.createdAt || '',
       modifier: app.modifier ? (app.modifier.name || app.modifier.code) : '', modifiedAt: app.modifiedAt || '',
       fields: properties ? flattenFields(properties) : null,
@@ -357,7 +399,7 @@
       soleManager: Refs.soleManager(val('appAcl')),
       fieldUse: fieldUse(app, val),
       xref: properties ? crossRefs(properties, val('actions')) : null,
-      warnings: warningsFor(val('appAcl'), val('recordAcl'), val('fieldAcl'), labels),
+      warnings: warningsFor(val('appAcl'), val('recordAcl'), val('fieldAcl'), labels).concat(app.guest ? [{ level: '確認', kind: 'アプリ', order: '', target: 'ゲストスペース', text: GUEST_NOTE }] : []),
       notes: val('adminNotes') ? !!String(val('adminNotes').content || '').replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim() : null,
       health: healthChecks(app, properties, val('customize'), val('adminNotes') ? !!String(val('adminNotes').content || '').replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim() : null),
       errors: errors
@@ -547,7 +589,7 @@
   // 点検台帳の記録に、これまでの点検の件数を残す（前回の点検台帳を選んで作るたびに1行ずつ増える）
 
   var HISTORY_MAX = 24;
-  var VERSION = '1.6.3'; // manifest.json の version と同じにする（テストで確かめる）
+  var VERSION = '1.7.0'; // manifest.json の version と同じにする（テストで確かめる）
 
   // 判定の基準（点検台帳の「判定の基準」シートと、報告書の別紙1に載せる）。[区分, 重要度, 判定, 基準・出典]
   var CRITERIA = [
@@ -555,6 +597,7 @@
     ['権限', '要確認', 'Everyoneに「削除」の権限がある', 'アプリのアクセス権'],
     ['権限', '確認', 'Everyoneに「書き出し」の権限がある', 'アプリのアクセス権。だれでもレコードをファイルに書き出せる'],
     ['権限', '確認', 'アプリ・レコード・フィールドのアクセス権で、ユーザー個人を指定している', '異動や退職のときに見直しが要る'],
+    ['権限', '確認', 'ゲストスペースのアプリ（社外のゲストが参加できる）', 'ゲストスペースの参加メンバーは点検していないため、参加しているゲストを確かめる'],
     ['権限', '確認', 'アプリ管理の権限が、ユーザー1人だけに付いている', '管理者が異動・退職すると、だれも設定を直せなくなる'],
     ['ユーザーの指定', '要確認', 'もういないユーザー・組織・グループが、アクセス権・プロセス管理・通知・一覧の条件などに指定されている', 'cybozu.comに同じコードのユーザー・組織・グループがない（削除されたか、コードが変わった）'],
     ['ユーザーの指定', '確認', '利用停止中のユーザーが指定されている', 'cybozu.comのユーザーの状態'],
@@ -571,9 +614,11 @@
     ['フィールドの使われ方', '－', 'ほかのアプリから使われているフィールド、設定では使われていないフィールド', '★は、使われている間はkintoneがフィールドの削除を止める設定']
   ];
 
+  var GUEST_NOTE = 'ゲストスペースのアプリです。社外のゲストも参加できるスペースなので、参加しているゲストと、ゲストに見せてよい設定・データかを確かめてください。';
+
   // 点検していないもの（報告書と点検台帳の表紙に書く）
   var ACTION_COLUMNS = ['対応方針', '担当', '期限', '完了日', '確認者'];
-  var NOT_COVERED = 'cybozu.comのユーザーアカウントの管理（退職した人のアカウントが止まっているか）、kintoneシステム管理者・cybozu.com共通管理者が誰か、監査ログ、APIトークンとWebhook、外部サービスとの連携、ゲストスペースのアプリ、レコードの中身';
+  var NOT_COVERED = 'cybozu.comのユーザーアカウントの管理（退職した人のアカウントが止まっているか）、kintoneシステム管理者・cybozu.com共通管理者が誰か、監査ログ、APIトークンとWebhook、外部サービスとの連携、ゲストスペースの参加メンバー（ゲストスペースのアプリの設定は点検します）、レコードの中身';
 
   // 点検した人・権限・試用かどうか（meta）を、表紙と報告書で同じ言い方にする
   function inspectorText(meta) {
@@ -612,7 +657,7 @@
   }
 
   var DIFF_ITEMS = [['アプリ', ['アプリ', 'アプリ名']], ['フィールド', ['フィールド']], ['アクセス権', ['アプリのアクセス権', 'レコードのアクセス権', 'フィールドのアクセス権']], ['プラグイン', ['プラグイン']], ['カスタマイズ', ['カスタマイズ']]];
-  var REPORT_IMPORTANT_MAX = 8;
+  var REPORT_IMPORTANT_MAX = 6; // 1枚目に載せる要確認の項目（すべては別紙2）。前回の点検台帳を選んでも1枚に収まる数
 
   // 報告書に載せる内容。sheets は buildSheets の結果（注意点は sheets[3]、変更点は sheets[2]）
   // ledger：{ fileName, hash }（作った点検台帳のファイル名と照合用の値。試用版では hash を付けない）
@@ -643,14 +688,19 @@
       unreadable: apps.filter(function (a) { return Object.keys(a.errors || {}).length; }).length,
       total: current.total, important: current.important, before: before,
       groups: groups, diff: diff, prevAt: prev ? prev.takenAt : null,
-      history: history.slice(-6),
+      history: history.slice(-5),
       items: important.slice(0, REPORT_IMPORTANT_MAX).map(function (w) { return { app: w[2], target: w[5], text: w[6] }; }),
       more: Math.max(0, important.length - REPORT_IMPORTANT_MAX),
       all: important.map(function (w) { return { id: w[1], app: w[2], kind: w[3], target: w[5], text: w[6] }; }),
       plan: snapshot.plan || '',
       inspector: inspectorText(meta), admin: adminText(meta), trial: !!meta.trial, version: meta.version || VERSION,
       unlisted: unlistedText((snapshot.env || {}).unlisted), unlistedCount: (((snapshot.env || {}).unlisted || {}).found || []).length,
-      fileName: (ledger && ledger.fileName) || '', hash: meta.trial ? '' : ((ledger && ledger.hash) || '')
+      fileName: (ledger && ledger.fileName) || '', hash: meta.trial ? '' : ((ledger && ledger.hash) || ''),
+      review: reviewShortText((sheets.filter(function (x) { return x.name === '対象ごとの権限'; })[0] || {}).review),
+      reviewLong: ((sheets.filter(function (x) { return x.name === '対象ごとの権限'; })[0] || { heading: {} }).heading.lead) || '',
+      next: nextInspectionText(now),
+      follow: (sheets.filter(function (x) { return x.name === FOLLOW_SHEET; })[0] || {}).follow || null,
+      prevFile: (prev && prev.file) || null
     };
   }
 
@@ -669,21 +719,21 @@
     '.bar{position:sticky;top:0;display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:10px 16px;background:#f5f6f7;border-bottom:1px solid #ccc}' +
     '.bar button{height:40px;padding:0 18px;border:none;background:#1f77b4;color:#fff;font:inherit;font-size:11pt;cursor:pointer}' +
     '.sheet{max-width:186mm;margin:0 auto;padding:8mm 4mm 12mm}' +
-    'h1{margin:0;padding-top:5mm;font-size:16pt;text-align:center;letter-spacing:.15em;color:#1f3a5f}' +
+    'h1{margin:0;padding-top:2mm;font-size:16pt;text-align:center;letter-spacing:.15em;color:#1f3a5f}' +
     '.sheet{position:relative}.date{position:absolute;top:0;right:0;margin:0;font-size:9pt}' +
     '.parties{display:flex;justify-content:space-between;gap:8mm;margin:3mm 0 2mm}.parties div{flex:1}' +
     '.fill{display:inline-block;min-width:52mm;border-bottom:1px solid #666;padding:0 2px}.fill:empty::before{content:attr(data-placeholder);color:#aaa}' +
-    '.summary{margin:1.5mm 0 1mm;padding:2mm 3mm;border:1px solid #1f3a5f;border-left:5px solid #1f3a5f;background:#f4f7fb;font-size:10pt}' +
+    '.summary{margin:1.5mm 0 1mm;padding:2mm 3mm;border:1px solid #1f3a5f;border-left:5px solid #1f3a5f;background:#f4f7fb;font-size:9.5pt}' +
     '.summary b{color:#1f3a5f}.scope{margin:1mm 0 0;font-size:8.5pt;color:#444}' +
-    'h2{margin:3.5mm 0 1.5mm;padding-left:6px;border-left:4px solid #1f3a5f;font-size:10.5pt;color:#1f3a5f}' +
+    'h2{margin:2.5mm 0 1mm;padding-left:6px;border-left:4px solid #1f3a5f;font-size:10.5pt;color:#1f3a5f}' +
     'table{width:100%;border-collapse:collapse}th,td{padding:1.5px 5px;border:1px solid #999;text-align:left;vertical-align:top}tr{break-inside:avoid}' +
     'th{background:#1f3a5f;color:#fff;border-color:#1f3a5f}.n{text-align:right;white-space:nowrap}.total td{font-weight:bold;background:#eef2f6}.imp{color:#b42318;font-weight:bold}' +
     '.meta td{padding:1px 0;border:none}.note{margin:1.5mm 0 0;font-size:8pt;color:#555}' +
     '.two{display:flex;gap:5mm}.two>section{flex:1;min-width:0}.items td{font-size:8pt}' +
-    '.end{display:flex;gap:4mm;align-items:stretch}.memo{flex:1;min-height:15mm;padding:4px 6px;border:1px solid #999;white-space:pre-wrap}.memo:empty::before{content:attr(data-placeholder);color:#999}' +
+    '.end{display:flex;gap:4mm;align-items:stretch}.memo{flex:1;min-height:12mm;padding:4px 6px;border:1px solid #999;white-space:pre-wrap}.memo:empty::before{content:attr(data-placeholder);color:#999}' +
     '.sign{display:flex;flex:none}.sign div{width:22mm;margin-left:-1px;border:1px solid #999;text-align:center}' +
-    '.sign span{display:block;border-bottom:1px solid #999;background:#eef1f3;font-size:8.5pt}.sign i{display:block;height:14mm}' +
-    '.foot{margin-top:3mm;font-size:8pt;color:#666}' +
+    '.sign span{display:block;border-bottom:1px solid #999;background:#eef1f3;font-size:8.5pt}.sign i{display:block;height:12mm}' +
+    '.foot{margin-top:3mm;font-size:8pt;color:#666}.sheet>table th,.sheet>table td,.two th,.two td{font-size:8.5pt;line-height:1.3}.h2note{margin-left:3mm;font-weight:normal;font-size:8.5pt;color:#444}' +
     '.overview{margin:1.5mm 0 0;font-size:8pt}.overview th{width:24mm;background:#eef2f6;color:#1f3a5f;border-color:#999;font-weight:bold}.overview td,.overview th{padding:1px 4px}' +
     '.hash{font-family:Consolas,Menlo,monospace;font-size:7.5pt;word-break:break-all}.fillin{display:inline-block;min-width:14mm;border-bottom:1px solid #666;text-align:center}' +
     '.trial{margin:2mm 0 0;padding:1.5mm 3mm;border:1px solid #b42318;color:#b42318;font-weight:bold;font-size:9pt;text-align:center}' +
@@ -703,6 +753,7 @@
       var changes = d.diff.reduce(function (n, r) { return n + r.add + r.change + r.remove; }, 0);
       out += '前回からの設定の変更は' + changes + '件です。';
     }
+    if (d.follow && d.follow.readable) out += followText(d.follow);
     out += d.important ? '「4. 要確認の項目」から、優先して確かめてください。' : '要確認の項目はありませんでした。';
     return out;
   }
@@ -723,11 +774,14 @@
       '<tr><th>点検の対象</th><td>kintone環境「' + esc(d.host) + '」の、' + esc(SCOPE_TEXT_BASE) + ' ' + d.apps + '個。点検していないものは別紙1</td></tr>' +
       '<tr><th>点検した人</th><td>' + esc(d.inspector || '－') + '。kintoneシステム管理者：' + esc(d.admin) + '</td></tr>' +
       '<tr><th>対象に入らなかったアプリ</th><td' + (d.unlistedCount ? ' class="imp"' : '') + '>' + esc(d.unlisted) + '</td></tr>' +
+      (d.review ? '<tr><th>アクセス権の見直し</th><td>' + esc(d.review) + '</td></tr>' : '') +
       '<tr><th>アプリの数の照合</th><td>kintoneシステム管理の「アプリ管理」に出るアプリの数：<span class="fillin" contenteditable="true"></span>個（上の2つの数の合計と同じかを確かめて記入）</td></tr>' +
-      '<tr><th>点検日時・方法</th><td>' + esc(dateText(d.at)) + '（点検したパソコンの時計）。台帳屋 棚卸し・変更監視パック ' + esc(d.version) + 'で、アプリの設定を読み取って点検（設定は変えていません。レコードの中身は読んでいません）。判定の基準は別紙1</td></tr>' +
+      '<tr><th>点検日時・方法</th><td>' + esc(dateText(d.at)) + '（点検したパソコンの時計）。台帳屋 棚卸し・変更監視パック ' + esc(d.version) + 'で設定を読み取って点検（設定は変えていません。レコードの中身は読んでいません。判定の基準は別紙1）</td></tr>' +
       '<tr><th>照合用の値</th><td>' + (d.hash
-        ? '点検台帳「' + esc(d.fileName) + '」のSHA-256：<span class="hash">' + esc(d.hash) + '</span>（受け取った点検台帳が、この報告書を作ったときのものと同じかを確かめられます。Windowsでは「certutil -hashfile ファイル名 SHA256」）'
-        : (d.trial ? '試用版のため、付けていません。' : '－')) + '</td></tr>' +
+        ? '今回の点検台帳「' + esc(d.fileName) + '」のSHA-256：<span class="hash">' + esc(d.hash) + '</span>'
+        : (d.trial ? '試用版のため、付けていません。' : '－')) +
+        (d.prevFile && d.prevFile.hash ? '<br>前回の点検台帳「' + esc(d.prevFile.name) + '」のSHA-256：<span class="hash">' + esc(d.prevFile.hash) + '</span>' : '') +
+        (d.hash || (d.prevFile && d.prevFile.hash) ? '（確かめ方は別紙1）' : '') + '</td></tr>' +
       '</table>');
 
     h.push('<h2>1. 点検の結果</h2><table><tr><th>区分</th><th class="n">件数</th><th class="n">うち要確認</th><th class="n">前回</th><th class="n">増減</th></tr>');
@@ -739,7 +793,7 @@
     h.push('<tr class="total"><td>合計</td><td class="n">' + d.total + '件</td><td class="n">' + d.important + '件</td><td class="n">' + (known(bt) ? bt + '件' : '－') + '</td><td class="n">' + (known(bt) ? signed(d.total - bt) : '－') + '</td></tr></table>');
     if (d.unreadable) h.push('<p class="note">権限がなく、設定の一部を読み取れなかったアプリが' + d.unreadable + '個あります。kintoneシステム管理者か、そのアプリの管理権限を持つ人が点検すると、読み取れます。</p>');
 
-    h.push('<div class="two"><section><h2>2. 前回の点検からの変更</h2>');
+    h.push('<div class="two"><section><h2>2. 前回の点検からの変更' + (d.diff ? '<span class="h2note">前回：' + esc(dateText(d.prevAt).slice(0, 10)) + '</span>' : '') + '</h2>');
     if (d.diff) {
       h.push('<table><tr><th>項目</th><th class="n">追加</th><th class="n">変更</th><th class="n">削除</th></tr>');
       var sum = { add: 0, change: 0, remove: 0 };
@@ -748,7 +802,6 @@
         h.push('<tr><td>' + esc(r.name) + '</td><td class="n">' + r.add + '件</td><td class="n">' + r.change + '件</td><td class="n">' + r.remove + '件</td></tr>');
       });
       h.push('<tr class="total"><td>合計</td><td class="n">' + sum.add + '件</td><td class="n">' + sum.change + '件</td><td class="n">' + sum.remove + '件</td></tr></table>');
-      h.push('<p class="note">前回の点検：' + esc(dateText(d.prevAt)) + '。中身は点検台帳の「変更点」シートにあります。</p>');
     } else {
       h.push('<p class="note">今回は前回の点検台帳を選ばずに作成したため、比べていません。次回、今回の点検台帳を選んで作成すると、変更の件数が入ります。</p>');
     }
@@ -759,7 +812,7 @@
         (known(x.important) ? x.important + '件' : '－') + '</td><td class="n">' + (known(x.changes) ? x.changes + '件' : '－') + '</td></tr>');
     });
     h.push('</table>');
-    if (d.history.length < 2) h.push('<p class="note">前回の点検台帳を選んで点検を続けると、ここに点検ごとの件数が並びます（最新の6回分）。</p>');
+    if (d.history.length < 2) h.push('<p class="note">前回の点検台帳を選んで点検を続けると、ここに点検ごとの件数が並びます（最新の5回分）。</p>');
     h.push('</section></div>');
 
     h.push('<h2>4. 要確認の項目</h2>');
@@ -772,14 +825,16 @@
       h.push('<p class="note">要確認の項目はありませんでした。確認の項目は、点検台帳の「注意点」シートにあります。</p>');
     }
 
-    h.push('<h2>5. 所見・対応</h2><div class="end"><div class="memo" contenteditable="true" data-placeholder="対応したこと、対応の予定、担当などを書き込めます"></div>');
+    h.push('<h2>5. 所見・対応' + (d.next ? '<span class="h2note">次回の点検の目安：' + esc(d.next) + '（半年ごと）</span>' : '') + '</h2><div class="end"><div class="memo" contenteditable="true" data-placeholder="対応したこと、対応の予定、担当などを書き込めます"></div>');
     h.push('<div class="sign"><div><span>点検者</span><i></i></div><div><span>確認者</span><i></i></div><div><span>承認者</span><i></i></div></div></div>');
-    h.push('<p class="foot">台帳屋 棚卸し・変更監視パック ' + esc(d.version) + 'で作成。詳しい内容は、同じときに作成した点検台帳（Excel）の各シートをご覧ください。' + (d.plan ? 'ご契約のプラン：' + esc(d.plan) + '。' : '') + '</p>');
 
     // 別紙1：判定の基準と、点検していないもの
     h.push('<section class="annex"><h2>別紙1　判定の基準</h2><table><tr><th style="width:14%">区分</th><th style="width:8%">重要度</th><th>判定</th><th style="width:34%">基準・出典</th></tr>');
     CRITERIA.forEach(function (c) { h.push('<tr><td>' + esc(c[0]) + '</td><td>' + esc(c[1]) + '</td><td>' + esc(c[2]) + '</td><td>' + esc(c[3]) + '</td></tr>'); });
-    h.push('</table><p class="note">点検の対象：' + esc(SCOPE_TEXT_BASE) + '。</p><p class="note">点検していないもの：' + esc(NOT_COVERED) + '。</p></section>');
+    h.push('</table><p class="note">点検の対象：' + esc(SCOPE_TEXT_BASE) + '。</p><p class="note">点検していないもの：' + esc(NOT_COVERED) + '。</p>');
+    h.push('<p class="note">照合用の値の確かめ方：受け取った点検台帳が、この報告書を作ったときのものと同じかは、Windowsのコマンドプロンプトで「certutil -hashfile ファイル名 SHA256」を実行し、出てきた値が上の値と同じかで確かめられます。対応や見直しの結果を書き込んだ点検台帳は、別の名前で保存してください（照合用の値は書き込む前のファイルのものです）。次回の点検でそれを「前回の点検台帳」に選ぶと、書き込んだ内容と、そのファイルの照合用の値が次の報告書に入ります。</p>');
+    h.push('<p class="note">' + esc(NOT_CERTIFIED) + '</p>');
+    h.push('<p class="foot">台帳屋 棚卸し・変更監視パック ' + esc(d.version) + 'で作成。詳しい内容は、同じときに作成した点検台帳（Excel）の各シートをご覧ください。' + (d.plan ? 'ご契約のプラン：' + esc(d.plan) + '。' : '') + '</p></section>');
 
     // 別紙2：要確認の項目のすべて（省略しない）
     if (d.all.length) {
@@ -787,8 +842,309 @@
       d.all.forEach(function (x, i) { h.push('<tr><td class="n">' + (i + 1) + '</td><td>' + esc(x.id) + '</td><td>' + esc(x.app) + '</td><td>' + esc(x.target) + '</td><td>' + esc(x.text) + '</td></tr>'); });
       h.push('</table><p class="note">対応の記録は、点検台帳の「注意点」シートの「' + ACTION_COLUMNS.join('」「') + '」の列に書き込めます。</p></section>');
     }
+    // 別紙3：前回の対応状況（残っているもの・確かめること）
+    if (d.follow && d.follow.readable && (d.follow.notes.length || d.follow.decisions.length)) {
+      var left = d.follow.notes.filter(function (r) { return r.state !== '解消しました'; });
+      // 別紙には、確かめることがあるものと、要確認の項目だけを載せる（確認の項目はシートで）
+      var open = left.filter(function (r) { return r.check || r.note.level === '要確認'; });
+      var dec = d.follow.decisions.filter(function (r) { return r.check; });
+      h.push('<section class="annex"><h2>別紙3　前回の対応状況（前回の点検：' + esc(dateText(d.follow.prevAt).slice(0, 10)) + '）</h2><p class="note">' + esc(followText(d.follow)) + '</p>');
+      if (open.length) {
+        h.push('<table><tr><th style="width:11%">今回</th><th style="width:15%">アプリ</th><th style="width:16%">対象</th><th>内容</th><th style="width:14%">対応方針・期限</th><th style="width:20%">確かめること</th></tr>');
+        open.forEach(function (r) { var n = r.note; h.push('<tr' + (r.check ? ' class="imp"' : '') + '><td>' + esc(r.state) + '</td><td>' + esc(n.app) + '</td><td>' + esc(n.target) + '</td><td>' + esc(clip(firstSentence(n.text), 40)) + '</td><td>' + esc([n.act['対応方針'], n.act['期限']].filter(Boolean).join('・')) + '</td><td>' + esc(r.check) + '</td></tr>'); });
+        h.push('</table>');
+      } else if (d.follow.notes.length) h.push('<p class="note">' + (left.length ? '確かめることがあるもの・要確認の項目で残っているものは、ありません。' : '前回の注意点は、すべて解消しました。') + '</p>');
+      if (left.length > open.length) h.push('<p class="note">ほかに、確認の項目で残っているものが' + (left.length - open.length) + '件あります。</p>');
+      if (dec.length) {
+        h.push('<table><tr><th style="width:24%">対象</th><th style="width:16%">前回の見直しの結果</th><th style="width:18%">確認者・確認日</th><th>確かめること</th></tr>');
+        dec.forEach(function (r) { var x = r.decision; h.push('<tr class="imp"><td>' + esc(x.target) + '</td><td>' + esc(x.result) + '</td><td>' + esc([x.by, x.at].filter(Boolean).join('・')) + '</td><td>' + esc(r.check) + '</td></tr>'); });
+        h.push('</table>');
+      }
+      h.push('<p class="note">すべての行は、点検台帳の「' + FOLLOW_SHEET + '」シートにあります。</p></section>');
+    }
     h.push('</div></body></html>');
     return h.join('');
+  }
+
+  // ===== 3-4. 対象ごとの権限（アクセス権の見直しの記録）と、次回の点検の目安 =====
+  // アプリのアクセス権に出てくる対象（Everyone・ユーザー・組織・グループ・作成者）ごとに、どのアプリに行があり、何ができる行かをまとめる。
+  // 実際に使われる設定は行の順番で決まる（1人が複数の行に当てはまるときは上の行）ため、ここでは「指定されている行」を数える。
+  // ISMSのアクセス権の見直しなどで、対象ごとに「この権限を続けるか」を決めて書き込めるように、見直しの欄を付ける。
+
+  var REVIEW_COLUMNS = ['見直しの結果', '確認者', '確認日'];
+  var REVIEW_KIND_ORDER = { Everyone: 0, ユーザー: 1, 組織: 2, グループ: 3, 作成者: 4 };
+  var REVIEW_TYPES = { ユーザー: 'USER', 組織: 'ORGANIZATION', グループ: 'GROUP' };
+  var REVIEW_LIST_MAX = 400; // 1つのセルに入れるアプリ名の文字数（長すぎると印刷で字が小さくなる）
+  var INSPECTION_INTERVAL_MONTHS = 6; // サイボウズ「kintone運用ルール（応用編）」は、棚卸しを半年に1回すすめている
+
+  function reviewKind(target) {
+    if (target === 'Everyone' || target === '作成者') return target;
+    return String(target || '').split('：')[0];
+  }
+
+  // 対象の文字列（「ユーザー：sato」「組織：営業部（下位組織を含む）」）から、cybozu.comでの名前と状態を引く
+  function reviewState(target, dir) {
+    var kind = reviewKind(target);
+    var type = REVIEW_TYPES[kind];
+    if (!type) return { name: '', state: '－', level: 0 };
+    var code = String(target).slice(kind.length + 1).replace(/（下位組織を含む）$/, '');
+    var st = Refs.stateOf({ type: type, code: code }, dir);
+    return { name: st.name || '', state: st.text, level: st.level };
+  }
+
+  function appListText(list) {
+    var text = '';
+    for (var i = 0; i < list.length; i++) {
+      var next = (text ? text + '、' : '') + list[i];
+      if (next.length > REVIEW_LIST_MAX) return text + '、ほか' + (list.length - i) + '個';
+      text = next;
+    }
+    return text;
+  }
+
+  function entityReview(apps, dir) {
+    var map = {};
+    function entry(target) {
+      if (!map[target]) map[target] = { target: target, apps: {}, admin: {}, del: {}, exp: {}, other: {} };
+      return map[target];
+    }
+    var names = {};
+    apps.forEach(function (a) {
+      names[a.id] = a.name;
+      (a.acl.app || []).forEach(function (line) {
+        var p = line.split('｜'); // 順｜対象｜権限
+        var e = entry(p[1]);
+        var rights = String(p[2] || '').split('・');
+        e.apps[a.id] = true;
+        if (rights.indexOf('アプリ管理') >= 0) e.admin[a.id] = true;
+        if (rights.indexOf('削除') >= 0) e.del[a.id] = true;
+        if (rights.indexOf('書き出し') >= 0) e.exp[a.id] = true;
+      });
+      ['record', 'field'].forEach(function (k) {
+        (a.acl[k] || []).forEach(function (line) { entry(line.split('｜')[2]).other[a.id] = true; }); // 順｜条件・フィールド｜対象｜権限
+      });
+    });
+    var count = function (set) { return Object.keys(set).length; };
+    var list = Object.keys(map).map(function (k) {
+      var e = map[k];
+      var st = reviewState(e.target, dir);
+      var adminIds = Object.keys(e.admin).sort(function (x, y) { return Number(x) - Number(y); });
+      return {
+        target: e.target, kind: reviewKind(e.target), name: st.name, state: st.state, level: st.level,
+        apps: count(e.apps), admin: adminIds.length, del: count(e.del), exp: count(e.exp), other: count(e.other),
+        adminApps: appListText(adminIds.map(function (id) { return (names[id] || '') + '（' + id + '）'; }))
+      };
+    });
+    list.sort(function (x, y) {
+      return (y.level - x.level) || ((REVIEW_KIND_ORDER[x.kind] === undefined ? 9 : REVIEW_KIND_ORDER[x.kind]) - (REVIEW_KIND_ORDER[y.kind] === undefined ? 9 : REVIEW_KIND_ORDER[y.kind])) ||
+        (y.admin - x.admin) || (x.target < y.target ? -1 : x.target > y.target ? 1 : 0);
+    });
+    var kinds = { Everyone: 0, ユーザー: 0, 組織: 0, グループ: 0, 作成者: 0 };
+    list.forEach(function (x) { if (x.kind in kinds) kinds[x.kind] += 1; });
+    return { list: list, kinds: kinds, missing: list.filter(function (x) { return x.level > 0; }).length };
+  }
+
+  function reviewParts(review) {
+    var k = review.kinds;
+    return [k.Everyone ? 'Everyone' : '', k.ユーザー ? 'ユーザー' + k.ユーザー + '人' : '', k.組織 ? '組織' + k.組織 : '', k.グループ ? 'グループ' + k.グループ : '', k.作成者 ? '作成者' : ''].filter(Boolean).join('・');
+  }
+
+  // 報告書の1行に収まる短い言い方
+  function reviewShortText(review) {
+    if (!review || !review.list.length) return '';
+    return '対象' + review.list.length + '件（' + reviewParts(review) + '）' + (review.missing ? '、うち、もういないか利用停止中' + review.missing + '件' : '') + '。一覧と見直しの欄は、点検台帳の「対象ごとの権限」シート';
+  }
+
+  function reviewSummaryText(review) {
+    if (!review.list.length) return 'アクセス権を読み取れたアプリがありません。';
+    return 'アクセス権に指定されている対象は' + review.list.length + '件です（' + reviewParts(review) + '）' +
+      (review.missing ? '。うち、もういないか利用停止中のものが' + review.missing + '件あります' : '') + '。';
+  }
+
+  // 次回の点検の目安（半年後の月）
+  function nextInspectionText(now) {
+    var d = now instanceof Date ? new Date(now.getTime()) : new Date(now || Date.now());
+    if (isNaN(d.getTime())) return '';
+    d.setDate(1);
+    d.setMonth(d.getMonth() + INSPECTION_INTERVAL_MONTHS);
+    return d.getFullYear() + '年' + (d.getMonth() + 1) + '月ごろ';
+  }
+
+  // ===== 3-5. 前回の対応状況（前回の点検台帳に書き込まれた対応と見直しの結果を、今回の点検で確かめる） =====
+  // 監査では「前回の指摘を直したか」が見られる。前回の点検台帳の「注意点」と「対象ごとの権限」のシートに
+  // 利用者が書き込んだ対応方針・期限・完了日・見直しの結果を読み、今回も同じ注意点が見つかるかで判定する。
+
+  var FOLLOW_SHEET = '前回の対応状況';
+  var NOT_CERTIFIED = 'この点検台帳と報告書は、点検した時点のkintoneの設定を、判定の基準に沿って読み取った結果です。ISMSやJ-SOXなどの基準に適合していることを示すものではありません。監査で使うときは、求められる形式を監査を行う方に確かめてください。';
+  var REMOVE_WORDS = /外す|外した|はずす|削除|取り消/;
+  var CHANGE_WORDS = /変える|変えた|変更|減らす|絞る/;
+
+  function pad2(n) { return ('0' + n).slice(-2); }
+  // 数の違い（「3個」→「5個」）では別の注意点にしない
+  function normText(t) { return String(t || '').replace(/[0-9０-９][0-9０-９,，.]*/g, '#'); }
+  function warnKey(id, kind, target, text) { return [String(id || ''), kind || '', target || '', normText(text)].join('｜'); }
+
+  // Excelで日付を入力すると、日付の通し番号（1900年1月1日からの日数）で保存される
+  function cellDate(v) {
+    var s = String(v === null || v === undefined ? '' : v).trim();
+    if (/^\d{5}(\.\d+)?$/.test(s)) {
+      var n = Number(s);
+      if (n > 20000 && n < 80000) {
+        var d = new Date(Math.round((n - 25569) * 86400000));
+        return d.getUTCFullYear() + '-' + pad2(d.getUTCMonth() + 1) + '-' + pad2(d.getUTCDate());
+      }
+    }
+    return s;
+  }
+  function isoDay(s) {
+    var m = /^(\d{4})[-\/年.](\d{1,2})[-\/月.](\d{1,2})/.exec(String(s || ''));
+    return m ? m[1] + '-' + pad2(Number(m[2])) + '-' + pad2(Number(m[3])) : '';
+  }
+
+  // 見出しの行（1列目が first）を探し、見出しの名前で列を引けるようにする
+  function tableOf(rows, first) {
+    for (var i = 0; i < (rows || []).length; i++) {
+      if (rows[i] && String(rows[i][0]).trim() === first) {
+        var idx = {};
+        rows[i].forEach(function (h, j) { if (h) idx[String(h).trim()] = j; });
+        return { idx: idx, rows: rows.slice(i + 1).filter(Boolean) };
+      }
+    }
+    return null;
+  }
+  function getter(t) { return function (r, k) { return k in t.idx ? String(r[t.idx[k]] === null || r[t.idx[k]] === undefined ? '' : r[t.idx[k]]).trim() : ''; }; }
+
+  function writtenNotes(written) {
+    var t = written && tableOf(written.notes, '重要度');
+    if (!t || !('内容' in t.idx)) return [];
+    var get = getter(t);
+    return t.rows.filter(function (r) { var lv = get(r, '重要度'); return lv === '要確認' || lv === '確認'; }).map(function (r) {
+      var act = {};
+      ACTION_COLUMNS.forEach(function (c) { act[c] = /期限|完了日/.test(c) ? cellDate(get(r, c)) : get(r, c); });
+      return { level: get(r, '重要度'), id: get(r, 'アプリID'), app: get(r, 'アプリ名'), kind: get(r, '種類'), target: get(r, '対象'), text: get(r, '内容'), act: act };
+    });
+  }
+
+  function writtenReview(written) {
+    var t = written && tableOf(written.review, '対象');
+    if (!t || !('見直しの結果' in t.idx)) return [];
+    var get = getter(t);
+    var num = function (r, k) { var v = get(r, k); return v === '' ? null : Number(v); };
+    return t.rows.filter(function (r) { return get(r, '対象') && get(r, '見直しの結果'); }).map(function (r) {
+      return { target: get(r, '対象'), result: get(r, '見直しの結果'), by: get(r, '確認者'), at: cellDate(get(r, '確認日')),
+        apps: num(r, 'アプリの数'), admin: num(r, 'アプリ管理'), del: num(r, '削除'), exp: num(r, '書き出し') };
+    });
+  }
+
+  // prev：前回の点検台帳（readSnapshot の結果。written に書き込まれたシート、file にファイル名と照合用の値）
+  // warnings：今回の注意点の行、review：entityReview の結果、apps：今回点検したアプリ
+  function followUp(prev, warnings, review, now, apps) {
+    if (!prev) return null;
+    var written = prev.written || null;
+    var notes = writtenNotes(written);
+    var decisions = writtenReview(written);
+    var today = dateText(now || new Date()).slice(0, 10);
+    var current = {};
+    warnings.forEach(function (w) { current[warnKey(w[1], w[3], w[5], w[6])] = true; });
+    var appIds = {};
+    (apps || []).forEach(function (a) { appIds[a.id] = a; });
+    var noteRows = notes.map(function (n) {
+      var state = '解消しました';
+      var check = '';
+      if (current[warnKey(n.id, n.kind, n.target, n.text)]) {
+        state = '残っています';
+        var due = isoDay(n.act['期限']);
+        if (n.act['完了日']) check = '完了と書かれていますが、今回の点検でも見つかりました。';
+        else if (due && due < today) check = '期限（' + n.act['期限'] + '）を過ぎています。';
+        else if (!n.act['対応方針'] && n.level === '要確認') check = '対応方針が書かれていません。';
+      } else if (n.id && !appIds[n.id]) {
+        state = '確かめられません';
+        check = '今回はこのアプリを点検していません（アプリが削除されたか、点検した人が見られません）。';
+      } else if (n.id && Object.keys(appIds[n.id].errors || {}).length) {
+        // 読み取れなかった設定があると、注意点が出ないだけで「解消」と見えてしまうため
+        state = '確かめられません';
+        check = '今回は、このアプリの設定の一部を読み取れませんでした（点検した人の権限を確かめてください）。';
+      }
+      return { state: state, check: check, note: n };
+    });
+    var byTarget = {};
+    ((review && review.list) || []).forEach(function (x) { byTarget[x.target] = x; });
+    var decisionRows = decisions.map(function (d) {
+      var cur = byTarget[d.target];
+      var still = !!(cur && (cur.apps || cur.other));
+      var check = '';
+      if (REMOVE_WORDS.test(d.result) && still) check = '前回の見直しで「' + d.result + '」としましたが、まだアクセス権に残っています。';
+      else if (CHANGE_WORDS.test(d.result) && cur && d.apps !== null && cur.apps === d.apps && cur.admin === d.admin && cur.del === d.del && cur.exp === d.exp) {
+        check = '前回の見直しで「' + d.result + '」としましたが、アプリの数と権限の数が前回と同じです。';
+      }
+      return { state: still ? 'アクセス権にあります' : 'アクセス権にありません', check: check, decision: d, current: cur || null };
+    });
+    var count = function (list, f) { return list.filter(f).length; };
+    return {
+      prevAt: prev.takenAt || '', file: prev.file || null, readable: !!(written && (written.notes || written.review)),
+      notes: noteRows, decisions: decisionRows,
+      sum: {
+        notes: noteRows.length, important: count(noteRows, function (r) { return r.note.level === '要確認'; }),
+        resolved: count(noteRows, function (r) { return r.state === '解消しました'; }),
+        remaining: count(noteRows, function (r) { return r.state === '残っています'; }),
+        unknown: count(noteRows, function (r) { return r.state === '確かめられません'; }),
+        done: count(noteRows, function (r) { return /^完了と書かれて/.test(r.check); }),
+        overdue: count(noteRows, function (r) { return /^期限/.test(r.check); }),
+        decisions: decisionRows.length,
+        removeKept: count(decisionRows, function (r) { return /残っています。$/.test(r.check); }),
+        changeSame: count(decisionRows, function (r) { return /前回と同じです。$/.test(r.check); })
+      }
+    };
+  }
+
+  // 前回の対応状況を1〜2文で（報告書の総評・点検台帳の表紙・画面）
+  function followText(f) {
+    if (!f) return '';
+    if (!f.readable) return '前回の点検台帳から、注意点と見直しの結果を読み取れませんでした（1.6以前の点検台帳か、シートが削除されています）。';
+    var s = f.sum;
+    var head = !s.notes ? '' : s.resolved === s.notes ? '前回の注意点' + s.notes + '件は、すべて解消しました'
+      : s.remaining === s.notes ? '前回の注意点' + s.notes + '件は、すべて残っています'
+      : '前回の注意点' + s.notes + '件のうち、' + s.resolved + '件は解消し、' + s.remaining + '件が残っています';
+    var out = s.notes
+      ? head + (s.unknown ? '（' + s.unknown + '件は確かめられません）' : '') +
+        (s.done || s.overdue ? '。残っているもののうち、完了と書かれているもの' + s.done + '件、期限を過ぎたもの' + s.overdue + '件' : '') + '。'
+      : '前回の注意点はありませんでした。';
+    if (s.decisions) {
+      out += '前回のアクセス権の見直し' + s.decisions + '件のうち、「外す」としたのに残っているもの' + s.removeKept + '件' +
+        (s.changeSame ? '、「変える」としたのに前回と同じもの' + s.changeSame + '件' : '') + '。';
+    }
+    return out;
+  }
+
+  var FOLLOW_ORDER = { 残っています: 0, 確かめられません: 1, 解消しました: 2 };
+
+  // 点検台帳の「前回の対応状況」シート。head：見出しを作る関数
+  function followSheet(follow, head) {
+    var sheet = { name: FOLLOW_SHEET, list: true, follow: follow, widths: [12, 30, 8, 7, 18, 12, 18, 40, 18, 10, 11, 11, 10] };
+    if (!follow || !follow.readable) {
+      var why = follow ? followText(follow) : '前回の点検台帳を選ばずに作成したため、確かめていません。次回の点検で、この点検台帳（対応方針や見直しの結果を書き込んだもの）を「前回の点検台帳」に選ぶと、ここで前回の注意点が解消したかを確かめます。';
+      sheet.heading = head(FOLLOW_SHEET, why);
+      sheet.blocks = [{ title: null, header: [], rows: [], note: why }];
+      return sheet;
+    }
+    sheet.heading = head(FOLLOW_SHEET, followText(follow) + '（前回の点検：' + dateText(follow.prevAt) + '）');
+    var notes = follow.notes.slice().sort(function (x, y) {
+      return ((x.check ? 0 : 1) - (y.check ? 0 : 1)) || (FOLLOW_ORDER[x.state] - FOLLOW_ORDER[y.state]) || ((x.note.level === '要確認' ? 0 : 1) - (y.note.level === '要確認' ? 0 : 1));
+    });
+    var decisions = follow.decisions.slice().sort(function (x, y) { return (x.check ? 0 : 1) - (y.check ? 0 : 1); });
+    sheet.blocks = [
+      { title: '前回の注意点（前回の点検台帳に書き込まれた対応と、今回の点検の結果）', ids: [3], header: ['今回', '確かめること', '重要度', 'アプリID', 'アプリ名', '種類', '対象', '内容'].concat(ACTION_COLUMNS),
+        rows: notes.map(function (r) { var n = r.note; return [r.state, r.check, n.level, n.id, n.app, n.kind, n.target, n.text].concat(ACTION_COLUMNS.map(function (c) { return n.act[c] || ''; })); }),
+        styles: notes.map(function (r) { return r.check ? STYLE.important : r.state === '残っています' ? STYLE.warn : STYLE.body; }),
+        note: notes.length ? null : '前回の点検台帳に、注意点はありませんでした。' },
+      { title: '前回のアクセス権の見直し（「対象ごとの権限」シートに書き込まれた見直しの結果）', numbers: [6, 7], header: ['今回', '確かめること', '対象', '前回の見直しの結果', '確認者', '確認日', '前回のアプリの数', '今回のアプリの数'],
+        rows: decisions.map(function (r) { var d = r.decision; return [r.state, r.check, d.target, d.result, d.by, d.at, d.apps === null ? '' : String(d.apps), r.current ? String(r.current.apps) : '0']; }),
+        styles: decisions.map(function (r) { return r.check ? STYLE.important : STYLE.body; }),
+        note: decisions.length ? null : '前回の点検台帳の「対象ごとの権限」シートに、見直しの結果は書き込まれていませんでした。' },
+      { title: null, header: [], rows: [], note: '「解消しました」は、今回の点検で同じ注意点が見つからなかったものです（設定を直したほか、アプリやフィールドを削除した場合も含みます）。' },
+      { title: null, header: [], rows: [], note: '「外す」「削除」と書かれた見直しの結果は、今回もその対象がアクセス権に残っていないかを、「変える」「変更」と書かれたものは、権限の数が前回と同じでないかを確かめます。' }
+    ];
+    return sheet;
   }
 
   // ===== 4. 前回との比較 =====
@@ -969,6 +1325,13 @@
     // 点検の推移（記録シートに入れて、次回の点検台帳に引き継ぐ）
     snapshot.history = historyOf(prev, snapshot.host, inspectionSummary(snapshot.takenAt || (now ? now.toISOString() : ''), apps.length, warnings, diff));
     var notAllowedApps = allowed && allowed.length ? apps.filter(function (a) { return pluginWarnings(a, allowed, env.selfPlugin).length; }).length : 0;
+    var review = entityReview(apps, dir);
+    var follow = followUp(prev, warnings, review, now, apps);
+    // まだ残っている注意点には、前回書き込まれた対応方針・担当・期限を引き継ぐ（完了日と確認者は引き継がない）
+    var carry = {};
+    if (follow) follow.notes.forEach(function (r) { if (r.state === '残っています') carry[warnKey(r.note.id, r.note.kind, r.note.target, r.note.text)] = r.note.act; });
+    var prevReview = {};
+    if (follow) follow.decisions.forEach(function (r) { prevReview[r.decision.target] = r.decision; });
 
     var cover = [
       ['点検日時', dateText(now) + '（点検したパソコンの時計）'],
@@ -982,8 +1345,11 @@
       ['点検の方法', '台帳屋 棚卸し・変更監視パック ' + (meta.version || VERSION) + '。アプリの設定を読み取るだけで、設定は変えていません。判定の基準は「判定の基準」シートにあります。'],
       ['読み取れなかった項目があるアプリ', withErrors.length + '個' + (withErrors.length ? '（「アプリ一覧」シートの右端の列を参照）' : '')],
       ['注意点（権限・利用状況・ユーザーの指定・健康診断）', warnings.length + '件（うち健康診断 ' + healthCount + '件）'],
-      ['前回の点検', prev ? dateText(prev.takenAt) + '（' + (prev.host || '') + '）' : '比較していません'],
+      ['前回の点検', prev ? dateText(prev.takenAt) + '（' + (prev.host || '') + '）' + (prev.file && prev.file.name ? '。ファイル「' + prev.file.name + '」' + (prev.file.hash ? '（SHA-256：' + prev.file.hash + '）' : '') : '') : '比較していません'],
+      ['前回の対応状況', follow ? followText(follow) + (follow.readable ? '一覧は「' + FOLLOW_SHEET + '」シートにあります。' : '') : '前回の点検台帳を選ぶと、前回の注意点が解消したか、前回のアクセス権の見直しのとおりに直っているかを確かめます。'],
       ['前回からの変更', diff ? diff.length + '件' : '－'],
+      ['アクセス権の見直し', reviewSummaryText(review) + '「対象ごとの権限」シートの「見直しの結果」の列に、続ける・変える・外すを書き込むと、見直しの記録として残せます。'],
+      ['次回の点検の目安', nextInspectionText(now) + '（サイボウズの「kintone運用ルール（応用編）」は、棚卸しを半年に1回すすめています。次回は、この点検台帳を「前回の点検台帳」に選ぶと、変更点が分かります）'],
       ['許可するプラグイン', allowed && allowed.length ? allowed.length + '個を指定（許可していないプラグインが入っているアプリ ' + notAllowedApps + '個）' : '指定していません（設定画面で指定すると、健康診断で許可していないプラグインを見つけます）'],
       ['ライセンス', licenseText || '']
     ];
@@ -991,7 +1357,7 @@
     var historyRows = snapshot.history.slice().reverse().map(function (x) { return [dateText(x.at), historyText(x)]; });
     var day = function (v) { return dateText(v).slice(0, 10); };
     var appRows = apps.map(function (a) {
-      return [a.id, a.name, a.spaceId, a.creator, day(a.createdAt), a.modifier, day(a.modifiedAt), daysSince(a.modifiedAt, now),
+      return [a.id, a.name, a.spaceId ? a.spaceId + (a.guest ? '（ゲスト）' : '') : '', a.creator, day(a.createdAt), a.modifier, day(a.modifiedAt), daysSince(a.modifiedAt, now),
         a.fields ? String(Object.keys(a.fields).length) : '', a.plugins ? String(a.plugins.length) : '', a.customize ? String(a.customize.files.length) : '',
         a.records ? String(a.records.count) : '', a.records ? day(a.records.lastUpdated) : '', a.records ? daysSince(a.records.lastUpdated, now) : '',
         String(noteOf(a).length), Object.keys(a.errors).map(function (k) { return ERROR_KEYS[k] + '（' + a.errors[k] + '）'; }).join('、')];
@@ -1049,7 +1415,9 @@
             ['アプリ一覧', '全アプリの作成者・設定の最終更新・フィールド数・レコードの件数と最終更新'],
             ['変更点', '前回の点検台帳と比べて、追加・削除・変更された設定'],
             ['注意点', '見直したほうがよい設定（要確認は赤、確認は白）'],
+            [FOLLOW_SHEET, '前回の注意点が解消したか、前回のアクセス権の見直しのとおりに直っているか'],
             ['権限一覧', '全アプリのアプリ・レコード・フィールドのアクセス権'],
+            ['対象ごとの権限', 'ユーザー・組織・グループごとに、どのアプリで何ができるか（見直しの結果を書き込む欄つき）'],
             ['ユーザーの指定', '設定に出てくるユーザー・組織・グループ（もういない人を先頭に）'],
             ['プラグイン', 'どのアプリに、どのプラグインが入っているか'],
             ['カスタマイズ', 'どのアプリに、どのJavaScript・CSSが入っているか'],
@@ -1062,11 +1430,28 @@
       { name: '変更点', list: true, heading: head('変更点', diff ? '前回の点検（' + dateText(prev.takenAt) + '）からの変更は' + diff.length + '件です。' : '前回の点検台帳を選ばずに作成したため、比較していません。'), widths: [8, 8, 24, 18, 36, 40, 40], blocks: [Object.assign({ ids: [1] }, diffBlock)] },
       { name: '注意点', list: true, heading: head('注意点', '見直したほうがよい設定は' + warnings.length + '件です（うち要確認 ' + importantCount + '件。赤の行）。'), widths: [8, 7, 20, 12, 5, 22, 50, 18, 9, 9, 9, 9],
         blocks: [{ title: null, ids: [1], numbers: [4], header: ['重要度', 'アプリID', 'アプリ名', '種類', '順', '対象', '内容'].concat(ACTION_COLUMNS),
-          rows: warnings.map(function (w) { return w.concat(ACTION_COLUMNS.map(function () { return ''; })); }),
+          rows: warnings.map(function (w) {
+            var act = carry[warnKey(w[1], w[3], w[5], w[6])];
+            return w.concat(ACTION_COLUMNS.map(function (c) { return act && /対応方針|担当|期限/.test(c) ? act[c] || '' : ''; }));
+          }),
           styles: warnings.map(function (w) { return w[0] === '要確認' ? STYLE.important : STYLE.body; }), note: warnings.length ? null : '注意点は見つかりませんでした。' }].concat(warnings.length ? [
-          { title: null, header: [], rows: [], note: '「' + ACTION_COLUMNS.join('」「') + '」の列は、見つかったものへの対応を記録するために書き込む欄です。' }
+          { title: null, header: [], rows: [], note: '「' + ACTION_COLUMNS.join('」「') + '」の列は、見つかったものへの対応を記録するために書き込む欄です。' + (follow && Object.keys(carry).length ? '前回から残っている注意点には、前回の点検台帳に書き込まれた対応方針・担当・期限を引き継いでいます。' : '') }
         ] : []) },
+      followSheet(follow, head),
       { name: '権限一覧', list: true, heading: head('権限一覧'), widths: [7, 24, 10, 5, 30, 28, 40], blocks: [{ title: null, ids: [0], numbers: [3], header: ['アプリID', 'アプリ名', '種類', '順', '条件・フィールド', '対象', '権限'], rows: aclRows }] },
+      { name: '対象ごとの権限', list: true, review: review, heading: head('対象ごとの権限', reviewSummaryText(review)), widths: [30, 14, 14, 9, 9, 7, 9, 12, 40, 20, 13, 12, 11],
+        blocks: [{ title: null, numbers: [3, 4, 5, 6, 7], header: ['対象', '名前', '状態', 'アプリの数', 'アプリ管理', '削除', '書き出し', 'レコード・フィールドの権限', 'アプリ管理できるアプリ', '前回の見直し'].concat(REVIEW_COLUMNS),
+          rows: review.list.map(function (x) {
+            var pr = prevReview[x.target];
+            return [x.target, x.name, x.state, String(x.apps), String(x.admin), String(x.del), String(x.exp), String(x.other), x.adminApps,
+              pr ? pr.result + (pr.by || pr.at ? '（' + [pr.by, pr.at].filter(Boolean).join('・') + '）' : '') : ''].concat(REVIEW_COLUMNS.map(function () { return ''; }));
+          }),
+          styles: review.list.map(function (x) { return x.level > 0 ? STYLE.warn : STYLE.body; }),
+          note: review.list.length ? null : 'アクセス権を読み取れたアプリがありません。' }].concat(review.list.length ? [
+          { title: null, header: [], rows: [], note: '数は、アプリのアクセス権でその対象の行があり、その権限が付いているアプリの数です。「レコード・フィールドの権限」は、レコードかフィールドのアクセス権に出てくるアプリの数です。' },
+          { title: null, header: [], rows: [], note: '1人が複数の行に当てはまるときは、上の行の設定が使われます。実際にできることは、「権限一覧」シートで行の順番と合わせて確かめてください。' },
+          { title: null, header: [], rows: [], note: '「見直しの結果」「確認者」「確認日」は、見直した結果を残すために書き込む欄です（例：続ける・変える・外す）。' }
+        ] : []) },
       { name: 'ユーザーの指定', list: true, heading: head('ユーザーの指定'), widths: [11, 8, 14, 18, 7, 20, 20, 48], blocks: [{ title: null, ids: [4], header: ['状態', '種類', '名前', 'コード', 'アプリID', 'アプリ名', '設定の場所', '内容'], rows: refRows, styles: refRows.map(function (r) { return r[0] === '見つかりません' ? STYLE.warn : STYLE.body; }), note: refRows.length ? null : 'ユーザー・組織・グループを指定している設定はありません。' }] },
       { name: 'プラグイン', list: true, heading: head('プラグイン'), widths: [7, 24, 36, 36, 8, 14], blocks: [{ title: null, ids: [0], header: ['アプリID', 'アプリ名', 'プラグイン名', 'プラグインID', '状態', '許可'], rows: pluginRows,
         styles: pluginRows.map(function (r) { return r[5] === '許可していない' ? STYLE.warn : STYLE.body; }),
@@ -1086,7 +1471,8 @@
       { name: '判定の基準', list: true, heading: head('判定の基準', '注意点は、次の基準で判定しました（台帳屋 棚卸し・変更監視パック ' + (meta.version || VERSION) + '）。'), widths: [14, 8, 52, 56],
         blocks: [{ title: null, header: ['区分', '重要度', '判定', '基準・出典'], rows: CRITERIA },
           { title: null, header: [], rows: [], note: '点検の対象：' + SCOPE_TEXT_BASE + '。' },
-          { title: null, header: [], rows: [], note: '点検していないもの：' + NOT_COVERED + '。' }] },
+          { title: null, header: [], rows: [], note: '点検していないもの：' + NOT_COVERED + '。' },
+          { title: null, header: [], rows: [], note: NOT_CERTIFIED }] },
       { name: RECORD_SHEET, hidden: true, widths: [20], blocks: [{ title: null, header: [], rows: chunks }] }
     ];
   }
@@ -1119,7 +1505,8 @@
         examples: hit.slice(0, per).map(function (r) { return { app: r[2], target: r[5], text: r[6] }; })
       };
     });
-    var use = sheets[9] && sheets[9].blocks[0].rows;
+    var useSheet = sheets.filter(function (x) { return x.name === 'フィールドの使われ方'; })[0];
+    var use = useSheet && useSheet.blocks[0].rows;
     var fieldCount = { other: 0, blocked: 0, unused: 0 };
     (use || []).forEach(function (r) {
       if (r[5] === 'ほかのアプリから使われています') { fieldCount.other += 1; if (/★/.test(r[7])) fieldCount.blocked += 1; }
@@ -1237,7 +1624,8 @@
     pluginWarnings: pluginWarnings, historyOf: historyOf, inspectionSummary: inspectionSummary, reportData: reportData, reportHtml: reportHtml,
     buildXlsx: buildXlsx, readSnapshot: readSnapshot, readZip: readZip, sha256Hex: sha256Hex, VERSION: VERSION, CRITERIA: CRITERIA,
     appSnapshot: appSnapshot, diffSnapshots: diffSnapshots, buildSheets: buildSheets, summaryText: summaryText,
-    fieldSignature: fieldSignature, warningsFor: warningsFor, extractLinks: extractLinks, entityText: entityText, dateText: dateText
+    fieldSignature: fieldSignature, warningsFor: warningsFor, extractLinks: extractLinks, entityText: entityText, dateText: dateText,
+    entityReview: entityReview, nextInspectionText: nextInspectionText, followUp: followUp, followText: followText, sheetRows: sheetRows, cellDate: cellDate
   };
   if (typeof module !== 'undefined' && module.exports) { module.exports = Core; return; }
   if (typeof kintone === 'undefined') return;
@@ -1256,7 +1644,21 @@
     return node;
   }
 
-  function api(path, params) { return kintone.api(kintone.api.url(path, true), 'GET', params); }
+  // base：ゲストスペースのアプリなら「/k/guest/（ゲストスペースのID）」。通常の送り先では GAIA_IL23 で読めない
+  // （2026年11月6日、検証用のkintoneで確かめた。アプリの一覧には、見られるゲストスペースのアプリも入る）
+  function api(path, params, base) { return kintone.api(base ? path.replace(/^\/k\/v1\//, base + '/v1/') : path, 'GET', params); }
+  var guestBase = {};
+  // スペースごとに1回だけ確かめる（同じスペースのアプリは、どれもゲストスペースか、どれも違う）
+  function baseFor(app) {
+    var sid = app.spaceId;
+    if (!sid) return Promise.resolve('');
+    if (!guestBase[sid]) {
+      guestBase[sid] = kintone.api('/k/v1/app.json', 'GET', { id: app.appId }).then(function () { return ''; }, function (e) {
+        return e && e.code === 'GAIA_IL23' ? '/k/guest/' + sid : '';
+      });
+    }
+    return guestBase[sid];
+  }
   // cybozu.com の User API（ユーザー・組織・グループがいまもあるか）
   function userApi(path, params) { return kintone.api(path, 'GET', params); }
   function settle(promise) {
@@ -1275,37 +1677,37 @@
   }
 
   // レコードの中身は読まない。更新日時のフィールドだけを1件取り、件数と合わせて確かめる
-  function recordRequest(appId, fieldsResult) {
+  function recordRequest(appId, fieldsResult, base) {
     var props = (fieldsResult.ok && fieldsResult.value.properties) || {};
     var code = Object.keys(props).filter(function (k) { return props[k].type === 'UPDATED_TIME'; })[0];
     if (!code) return Promise.resolve(null);
-    return settle(api('/k/v1/records.json', { app: appId, fields: [code], query: 'order by ' + code + ' desc limit 1', totalCount: true }));
+    return settle(api('/k/v1/records.json', { app: appId, fields: [code], query: 'order by ' + code + ' desc limit 1', totalCount: true }, base));
   }
 
-  function collect(appId, withRecords) {
+  function collect(appId, withRecords, base) {
     var requests = {
-      fields: api('/k/v1/app/form/fields.json', { app: appId }),
-      appAcl: api('/k/v1/app/acl.json', { app: appId }),
-      recordAcl: api('/k/v1/record/acl.json', { app: appId }),
-      fieldAcl: api('/k/v1/field/acl.json', { app: appId }),
-      plugins: api('/k/v1/app/plugins.json', { app: appId }),
-      customize: api('/k/v1/app/customize.json', { app: appId }),
-      actions: api('/k/v1/app/actions.json', { app: appId }),
-      status: api('/k/v1/app/status.json', { app: appId }),
-      general: api('/k/v1/app/notifications/general.json', { app: appId }),
-      perRecord: api('/k/v1/app/notifications/perRecord.json', { app: appId }),
-      reminder: api('/k/v1/app/notifications/reminder.json', { app: appId }),
-      views: api('/k/v1/app/views.json', { app: appId }),
-      reports: api('/k/v1/app/reports.json', { app: appId }),
-      appSettings: api('/k/v1/app/settings.json', { app: appId }),
-      adminNotes: api('/k/v1/app/adminNotes.json', { app: appId })
+      fields: api('/k/v1/app/form/fields.json', { app: appId }, base),
+      appAcl: api('/k/v1/app/acl.json', { app: appId }, base),
+      recordAcl: api('/k/v1/record/acl.json', { app: appId }, base),
+      fieldAcl: api('/k/v1/field/acl.json', { app: appId }, base),
+      plugins: api('/k/v1/app/plugins.json', { app: appId }, base),
+      customize: api('/k/v1/app/customize.json', { app: appId }, base),
+      actions: api('/k/v1/app/actions.json', { app: appId }, base),
+      status: api('/k/v1/app/status.json', { app: appId }, base),
+      general: api('/k/v1/app/notifications/general.json', { app: appId }, base),
+      perRecord: api('/k/v1/app/notifications/perRecord.json', { app: appId }, base),
+      reminder: api('/k/v1/app/notifications/reminder.json', { app: appId }, base),
+      views: api('/k/v1/app/views.json', { app: appId }, base),
+      reports: api('/k/v1/app/reports.json', { app: appId }, base),
+      appSettings: api('/k/v1/app/settings.json', { app: appId }, base),
+      adminNotes: api('/k/v1/app/adminNotes.json', { app: appId }, base)
     };
     var keys = Object.keys(requests);
     return Promise.all(keys.map(function (k) { return settle(requests[k]); })).then(function (list) {
       var results = {};
       keys.forEach(function (k, i) { results[k] = list[i]; });
       if (!withRecords) return results;
-      return recordRequest(appId, results.fields).then(function (r) { if (r) results.records = r; return results; });
+      return recordRequest(appId, results.fields, base).then(function (r) { if (r) results.records = r; return results; });
     });
   }
 
@@ -1317,8 +1719,10 @@
     function worker() {
       if (index >= apps.length) return Promise.resolve();
       var app = apps[index++];
-      return collect(app.appId, withRecords).then(function (results) {
-        snapshots[app.appId] = appSnapshot(app, results);
+      return baseFor(app).then(function (base) {
+        return collect(app.appId, withRecords, base).then(function (results) { return { base: base, results: results }; });
+      }).then(function (got) {
+        snapshots[app.appId] = appSnapshot(got.base ? Object.assign({ guest: true }, app) : app, got.results);
         done += 1;
         onProgress(done, apps.length);
         return worker();
@@ -1535,6 +1939,8 @@
       });
       box.appendChild(el('p', { class: P + '-lead', text: '前回の点検からの変更：' + (parts.length ? parts.join('、') : 'ありません') }));
     }
+    if (d.follow && d.follow.readable) box.appendChild(el('p', { class: P + '-lead', text: '前回の対応状況：' + followText(d.follow) + '一覧は点検台帳の「' + FOLLOW_SHEET + '」シートと、報告書の別紙3にあります。' }));
+    if (d.reviewLong) box.appendChild(el('p', { class: P + '-lead', text: 'アクセス権の見直し：' + d.reviewLong + '点検台帳の「対象ごとの権限」のシートに、見直しの結果を書き込めます。' + (d.next ? '次回の点検の目安は' + d.next + 'です。' : '') }));
     if (d.items.length) {
       box.appendChild(el('p', { class: P + '-lead', text: '要確認の項目（先に確かめてください）' }));
       var list = el('ul', { class: P + '-items' });
@@ -1557,7 +1963,8 @@
     var status = el('p', { class: P + '-status', role: 'status' });
     var result = el('div', { class: P + '-result' });
     var last = readLastRun();
-    var prevBlock = el('div', { class: P + '-prev' }, [el('label', { for: P + '-prev', text: '前回の点検台帳（任意）' }), fileInput]);
+    var prevBlock = el('div', { class: P + '-prev' }, [el('label', { for: P + '-prev', text: '前回の点検台帳（任意）' }), fileInput,
+      el('p', { class: P + '-prev-hint', text: '対応方針や見直しの結果を書き込んだ前回の点検台帳を選ぶと、変わったところに加えて、前回の注意点が解消したかと、見直しのとおりに直っているかも確かめます。' })]);
     var dialog = el('div', { class: P + '-dialog', role: 'dialog', 'aria-modal': 'true', 'aria-label': '棚卸し・変更監視パック' }, [
       el('div', { class: P + '-head' }, [el('h2', { text: '棚卸し・変更監視パック' }), closeBtn]),
       licenseLine,
@@ -1638,7 +2045,12 @@
       var file = fileInput.files && fileInput.files[0];
       var prev;
       status.textContent = file ? '前回の点検台帳を読み込み中…' : 'アプリの一覧を読み込み中…';
-      (file ? readFile(file).then(readSnapshot) : Promise.resolve(null)).then(function (p) {
+      (file ? readFile(file).then(function (bytes) {
+        return Promise.all([readSnapshot(bytes), sha256Hex(bytes).catch(function () { return ''; })]).then(function (x) {
+          x[0].file = { name: file.name, hash: x[1] };
+          return x[0];
+        });
+      }) : Promise.resolve(null)).then(function (p) {
         prev = p;
         return Promise.all([scan(recordsBox.checked, status), systemAdmin()]);
       }).then(function (r) {

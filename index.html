@@ -67,15 +67,15 @@
     <h2>点検の結果は、そのまま資料に</h2>
     <div class="feat-rows">
       <div class="feat">
-        <a class="feat-shot" href="pro.html#report"><img src="images/feat-ledger-sheets.webp" width="1040" height="650" alt="点検台帳（Excel）の表紙の目次。アプリ一覧・変更点・注意点・権限一覧・ユーザーの指定・プラグイン・カスタマイズ・つながり・フィールドの使われ方・判定の基準のシートが並ぶ" loading="lazy"></a>
+        <a class="feat-shot" href="pro.html#report"><img src="images/feat-ledger-sheets.webp" width="1040" height="822" alt="点検台帳（Excel）の表紙の目次。アプリ一覧・変更点・注意点・前回の対応状況・権限一覧・対象ごとの権限・ユーザーの指定・プラグイン・カスタマイズ・つながり・フィールドの使われ方・判定の基準のシートが並ぶ" loading="lazy"></a>
         <div class="feat-body">
           <h3>全アプリの点検台帳（Excel）</h3>
-          <p>アプリ一覧・権限・ユーザーの指定・注意点・つながりなどを、11のシートにまとめます。注意点のシートには、対応方針・担当・期限を書き込めます。</p>
+          <p>アプリ一覧・権限・ユーザーの指定・注意点・つながりなどを、13のシートにまとめます。注意点には対応方針・担当・期限を、人ごとの権限の一覧には見直しの結果を書き込めます。</p>
           <p class="feat-link"><a href="pro.html#items">点検する項目</a></p>
         </div>
       </div>
       <div class="feat">
-        <a class="feat-shot" href="pro.html#report"><img src="images/feat-report-review.webp" width="1040" height="562" alt="点検の報告書の後半。要確認の項目の表と、所見・対応の欄、点検者・確認者・承認者の欄が並ぶ" loading="lazy"></a>
+        <a class="feat-shot" href="pro.html#report"><img src="images/feat-report-review.webp" width="1040" height="455" alt="点検の報告書の後半。要確認の項目の表と、所見・対応の欄、点検者・確認者・承認者の欄が並ぶ" loading="lazy"></a>
         <div class="feat-body">
           <h3>上司への報告書（印刷・PDF）</h3>
           <p>総評・点検の結果・要確認の項目と、所見・対応、点検者・確認者・承認者の欄が1枚に。別紙に、判定の基準と要確認の項目のすべてを載せます。</p>
@@ -83,11 +83,11 @@
         </div>
       </div>
       <div class="feat">
-        <a class="feat-shot" href="pro.html#report"><img src="images/feat-report-results.webp" width="1040" height="560" alt="点検の報告書の、点検の結果・前回の点検からの変更・点検の推移の表。注意点は35件から21件に減っている" loading="lazy"></a>
+        <a class="feat-shot" href="pro.html#audit"><img src="images/feat-report-follow.webp" width="1040" height="526" alt="報告書の別紙3「前回の対応状況」の見本。前回の注意点が残っているか、完了と書かれているのに残っているもの、期限を過ぎたもの、見直しで「外す」としたのに残っている人が赤で並ぶ" loading="lazy"></a>
         <div class="feat-body">
-          <h3>前回からの変更と推移</h3>
-          <p>前回の点検台帳を選ぶと、追加・変更・削除された設定と、注意点の件数の推移が分かります。定期的に点検するほど役に立ちます。</p>
-          <p class="feat-link"><a href="pro.html">機能をくわしく</a></p>
+          <h3>前回からの変更と、指摘への対応</h3>
+          <p>前回の点検台帳を選ぶと、変わった設定と件数の推移に加えて、前回の注意点が解消したかが分かります。毎年の点検の記録が1つにつながります。</p>
+          <p class="feat-link"><a href="pro.html#audit">毎年の点検と監査で使うとき</a></p>
         </div>
       </div>
     </div>
@@ -192,7 +192,8 @@
       <details><summary>試用で作った資料は、そのまま社内に出せますか？</summary><div><p>試用中に作る点検台帳と報告書には「試用版」と入ります。社内に出す正式な資料は、ご契約のあとに同じ操作で作成してください。試用で作った点検台帳は、次の点検で「前回の点検台帳」として使えます。試用は、kintoneの環境ごとに1回です。</p></div></details>
       <details><summary>利用人数やアプリ数に制限はありますか？</summary><div><p>無料のプラグインは、利用人数やアプリ数の制限はありません。有料のプラグインは、アプリの数で3つのプラン（100個まで・500個まで・上限なし）があり、利用人数による追加料金はありません。</p></div></details>
       <details><summary>アプリの管理者でなくても使えますか？</summary><div><p>設定の読み取りには、そのアプリの管理権限が必要です。権限が足りない項目は、その旨を画面に表示します。</p></div></details>
-      <details><summary>使えない画面やアプリはありますか？</summary><div><p>パソコン版の画面のみに対応しています。ゲストスペースのアプリには、現在対応していません。</p></div></details>
+      <details><summary>ISMSなどの、アクセス権の見直しに使えますか？</summary><div><p>点検台帳の「対象ごとの権限」のシートに、ユーザー・組織・グループごとに、どのアプリで何ができるかをまとめます。見直しの結果・確認者・確認日を書き込む列があり、次の点検では、前回の見直しのとおりに直っているか（「外す」とした人が残っていないか）も確かめます。報告書には点検した人・日時・判定の基準・照合用の値が入ります。基準に適合していることを示すものではないため、監査で求められる形式は、監査を行う方に確かめてください。</p></div></details>
+      <details><summary>使えない画面やアプリはありますか？</summary><div><p>パソコン版の画面のみに対応しています。棚卸し・変更監視パックは、ゲストスペースのアプリも点検します。無料の6本は、ゲストスペースのアプリには、現在対応していません。</p></div></details>
       <details><summary>新しい版が出たら、どうすれば更新できますか？</summary><div><p>新しい版のzipファイルを、最初と同じように「kintoneシステム管理」の「プラグイン」で読み込むと、上書きされます。アプリへの追加をやり直す必要はありません。</p></div></details>
       <details><summary>サイボウズの製品ですか？</summary><div><p>いいえ。サイボウズ株式会社とは関係のない、個人の開発者による製品です。</p></div></details>
       <details><summary>不具合や要望は、どこに連絡すればよいですか？</summary><div><p><a href="mailto:daichoya.plugins@gmail.com">daichoya.plugins@gmail.com</a> までお知らせください。返信は平日の夜と土日に行っています。</p></div></details>
