@@ -482,7 +482,7 @@ a.hv-item:hover img { border-color: var(--ai-line); }
   .feat-rows { gap: 48px; margin-top: 36px; }
   .feat-shot, .feat:nth-child(even) .feat-shot { padding: 18px 0 0 18px; }
   .free-jobs { margin-top: 32px; }
-  .hero .actions .btn { flex: 1 1 100%; }
+  .hero .actions .btn, .pro-hero .actions .btn, .plugin-hero .actions .btn { flex: 1 1 100%; }
   .facts tbody th { width: 30%; }
   .site-head .wrap { min-height: 56px; padding-top: 8px; }
   .head-cta { display: inline-flex; align-items: center; min-height: 38px; padding: 0 16px; border-radius: 999px; background: var(--kaki); color: #fff; font-size: 14px; font-weight: 700; text-decoration: none; }
