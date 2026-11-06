@@ -104,3 +104,14 @@
 .dcy-ip-vs tr:first-child th:nth-child(3) { color: #c2410c; }
 .dcy-ip-vs td:nth-child(3) { color: #333; font-weight: bold; }
 .dcy-ip-trial-note a { margin-left: 6px; color: #1f6fb2; }
+/* 件数だけの無料点検の結果：見てすぐ分かるように、件数を大きく出す（1.7.3） */
+.dcy-ip-summary { margin-top: 12px; padding: 16px 20px; border: 1px solid #d5dde3; border-radius: 10px; background: #fff; }
+.dcy-ip-big { margin: 0; color: #1e2a36; font-size: 15px; }
+.dcy-ip-big strong { margin-right: 8px; color: #1f3a5f; font-size: 34px; line-height: 1.1; }
+.dcy-ip-sub { margin: 4px 0 0; color: #555; font-size: 13px; }
+.dcy-ip-counts { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 12px 0 0; padding: 0; list-style: none; font-size: 13px; }
+.dcy-ip-counts li { display: flex; gap: 6px; align-items: baseline; }
+.dcy-ip-counts span { color: #555; }
+.dcy-ip-counts strong { color: #1e2a36; font-size: 15px; }
+.dcy-ip-summary + .dcy-ip-gap { margin-top: 12px; }
+.dcy-ip-result > .dcy-ip-table { margin-top: 16px; }

@@ -589,7 +589,7 @@
   // 点検台帳の記録に、これまでの点検の件数を残す（前回の点検台帳を選んで作るたびに1行ずつ増える）
 
   var HISTORY_MAX = 24;
-  var VERSION = '1.7.2'; // manifest.json の version と同じにする（テストで確かめる）
+  var VERSION = '1.7.3'; // manifest.json の version と同じにする（テストで確かめる）
 
   // 判定の基準（点検台帳の「判定の基準」シートと、報告書の別紙1に載せる）。[区分, 重要度, 判定, 基準・出典]
   var CRITERIA = [
@@ -1551,10 +1551,10 @@
 
   // 件数だけの無料点検と、30日間の無料試用の違いを、この点検の数で言う（sum：freeSummary の結果）
   function freeGapText(sum) {
-    if (!sum.total) return '見直したほうがよい設定は見つかりませんでした。30日間の無料試用（申し込み制・すべての機能）では、全アプリの権限・フィールド・つながりの一覧を点検台帳（Excel）にまとめ、報告書も作れます。次の点検からは、前回から変わったところも分かります。';
+    if (!sum.total) return '見直したほうがよい設定は見つかりませんでした。30日間の無料試用では、全アプリの権限・フィールド・つながりの一覧を、点検台帳（Excel）と報告書にできます。';
     var hidden = Math.max(0, sum.total - sum.shown);
-    if (!hidden) return '見つかった' + sum.total + '件は、すべて例として出しました。30日間の無料試用（申し込み制・すべての機能）では、これを点検台帳（Excel）と報告書にまとめられます。次の点検からは、前回から変わったところも分かります。';
-    return '見つかった' + sum.total + '件のうち、ここに出したのは例の' + sum.shown + '件です。残りの' + hidden + '件も含めて「どのアプリの、どの設定か」をすべて一覧にできるのが、30日間の無料試用（申し込み制・すべての機能）です。点検台帳（Excel）と報告書も作れます。';
+    if (!hidden) return '見つかった' + sum.total + '件は、すべて例として出しました。30日間の無料試用では、これを点検台帳（Excel）と報告書にまとめられます。';
+    return '見つかった' + sum.total + '件のうち、ここに出したのは例の' + sum.shown + '件です。残りの' + hidden + '件を含む一覧と、点検台帳（Excel）・報告書は、30日間の無料試用で作れます。';
   }
 
   // キーに「アプリの数の上限（a）」があるときの確かめ。上限を超えても止めず、プランの変更をお願いする
@@ -1882,9 +1882,25 @@
     var p = lic && lic.payload;
     var trialEnded = !!(p && p.t === 'trial' && !lic.ok);
     var paidEnded = !!(p && p.t !== 'trial' && p.t !== 'demo' && !lic.ok && lic.state === 'expired');
+    var open = !(lic && lic.ok) && !trialEnded && !paidEnded;
     box.innerHTML = '';
     box.appendChild(el('h3', { text: '件数だけの無料点検の結果' }));
-    box.appendChild(el('p', { class: P + '-lead', text: sum.apps + '個のアプリを点検し、見直したほうがよい設定が' + sum.total + '件見つかりました（うち要確認 ' + sum.important + '件）。' }));
+    // 見てすぐ分かるように、件数を大きく出し、種類ごとの件数を1行に並べる
+    var counts = el('ul', { class: P + '-counts' });
+    sum.groups.forEach(function (g) { counts.appendChild(el('li', {}, [el('span', { text: g.name }), el('strong', { text: g.count + '件' })])); });
+    box.appendChild(el('div', { class: P + '-summary' }, [
+      el('p', { class: P + '-big' }, [el('strong', { text: sum.total + '件' }), '見直したほうがよい設定']),
+      el('p', { class: P + '-sub', text: sum.apps + '個のアプリを点検' + (sum.important ? '／うち要確認 ' + sum.important + '件' : '') }),
+      counts
+    ]));
+    // 試用もご契約もしていないときは、結果のすぐ下で30日間の無料試用を案内する
+    if (open) {
+      box.appendChild(el('p', { class: P + '-gap', text: freeGapText(sum) }));
+      box.appendChild(el('div', { class: P + '-controls' }, [
+        el('a', { class: P + '-btn ' + P + '-primary ' + P + '-link', href: trialUrl(domain), target: '_blank', rel: 'noopener', text: sum.total ? '30日間無料で、' + sum.total + '件すべてを見る' : '30日間無料で、すべての機能を試す' }),
+        el('a', { class: P + '-btn ' + P + '-link', href: PRICE_URL, target: '_blank', rel: 'noopener', text: '料金を見る' })
+      ]));
+    }
     var table = el('table', { class: P + '-table' });
     table.appendChild(el('tr', {}, [el('th', { text: '種類' }), el('th', { text: '件数' }), el('th', { text: '例（すべての一覧は、30日間の無料試用とご契約で）' })]));
     sum.groups.forEach(function (g) {
@@ -1932,13 +1948,8 @@
     ].forEach(function (r) { vs.appendChild(el('tr', {}, [el('th', { text: r[0] }), el('td', { text: r[1] }), el('td', { text: r[2] })])); });
     box.appendChild(el('div', { class: P + '-cta' }, [
       flowSteps(0),
-      el('p', { class: P + '-gap', text: freeGapText(sum) }),
       vs,
       el('p', { class: P + '-note', text: planText(sum.apps) }),
-      el('div', { class: P + '-controls' }, [
-        el('a', { class: P + '-btn ' + P + '-primary ' + P + '-link', href: trialUrl(domain), target: '_blank', rel: 'noopener', text: '30日間無料で、すべてを見る' }),
-        el('a', { class: P + '-btn ' + P + '-link', href: PRICE_URL, target: '_blank', rel: 'noopener', text: '料金を見る' })
-      ]),
       el('p', { class: P + '-note', text: '30日間の無料試用は、会社名・お名前・メールアドレスを入れるだけで申し込めます（kintoneの環境名は入力済みです）。数分でライセンスキーがメールで届きます。' })
     ]));
   }
@@ -1993,7 +2004,7 @@
       el('div', { class: P + '-head' }, [el('h2', { text: '棚卸し・変更監視パック' }), closeBtn]),
       licenseLine,
       trialLine,
-      el('p', { class: P + '-lead', text: '全アプリをまとめて点検します。「無料で点検する」は申し込み不要で、見直したほうがよい設定の件数と例が分かります。30日間の無料試用（申し込み制）とご契約では、すべての一覧を点検台帳（Excel）と報告書にまとめ、前回の点検台帳を選ぶと、変わったところと推移も分かります。' }),
+      el('p', { class: P + '-lead', text: '全アプリをまとめて点検します。「無料で点検する」は申し込み不要で、見直したほうがよい設定の件数と例が分かります。' }),
       last ? el('p', { class: P + '-note', text: '前回の点検：' + last + '（このブラウザで点検した日）' }) : el('span', {}),
       prevBlock,
       el('div', { class: P + '-option' }, [recordsBox, el('label', { for: P + '-records', text: '使われていないアプリも調べる（レコードの件数と最終更新日時だけを見ます。中身は読みません）' })]),
