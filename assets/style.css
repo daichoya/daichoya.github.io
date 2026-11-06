@@ -146,6 +146,41 @@ h2 + .tabbed, .section-lead + .tabbed { margin-top: 56px; }
 .facts .col-free { background: var(--take-tint); color: var(--take); }
 .facts .col-paid { background: var(--ai-tint); color: var(--ai); }
 .facts .col-paid .trial-pill { margin-left: 4px; }
+.facts .col-trial { background: var(--kaki-tint); color: var(--kaki-dark); }
+
+/* 件数だけの無料点検と、30日間の無料試用を見比べる（左：若竹＝無料点検、右：柿＝無料試用） */
+.vs-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-items: start; margin: 8px 0 28px; }
+.vs-card { display: flex; flex-direction: column; margin-top: 32px; padding: 20px 22px 18px; }
+.vs-card h3 { margin: 0; font-size: 19px; }
+.vs-key { margin: 2px 0 6px; font-size: 17px; font-weight: 700; line-height: 1.6; }
+.vs-card.is-free .vs-key { color: var(--take); }
+.vs-card.is-trial .vs-key { color: var(--kaki-dark); }
+.vs-cond { margin: 0 0 12px; font-size: 14px; color: var(--ink-2); line-height: 1.7; }
+.vs-sample { margin: 0 0 12px; padding: 12px 14px; border: 1px solid var(--rule); border-radius: var(--r-s); background: var(--paper); font-size: 13.5px; line-height: 1.6; }
+.vs-sample p { margin: 0 0 4px; }
+.vs-sample-label { display: inline-block; padding: 0 8px; border-radius: 4px; background: var(--ledger); color: var(--ink-2); font-size: 12px; }
+.vs-sample-head { margin-top: 6px !important; font-weight: 700; }
+.vs-sample-head b { margin-left: 6px; }
+.vs-more { color: var(--ink-2); }
+.vs-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.vs-table th, .vs-table td { padding: 3px 6px; border: 1px solid var(--rule); text-align: left; line-height: 1.5; }
+.vs-table th { background: var(--ai); color: #fff; font-weight: 700; }
+.vs-list { margin: 0 0 8px; padding-left: 1.2em; font-size: 14.5px; line-height: 1.75; }
+.vs-action { margin: 4px 0 0; font-size: 14.5px; font-weight: 700; }
+.vs-summary td { font-size: 14.5px; }
+.detail-more { margin-top: 18px; }
+.detail-more > summary { padding: 8px 0; color: var(--link); font-weight: 700; cursor: pointer; }
+.detail-more > .table-scroll { margin-top: 8px; }
+
+/* 有料の箱の中の「お金をかけずに使う2つの方法」 */
+.try-ways { display: grid; gap: 6px; margin: 12px 0 0; font-size: 14px; line-height: 1.65; }
+.try-ways > div { padding: 8px 12px; border-radius: var(--r-s); border-left: 4px solid; }
+.try-ways dt { font-weight: 700; }
+.try-ways dd { margin: 0; color: var(--ink-2); }
+.tw-free { border-color: var(--take) !important; background: var(--take-tint); }
+.tw-free dt { color: var(--take); }
+.tw-trial { border-color: var(--kaki) !important; background: var(--kaki-tint); }
+.tw-trial dt { color: var(--kaki-dark); }
 .table-scroll + .note, .table-scroll + p { margin-top: 12px; }
 .api { margin: 0; padding: 0; list-style: none; }
 .api li { margin: 0; }
@@ -548,6 +583,7 @@ a.rm-free:hover b { text-decoration: underline; }
 .rm-arrow::after { content: ""; position: absolute; top: 50%; right: 10px; width: 9px; height: 9px; margin-top: -5px; border-top: 2px solid var(--ai-line); border-right: 2px solid var(--ai-line); transform: rotate(45deg); }
 .relmap-note { font-size: 14px; color: var(--ink-2); }
 @media (max-width: 720px) {
+  .vs-cards { grid-template-columns: minmax(0, 1fr); gap: 14px; }
   .relmap-head { display: none; }
   .relmap-row { grid-template-columns: minmax(0, 1fr); margin-bottom: 16px; }
   .rm-arrow { height: 26px; }
@@ -557,3 +593,4 @@ a.rm-free:hover b { text-decoration: underline; }
   .rm-paid::before { content: "有料"; flex: none; order: 3; margin-left: auto; padding: 0 8px; border-radius: 4px; background: var(--ai); color: #fff; font-size: 12px; font-weight: 700; line-height: 1.6; }
   .rm-paid span, .rm-free span { order: 2; }
 }
+.try-ways + .note { margin-top: 8px !important; }

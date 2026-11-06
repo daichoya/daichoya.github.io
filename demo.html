@@ -16,7 +16,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="google-site-verification" content="J1TnZ6bD5c5EjVGtQBBk2eRmLsDje0VapbpwCEnbA6M">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="assets/style.css?v=c8ac4fb73e">
+<link rel="stylesheet" href="assets/style.css?v=e3c81c8694">
 </head>
 <body>
 <header class="site-head">
@@ -54,8 +54,8 @@
           <fieldset class="demo-mode">
             <legend>見え方<small>（デモだけの切り替え）</small></legend>
             <div class="seg">
+              <label><input type="radio" name="demo-mode" value="free">件数だけの無料点検（申し込む前）</label>
               <label><input type="radio" name="demo-mode" value="paid" checked>30日間の無料試用中・ご契約後</label>
-              <label><input type="radio" name="demo-mode" value="free">申し込む前</label>
             </div>
             <p class="demo-mode-hint" id="demo-mode-hint" aria-live="polite">「棚卸し」で、点検台帳（Excel）と報告書まで作れます</p>
           </fieldset>
@@ -95,15 +95,15 @@
         <span class="tab tab-paid">有料<small>棚卸し</small></span>
         <h3>全アプリをまとめて点検する</h3>
         <ol class="demo-steps">
-          <li>「見え方」を<strong>申し込む前</strong>にして「棚卸し」を押し、「無料で点検する」を押します。見直したほうがよい設定の件数と例が出ます。</li>
+          <li>「見え方」を<strong>件数だけの無料点検（申し込む前）</strong>にして「棚卸し」を押し、「無料で点検する」を押します。見直したほうがよい設定が「何件あるか」と、例が2つまで出ます。</li>
           <li>「見え方」を<strong>30日間の無料試用中・ご契約後</strong>に戻して「棚卸し」を押し、「点検台帳を作成」を押します。見本の7つのアプリをまとめた点検台帳（Excel）が保存され、画面に結果のまとめが出ます。</li>
           <li>続けて「点検の報告書を開く」を押すと、印刷やPDFにできる報告書（1枚目のまとめと、判定の基準・要確認の項目の別紙）が新しいタブに開きます。</li>
         </ol>
         <div class="table-scroll">
           <table class="facts demo-compare">
-            <thead><tr><th scope="col">「棚卸し」でできること</th><th scope="col" class="col-free">申し込む前</th><th scope="col" class="col-paid">試用中・ご契約後</th></tr></thead>
+            <thead><tr><th scope="col">「棚卸し」でできること</th><th scope="col" class="col-free">件数だけの無料点検</th><th scope="col" class="col-paid">30日間の無料試用・ご契約</th></tr></thead>
             <tbody>
-              <tr><th scope="row">件数だけの点検</th><td class="center"><span class="mark-yes">○</span></td><td class="center"><span class="mark-yes">○</span></td></tr>
+              <tr><th scope="row">全アプリの件数と、例を2つまで</th><td class="center"><span class="mark-yes">○</span></td><td class="center"><span class="mark-yes">○</span></td></tr>
               <tr><th scope="row">点検台帳（Excel・すべての一覧）</th><td class="center"><span class="mark-no">－</span></td><td class="center"><span class="mark-yes">○</span></td></tr>
               <tr><th scope="row">結果のまとめ（前回からの増減・要確認）</th><td class="center"><span class="mark-no">－</span></td><td class="center"><span class="mark-yes">○</span></td></tr>
               <tr><th scope="row">点検の報告書（印刷・PDF）</th><td class="center"><span class="mark-no">－</span></td><td class="center"><span class="mark-yes">○</span></td></tr>

@@ -16,7 +16,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="google-site-verification" content="J1TnZ6bD5c5EjVGtQBBk2eRmLsDje0VapbpwCEnbA6M">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="assets/style.css?v=c8ac4fb73e">
+<link rel="stylesheet" href="assets/style.css?v=e3c81c8694">
 </head>
 <body>
 <header class="site-head">
@@ -36,7 +36,7 @@
         <p class="tagline">kintoneの全アプリを、まとめて点検。</p>
         <div class="lead prose">
           <p>全アプリをまとめて点検する<strong>有料のプラグイン</strong>です。無料の6本で1つずつ調べること（権限・退職した人の指定・フィールドの使われ方・つながりなど）を全アプリまとめて行い、注意点をすべて一覧にした点検台帳（Excel）と、上司への報告や監査の準備に使える1枚の報告書を作ります。</p>
-          <p><strong>30日間、すべての機能を無料で試せます</strong>（カードの登録不要・期間が終わっても自動で課金されません）。試用のあとも、件数だけの点検は無料で使えます。</p>
+          <p>お金をかけずに使う方法は2つあります。<strong>件数だけの無料点検</strong>（申し込み不要・ずっと）では、見直したほうがよい設定が何件あるかが分かります。<strong>30日間の無料試用</strong>（申し込み制・カード不要）では、すべての機能を使って、どのアプリのどの設定かまで一覧にし、資料にできます（<a href="#compare">違いを見る</a>）。</p>
         </div>
         <ul class="chips"><li class="paid">年額33,000円から（税込・月あたり2,750円）</li><li class="trial">30日間 無料で試せる</li><li class="free">件数だけの点検は、いつでも無料</li><li>データは外部に送信しません</li></ul>
         <div class="actions"><a class="btn btn-trial btn-large" href="#trial">30日間無料で試す</a><a class="btn btn-large" href="demo.html">デモで試す（登録不要）</a></div>
@@ -49,18 +49,79 @@
     </div>
     <h2 id="flow-paid">使い始めてから、ご契約までの流れ</h2>
     <ol class="journey" aria-label="使い始めてから、ご契約までの流れ">
-      <li class="j-free"><p class="j-head">無料で点検</p><p class="j-sub">申し込み不要・いつでも</p><p>プラグインを入れて「無料で点検する」を押すと、全アプリの見直したほうがよい設定の件数と例が分かります。</p><p class="j-link"><a href="#free">件数だけの点検の始め方</a></p></li>
-      <li class="j-trial"><p class="j-head">30日間の無料試用</p><p class="j-sub">すべての機能・環境ごとに1回</p><p>すべての一覧、点検台帳、報告書を試せます。試用中に作る資料には「試用版」と入ります。棚卸しや監査の時期に合わせて申し込めます。</p><p class="j-link"><a href="#trial">30日間の無料試用を申し込む</a></p></li>
+      <li class="j-free"><p class="j-head">件数だけの無料点検</p><p class="j-sub">申し込み不要・ずっと無料</p><p>プラグインを入れて「無料で点検する」を押すと、全アプリの見直したほうがよい設定が「何件あるか」と、例が2つまで分かります。</p><p class="j-link"><a href="#free">件数だけの点検の始め方</a></p></li>
+      <li class="j-trial"><p class="j-head">30日間の無料試用</p><p class="j-sub">申し込み制・すべての機能・環境ごとに1回</p><p>「どのアプリの、どの設定か」まですべて一覧にし、点検台帳と報告書も作れます（「試用版」と入ります）。棚卸しや監査の時期に合わせて申し込めます。</p><p class="j-link"><a href="#trial">30日間の無料試用を申し込む</a></p></li>
       <li class="j-paid"><p class="j-head">ご契約</p><p class="j-sub">年額33,000円から（月あたり2,750円）</p><p>社内に出す正式な点検台帳と報告書を作れます。試用で作った点検台帳と比べて、変わったところと推移も分かります。</p><p class="j-link"><a href="#price">料金とお申し込み</a></p></li>
     </ol>
     <p class="journey-note prose">試用が終わっても、件数だけの点検はそのまま使えます。次の棚卸しや監査の時期に、ご契約いただければ続きから使えます。</p>
-    <nav class="page-toc" aria-label="このページの内容"><a href="#compare">無料（件数だけ）とご契約の違い</a><a href="#report">報告書と点検台帳</a><a href="#items">点検する項目</a><a href="#relation">無料の6本との関係</a><a href="#why">選ぶ理由</a><a href="#free">1. 件数だけの無料点検</a><a href="#trial">2. 30日間の無料試用</a><a href="#price">3. 料金とお申し込み</a></nav>
+    <nav class="page-toc" aria-label="このページの内容"><a href="#compare">無料点検と無料試用の違い</a><a href="#report">報告書と点検台帳</a><a href="#items">点検する項目</a><a href="#relation">無料の6本との関係</a><a href="#why">選ぶ理由</a><a href="#free">1. 件数だけの無料点検</a><a href="#trial">2. 30日間の無料試用</a><a href="#price">3. 料金とお申し込み</a></nav>
 
-    <h2 id="compare">無料（件数だけ）とご契約の違い</h2>
-    <div class="prose"><p>このプラグインは、入れてすぐ、件数だけの点検を無料で使えます。すべての一覧と点検台帳・報告書は、ご契約（または30日間の無料試用）で使えます。</p></div>
+    <h2 id="compare">件数だけの無料点検と、30日間の無料試用の違い</h2>
+    <div class="prose"><p>どちらも無料で、同じプラグインを使います。違いは、分かることと、作れる資料です。<strong>件数だけの無料点検</strong>では「何件あるか」が、<strong>30日間の無料試用</strong>では「どのアプリの、どの設定か」までが分かり、点検台帳と報告書にできます。</p></div>
+    <div class="vs-cards">
+      <div class="vs-card tabbed is-free">
+        <span class="tab tab-free">無料<small>ずっと</small></span>
+        <h3>件数だけの無料点検</h3>
+        <p class="vs-key">「何件あるか」が分かる</p>
+        <p class="vs-cond">申し込み不要。プラグインを入れて、すぐ使えます。</p>
+        <div class="vs-sample" role="img" aria-label="画面の見本：ユーザーの指定（退職・異動）6件。例が2件と、ほか4件。">
+          <p class="vs-sample-label">画面の見本</p>
+          <p class="vs-sample-head">ユーザーの指定（退職・異動）<b>6件</b></p>
+          <p>「案件管理」ユーザー：yamamoto　もういないユーザー</p>
+          <p>「案件管理」組織：経理部　もういない組織</p>
+          <p class="vs-more">ほか 4件（どのアプリの、どの設定かは出ません）</p>
+        </div>
+        <ul class="vs-list">
+          <li>全アプリの、見直したほうがよい設定の件数と、例を2つまで</li>
+          <li>点検台帳と報告書は作れません</li>
+        </ul>
+        <p class="vs-action"><a href="#free">始め方を見る</a></p>
+      </div>
+      <div class="vs-card tabbed is-trial">
+        <span class="tab tab-trial">無料<small>30日間</small></span>
+        <h3>30日間の無料試用</h3>
+        <p class="vs-key">「どのアプリの、どの設定か」まで分かり、資料にできる</p>
+        <p class="vs-cond">申し込み制（キーがメールで届きます。カードは不要）。kintoneの環境ごとに1回です。</p>
+        <div class="vs-sample" role="img" aria-label="点検台帳の見本：ユーザーの指定 6件すべてを、アプリ・対象・設定の場所の一覧にしたもの">
+          <p class="vs-sample-label">点検台帳の見本</p>
+          <p class="vs-sample-head">ユーザーの指定（退職・異動）<b>6件すべて</b></p>
+          <table class="vs-table">
+            <tr><th>アプリ</th><th>対象</th><th>設定の場所</th></tr>
+            <tr><td>案件管理</td><td>yamamoto</td><td>一覧の絞り込み</td></tr>
+            <tr><td>案件管理</td><td>経理部</td><td>フィールドのアクセス権</td></tr>
+            <tr><td>案件管理</td><td>kimura</td><td>プロセス管理の実行者</td></tr>
+            <tr><td>案件管理（検証）</td><td>yamamoto</td><td>一覧の絞り込み</td></tr>
+            <tr><td>案件管理（検証）</td><td>経理部</td><td>フィールドのアクセス権</td></tr>
+            <tr><td>案件管理（検証）</td><td>kimura</td><td>プロセス管理の実行者</td></tr>
+          </table>
+        </div>
+        <ul class="vs-list">
+          <li>ご契約後と同じ、すべての機能（点検台帳・報告書・前回からの変更点）</li>
+          <li>作る点検台帳と報告書には「試用版」と入ります</li>
+        </ul>
+        <p class="vs-action"><a href="#trial">申し込み方を見る</a></p>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table class="facts vs-summary">
+        <thead><tr><th scope="col"></th><th scope="col" class="col-free">件数だけの無料点検</th><th scope="col" class="col-trial">30日間の無料試用</th><th scope="col" class="col-paid">ご契約</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">料金</th><td>0円</td><td>0円</td><td>年額33,000円から（税込）</td></tr>
+          <tr><th scope="row">申し込み</th><td>不要</td><td>必要（カードは不要）</td><td>必要</td></tr>
+          <tr><th scope="row">使える期間</th><td>ずっと</td><td>30日間（環境ごとに1回）</td><td>1年ごと（自動で更新）</td></tr>
+          <tr><th scope="row">画面で分かること</th><td>件数と、例を2つまで</td><td>すべての一覧</td><td>すべての一覧</td></tr>
+          <tr><th scope="row">点検台帳（Excel）</th><td class="center"><span class="mark-no">－</span></td><td>作れる（「試用版」と入る）</td><td>作れる</td></tr>
+          <tr><th scope="row">報告書（印刷・PDF）</th><td class="center"><span class="mark-no">－</span></td><td>作れる（「試用版」と入る。照合用の値なし）</td><td>作れる（照合用の値つき）</td></tr>
+          <tr><th scope="row">前回からの変更点・推移</th><td class="center"><span class="mark-no">－</span></td><td>2回目の点検から</td><td>2回目の点検から</td></tr>
+          <tr><th scope="row">向いている使い方</th><td>見直すところがあるかを知る</td><td>中身を確かめて、社内で検討する</td><td>社内に出す正式な資料を作る</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <details class="detail-more">
+      <summary>点検することごとの違い（くわしく）</summary>
     <div class="table-scroll">
       <table class="facts">
-        <thead><tr><th scope="col">点検すること</th><th scope="col" class="col-free"><span class="plan plan-free">無料</span>件数だけ</th><th scope="col" class="col-paid"><span class="plan plan-paid">有料</span>ご契約・30日間の無料試用</th></tr></thead>
+        <thead><tr><th scope="col">点検すること</th><th scope="col" class="col-free">件数だけの無料点検</th><th scope="col" class="col-paid">30日間の無料試用・ご契約</th></tr></thead>
         <tbody>
           <tr><th scope="row">権限の注意点</th><td>件数と例</td><td>すべての一覧と、全アプリの権限を1つの表に</td></tr>
           <tr><th scope="row">退職・異動した人の指定</th><td>件数と例</td><td>どのアプリの、どの設定に残っているかの一覧</td></tr>
@@ -74,6 +135,7 @@
         </tbody>
       </table>
     </div>
+    </details>
 
     <h2 id="report">作れる資料</h2>
     <div class="prose"><p>点検台帳を作ると、画面にも結果のまとめ（種類ごとの件数・前回からの増減・要確認の項目）が出ます。そのうえで、次の2つを作れます。</p></div>
@@ -186,6 +248,7 @@
     <p class="note prose">アプリが少なく、1つずつ調べれば足りる場合は、<a href="index.html#free-plugins">無料の6本</a>と、件数だけの無料の点検で、ずっとお使いいただけます。30日間の無料試用が終わっても、件数だけの点検はそのまま使えます。</p>
 
     <h2 id="free" class="h-step"><span class="step-no step-free" aria-hidden="true">1</span>件数だけの無料点検（申し込み不要）</h2>
+    <div class="prose"><p>見直したほうがよい設定が「何件あるか」と、例が2つまで分かります。どのアプリのどの設定かの一覧と、点検台帳・報告書は、2の<a href="#trial">30日間の無料試用</a>で使えます。</p></div>
     <ol class="prose">
       <li>下の「ダウンロード」から、プラグインのファイル（zip）を保存します。zipは展開せず、そのまま使います。</li>
       <li>kintoneの歯車のアイコンから「kintoneシステム管理」を開き、「プラグイン」の「読み込む」でファイルを読み込みます。</li>
@@ -193,11 +256,11 @@
       <li>そのアプリの一覧画面の上にある「棚卸し」ボタンを押し、「無料で点検する」を押します。申し込みやライセンスキーは要りません。</li>
     </ol>
     <figure class="shot shot-narrow shot-crop">
-      <a href="images/inventory-free.webp" title="画像を大きく表示"><img src="images/inventory-free.webp" width="760" height="1744" alt="無料の点検の結果。7個のアプリを点検し、権限・ユーザーの指定・使われていないアプリ・健康診断の件数と例が表に出ている。下に30日間の無料試用の案内がある" loading="lazy"></a>
+      <a href="images/inventory-free.webp" title="画像を大きく表示"><img src="images/inventory-free.webp" width="760" height="2089" alt="件数だけの無料点検の結果。7個のアプリを点検し、権限・ユーザーの指定・使われていないアプリ・健康診断の件数と例が表に出ている。下に、見つかった19件のうち例として出したのは8件であることと、30日間の無料試用との違いの表がある" loading="lazy"></a>
       <figcaption>見本のアプリで「無料で点検する」を押した例（件数と、例をいくつか表示します）</figcaption>
     </figure>
     <div class="download" id="download">
-      <a class="btn btn-primary" href="downloads/daichoya-inventory-pack-1.6.2.zip" download>ダウンロード（v1.6.2・zip・63KB）</a><p class="note hash">ファイルの確認用（SHA-256）：<code>c9c77fd246d3df16c623367ec065f4f275f9e837463ececf5c3c2e14d84e4af5</code></p>
+      <a class="btn btn-primary" href="downloads/daichoya-inventory-pack-1.6.3.zip" download>ダウンロード（v1.6.3・zip・64KB）</a><p class="note hash">ファイルの確認用（SHA-256）：<code>a53d209ef628f633416ece116da64cd0b8fe31217ce6b8919fe598222db109b2</code></p>
       <p class="note">ご利用の前に<a href="terms.html">利用規約</a>をお読みください。件数だけの無料の点検も、ご契約後も、同じファイルです。</p>
     </div>
     <p class="note prose">点検するのは、操作した人が閲覧または追加できるアプリです（kintoneの仕組みで、kintoneシステム管理者でも、閲覧の権限がないアプリはアプリの一覧に出ません）。一覧に出ないアプリはアプリIDから見つけて、点検台帳と報告書に「点検の対象に入らなかったアプリ」として書きます。すべてのアプリを点検するには、点検する人に、すべてのアプリの閲覧の権限を付けてください。読み取るのは設定と、レコードの件数・最終更新日時だけです。結果は台帳屋のサーバーには送られません。</p>
@@ -205,7 +268,7 @@
     <h2 id="trial" class="h-step"><span class="step-no step-trial" aria-hidden="true">2</span>30日間の無料試用（すべての機能）</h2>
     <div class="trial-box tabbed is-trial">
       <span class="tab tab-trial">30日間 無料</span>
-      <p class="trial-lead">点検台帳・報告書・前回からの変更点まで、ご契約後と同じ機能を、アプリの数の上限なしで試せます。</p>
+      <p class="trial-lead">件数だけの無料点検では出なかった残りも含めて、「どのアプリの、どの設定か」をすべて一覧にできます。点検台帳・報告書・前回からの変更点まで、ご契約後と同じ機能を、アプリの数の上限なしで試せます。</p>
       <ul class="checks">
         <li>カードやお支払い方法の登録は不要です</li>
         <li>期間が終わっても、自動で課金されることはありません</li>
@@ -241,10 +304,11 @@
     <div class="actions"><a class="btn btn-trial" href="#trial">まずは30日間無料で試す</a></div>
 
     <h2>更新履歴</h2>
-    <p class="prose">1.6.2（2026年11月6日）：試用中やご契約中に「無料で点検する」を押したときは、試用の申し込みではなく、いまの段階と「点検台帳を作成」をご案内するようにしました。点検の内容は変わりません。</p>
+    <p class="prose">1.6.3（2026年11月6日）：件数だけの無料点検の結果に、30日間の無料試用との違い（分かること・点検台帳・報告書・申し込み・期間）の表と、「見つかった○件のうち、例として出したのは○件」を出すようにしました。点検の内容は変わりません。</p>
     <details class="history prose">
       <summary>以前の更新</summary>
       <ul>
+        <li>1.6.2（2026年11月6日）：試用中やご契約中に「無料で点検する」を押したときは、試用の申し込みではなく、いまの段階と「点検台帳を作成」をご案内するようにしました。点検の内容は変わりません。</li>
         <li>1.6.1（2026年11月6日）：件数だけの無料の点検の結果に、使い始めてからご契約までの3つの段階（無料の点検・30日間の無料試用・ご契約）を、いまの段階に印を付けて出すようにしました。ボタンの文字の青を少し濃くして、読みやすくしました。点検の内容は変わりません。</li>
         <li>1.6.0（2026年11月6日）：監査の資料として確かめやすくしました。報告書と点検台帳に、点検の対象に入らなかったアプリ（点検した人に閲覧の権限がなく、アプリの一覧に出ないアプリを、アプリIDから見つけます）、点検した人とkintoneシステム管理者かどうか、点検の対象と点検していないもの、プラグインの版、アプリの数の照合の記入欄を入れました。報告書に、点検台帳の照合用の値（SHA-256）と、別紙（判定の基準、要確認の項目のすべて）を付けました。点検台帳に「判定の基準」のシートと、注意点に対応を書き込む列を足しました。30日間の無料試用で作る報告書と点検台帳には「試用版」と入ります。料金の表示を年額にしました。</li>
         <li>1.5.1（2026年11月6日）：画面の説明を「件数だけの点検は無料、すべての一覧と点検台帳・報告書はご契約（30日間は無料で試せます）」と、分かりやすい言い方にしました。機能の変更はありません。</li>

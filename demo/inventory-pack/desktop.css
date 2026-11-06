@@ -95,4 +95,11 @@
 .dcy-ip-steps .dcy-ip-step-now { border: 2px solid #17774a; background: #f1f8f4; }
 .dcy-ip-steps .dcy-ip-step-now:nth-child(2) { border-color: #c2410c; background: #fff4ee; }
 .dcy-ip-steps .dcy-ip-step-now:nth-child(3) { border-color: #1f3a5f; background: #eef3f8; }
+/* いまの無料の点検と、30日間の無料試用の違い */
+.dcy-ip-gap { font-weight: bold; color: #1f3a5f; }
+.dcy-ip-vs { margin: 8px 0 12px !important; background: #fff; }
+.dcy-ip-vs th { width: 28%; }
+.dcy-ip-vs tr:first-child th:nth-child(2) { color: #17774a; }
+.dcy-ip-vs tr:first-child th:nth-child(3) { color: #c2410c; }
+.dcy-ip-vs td:nth-child(3) { color: #333; font-weight: bold; }
 .dcy-ip-trial-note a { margin-left: 6px; color: #1f6fb2; }
