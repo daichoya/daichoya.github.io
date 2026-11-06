@@ -589,7 +589,7 @@
   // 点検台帳の記録に、これまでの点検の件数を残す（前回の点検台帳を選んで作るたびに1行ずつ増える）
 
   var HISTORY_MAX = 24;
-  var VERSION = '1.7.1'; // manifest.json の version と同じにする（テストで確かめる）
+  var VERSION = '1.7.2'; // manifest.json の version と同じにする（テストで確かめる）
 
   // 判定の基準（点検台帳の「判定の基準」シートと、報告書の別紙1に載せる）。[区分, 重要度, 判定, 基準・出典]
   var CRITERIA = [
@@ -784,14 +784,15 @@
     var jday = day.replace(/^(\d+)-(\d+)-(\d+)$/, function (_, y, m, dd) { return y + '年' + Number(m) + '月' + Number(dd) + '日'; });
     h.push('<!doctype html><html lang="ja"><head><meta charset="utf-8"><title>' + name + '（' + esc(day) + '）</title><style>' + REPORT_CSS + reportPageCss(docNo) + '</style></head><body>');
     if (d.trial) h.push('<div class="wm" aria-hidden="true">試用版</div>');
-    h.push('<div class="bar"><button type="button" id="dcy-print">印刷・PDFで保存</button><span class="note">「機密区分」「提出先」「報告者」「所見・対応」の欄は、この画面で書き込んでから印刷できます。印刷の画面で「PDFに保存」を選ぶとPDFになります。</span></div>');
+    h.push('<div class="bar"><button type="button" id="dcy-print">印刷・PDFで保存</button><span class="note">「機密区分」「提出先」「報告者」「押印の欄の上の段（役職など）」「所見・対応」は、この画面で書き込んでから印刷できます。印刷の画面で「PDFに保存」を選ぶとPDFになります。</span></div>');
     h.push('<div class="sheet"><div class="doc-head"><span class="secret" contenteditable="true">社外秘</span>' +
       '<p class="docno">管理番号：' + esc(docNo) + '<br>作成日：' + esc(jday) + '</p></div>');
     h.push('<h1>' + name + '</h1>');
     if (d.trial) h.push('<p class="trial">' + esc(TRIAL_NOTE) + '</p>');
     h.push('<div class="parties"><div class="who"><p>提出先：<span class="fill" contenteditable="true" data-placeholder="（例）情報システム部長 様"></span></p>' +
       '<p>報告者：<span class="fill" contenteditable="true" data-placeholder="部署・氏名">' + esc(d.user) + '</span></p></div>' +
-      '<table class="stamp" aria-label="承認の欄"><tr><th>承認</th><th>確認</th><th>点検</th></tr><tr><td></td><td></td><td></td></tr></table></div>');
+      // 押印の欄は、役職の名前を決めつけない（会社ごとに「部長」「課長」などを書き込めるよう、上の段は空けておく）
+      '<table class="stamp" aria-label="押印の欄"><tr><th contenteditable="true"></th><th contenteditable="true"></th><th contenteditable="true"></th></tr><tr><td></td><td></td><td></td></tr></table></div>');
     h.push('<p class="lead">下記のとおり、kintone環境「' + esc(d.host) + '」のアプリの設定を点検しましたので、報告します。</p>');
     h.push('<div class="summary">' + summarySentence(d) + '</div>');
     h.push('<table class="overview">' +
