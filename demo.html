@@ -93,7 +93,7 @@
       <div class="tm tm-free">
         <p class="tm-mode">見え方</p>
         <p class="tm-name">件数だけの無料点検（申し込む前）</p>
-        <p class="try-flow"><span class="try-do">無料で点検する</span><span class="try-get">何件あるかと、例が2つまで</span></p>
+        <p class="try-flow"><span class="try-do">無料で点検する</span><span class="try-get">件数と、例が2つまで</span></p>
       </div>
       <div class="tm tm-paid">
         <p class="tm-mode">見え方</p>
@@ -148,7 +148,7 @@
       if (/^点検台帳を作成|^点検の報告書を開く/.test(t)) mark(b, true);
       else if (/^無料で点検する/.test(t)) mark(b, false);
     });
-    // デモの中の「30日間無料で、すべてを見る」は、申し込みフォームではなく、無料試用の説明へ
+    // デモの中の「30日間無料で、○件すべてを見る」は、申し込みフォームではなく、無料試用の説明へ
     document.querySelectorAll('.dcy-ip-dialog a[href*="docs.google.com/forms"]').forEach(function (a) { a.href = 'pro.html#trial'; });
   }
   new MutationObserver(markAll).observe(document.body, { childList: true, subtree: true });
