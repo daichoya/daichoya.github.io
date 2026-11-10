@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://daichoya.github.io/sitemap.xml
+Sitemap: https://daichoya.pages.dev/sitemap.xml
