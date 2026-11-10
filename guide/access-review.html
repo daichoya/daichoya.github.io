@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ISMSや内部統制のために、kintoneのアクセス権を見直して記録を残す方法｜台帳屋</title>
+<meta name="description" content="ISMS（ISO/IEC 27001）の管理策5.18や、J-SOXのIT全般統制で求められるアクセス権の見直しを、kintoneで行う手順。誰が何をできるかの一覧、見直しの結果の残し方、利用停止のユーザーなど見落としやすいところ。">
+<link rel="canonical" href="https://daichoya.github.io/guide/access-review.html">
+<meta property="og:title" content="ISMSや内部統制のために、kintoneのアクセス権を見直して記録を残す方法｜台帳屋">
+<meta property="og:description" content="ISMS（ISO/IEC 27001）の管理策5.18や、J-SOXのIT全般統制で求められるアクセス権の見直しを、kintoneで行う手順。誰が何をできるかの一覧、見直しの結果の残し方、利用停止のユーザーなど見落としやすいところ。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://daichoya.github.io/guide/access-review.html">
+<meta property="og:site_name" content="台帳屋">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:image" content="https://daichoya.github.io/images/ogp.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="google-site-verification" content="J1TnZ6bD5c5EjVGtQBBk2eRmLsDje0VapbpwCEnbA6M">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/style.css?v=b08391bea0">
+</head>
+<body>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="../index.html"><span class="brand-name">台帳屋</span><span class="brand-sub">kintone管理者向けプラグイン</span></a>
+    <a class="head-cta" href="../pro.html#trial">30日間無料で試す</a>
+    <nav class="site-nav" aria-label="サイト内のページ"><a href="../pro.html">機能</a><a href="../index.html#price">料金</a><a href="../index.html#free-plugins">無料プラグイン</a><a href="../demo.html">デモ</a><a href="../security.html">導入前の確認</a><a class="nav-cta" href="../pro.html#trial">30日間無料で試す</a></nav>
+  </div>
+</header>
+<main>
+<div class="page">
+  <div class="wrap">
+    <p class="breadcrumb"><a href="../index.html">台帳屋</a> ／ <a href="../guide/index.html">使い方ガイド</a></p>
+    <h1>ISMSや内部統制のために、kintoneのアクセス権を見直して記録を残す方法</h1>
+    <p class="updated">2026年11月10日</p>
+    <div class="lead prose">
+      <p>監査では「権限を見直したか」と「その記録があるか」を聞かれます。<br>kintoneでは、アプリごとのアクセス権を人ごとに並べ直し、結果と確認者を残すのが近道です。</p>
+    </div>
+
+    <h2>見直しの手順</h2>
+    <ol class="steps steps-4">
+      <li><strong>範囲を決める</strong><span>見直すアプリと、点検する人を決めます。点検する人が、すべてのアプリを閲覧できるかも確かめます（<a href="#pitfalls">下の注意</a>）。</span></li>
+      <li><strong>いまのユーザーを書き出す</strong><span>cybozu.com共通管理の［ファイルへの書き出し］で［ユーザー］を書き出します。［使用状態］が「0」の人は、使用停止中です。</span></li>
+      <li><strong>人ごとに見直す</strong><span>アプリのアクセス権を、ユーザー・組織・グループごとの表に並べ、「続ける・変える・外す」を決めます。</span></li>
+      <li><strong>直して、記録を保管する</strong><span>直した日と確認者を表に書き、承認をもらって保管します。次回は、この表と比べます。</span></li>
+    </ol>
+
+    <h2>記録に残す表の形</h2>
+    <div class="prose">
+      <p>アプリごとではなく、<strong>人ごと</strong>に並べます。監査で聞かれるのは「この人に、この権限が要るか」だからです。</p>
+    </div>
+    <div class="table-scroll">
+      <table class="facts sample">
+        <thead><tr><th scope="col">対象</th><th scope="col">アプリ</th><th scope="col">できること</th><th scope="col">見直しの結果</th><th scope="col">理由</th><th scope="col">確認者</th><th scope="col">確認日</th></tr></thead>
+        <tbody>
+          <tr><td>山本（使用停止中）</td><td>案件管理</td><td>閲覧・編集・アプリ管理</td><td>外す</td><td>3月末で退職</td><td>佐藤</td><td>4/10</td></tr>
+          <tr><td>経理部（組織）</td><td>経費精算</td><td>閲覧・編集・書き出し</td><td>続ける</td><td>精算の担当</td><td>佐藤</td><td>4/10</td></tr>
+          <tr><td>Everyone</td><td>顧客名簿</td><td>閲覧・書き出し</td><td>変える</td><td>書き出しは営業部だけに</td><td>佐藤</td><td>4/10</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">表の内容は説明のための例です。</p>
+    <div class="prose">
+      <p>アクセス権は、アプリ・レコード・フィールドの3か所にあります。行の順番で結果が変わるので、順番も残します（くわしくは「<a href="../guide/permission-list.html">kintoneのアクセス権を一覧で確認する方法</a>」）。<br>特に見ておきたいのは、［アプリ管理］と［ファイル書き出し］です。アプリ管理の権限があれば、アプリの設定を変えたり、アプリを削除したりできます。</p>
+      <p>アプリの外の権限も、表の最後に足しておきます。</p>
+      <ul>
+        <li>cybozu.com共通管理者と、kintoneシステム管理者になっている人</li>
+        <li>最初からある［Administrator］が「停止中」のままか（サイボウズは、ふだんは使わず停止中にしておくよう案内しています）</li>
+      </ul>
+    </div>
+
+    <h2 id="pitfalls">見落としやすいところ</h2>
+    <h3>システム管理者でも、見えないアプリがある</h3>
+    <div class="prose">
+      <p>kintoneシステム管理者でも、閲覧の権限がないアプリは、アプリの一覧に出ません（台帳屋が検証環境で確認）。一覧に出たアプリだけを見直すと、漏れが出ます。<br>見直しの範囲には「一覧に出ないアプリがないか」を確かめた結果も書いておきます。</p>
+    </div>
+    <h3>使用停止にした人は、アクセス権に残る</h3>
+    <div class="prose">
+      <p>退職した人を「停止中」にしても、アプリのアクセス権からは消えません（台帳屋が検証環境で確認）。停止中の人はログインできず、利用ユーザーにも数えられないため、気づきにくくなります。<br>残ったまま、REST APIでアクセス権を保存し直すと、エラー（GAIA_IL26）になります。手順2の一覧と照らし合わせて、外してください（くわしくは「<a href="../guide/user-references.html">退職者や異動者が設定されているアプリを探す方法</a>」）。</p>
+    </div>
+    <h3>直しても、アプリを更新するまで変わらない</h3>
+    <div class="prose">
+      <p>アクセス権を直したら、アプリを更新して運用中のアプリに反映します。記録の「確認日」は、更新したあとの日付にします。</p>
+    </div>
+
+    <h2>規格と基準で求められること</h2>
+    <div class="table-scroll">
+      <table class="facts">
+        <thead><tr><th scope="col">規格・基準</th><th scope="col">アクセス権について書かれていること</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">ISMS<br><small>ISO/IEC 27001:2022 附属書A 5.18</small></th><td>アクセス権を、方針に沿って与え、見直し、変え、取り消す。解説では、入社・異動・退職のときと、アクセスの監査のときに見直すとされています</td></tr>
+          <tr><th scope="row">J-SOX<br><small>金融庁の実施基準</small></th><td>ITに係る全般統制の例の1つに「内外からのアクセス管理などシステムの安全性の確保」が挙がっています</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">このページは規格の解説ではありません。どの頻度で、どの形の記録が要るかは、自社の規程と監査を行う方に確かめてください。</p>
+
+    <h2>プラグインで記録を作る</h2>
+    <div class="prose">
+      <p>1つのアプリなら、台帳屋の<a href="../plugins/permission-checker.html">権限チェッカー</a>（無料）で、3か所のアクセス権を1画面に並べ、ExcelやCSVに保存できます。</p>
+    </div>
+    <div class="related tabbed is-paid"><span class="tab tab-paid">有料<small>全アプリをまとめて</small></span><p class="related-head">全アプリを人ごとに見直すなら</p><p>有料のプラグイン「<a href="../pro.html">棚卸し・変更監視パック</a>」（年額33,000円から、税込）は、全アプリのアクセス権を「対象ごとの権限」のシートにまとめます。使用停止中の人ともういない人が先頭に並び、見直しの結果・確認者・確認日を書き込めます。一覧に出ないアプリは、アプリIDから見つけて報告書に書きます（<a href="../pro.html#audit">毎年の点検と監査で使うとき</a>）。</p><p>30日間の無料試用は、kintoneの環境ごとに1回です。試用で作った資料には「試用版」と入ります。</p><div class="actions"><a class="btn btn-trial" href="../pro.html#trial">30日間無料で試す</a><a class="btn" href="../demo.html">デモで試す</a></div></div>
+    <figure class="shot">
+      <a href="../images/feat-report-review.webp" title="画像を大きく表示"><img src="../images/feat-report-review.webp" width="1040" height="447" alt="点検の報告書の後半。要確認の項目の表と、所見・対応の欄が並ぶ" loading="lazy"></a>
+      <figcaption>見本のデータで作った報告書の後半</figcaption>
+    </figure>
+    <p class="note prose">点検台帳と報告書は、点検した時点のkintoneの設定を読み取った結果です。ISMSやJ-SOXなどの基準に適合していることを示すものではありません。</p>
+
+    <h2>参考</h2>
+    <ul class="prose refs">
+      <li><a href="https://jp.kintone.help/k/ja/app/rights/app_rights" rel="noopener">アプリにアクセス権を設定する（kintone ヘルプ）</a></li>
+      <li><a href="https://jp.kintone.help/k/ja/admin/permission_admin/admin_type" rel="noopener">管理者の種類と権限（kintone ヘルプ）</a></li>
+      <li><a href="https://jp.kintone.help/general/ja/admin/list_useradmin/list_csv/export" rel="noopener">ユーザーや組織などの情報をファイルに書き出す（cybozu.com ヘルプ）</a></li>
+      <li><a href="https://jp.kintone.help/general/ja/admin/list_useradmin/list_csv/list_format/user" rel="noopener">［ユーザー］のファイルフォーマット（cybozu.com ヘルプ）</a></li>
+      <li><a href="https://jp.kintone.help/general/ja/admin/list_useradmin/list_user/stop_user" rel="noopener">ユーザーを使用停止にする（cybozu.com ヘルプ）</a></li>
+      <li><a href="https://jp.kintone.help/general/ja/admin/list_administrator/whatisadmin" rel="noopener">Administratorとは（cybozu.com ヘルプ）</a></li>
+      <li><a href="https://cybozu.dev/ja/kintone/docs/rest-api/apps/settings/get-app-permissions/" rel="noopener">アプリのアクセス権の設定を取得する（cybozu developer network）</a></li>
+      <li><a href="https://www.isms.online/iso-27001/annex-a-2022/5-18-access-rights-2022/" rel="noopener">ISO 27001:2022 Annex A 5.18 Access Rights（ISMS.online、英語）</a></li>
+      <li><a href="https://www.fsa.go.jp/singi/singi_kigyou/kijun/20191206_naibutousei_kansa.pdf" rel="noopener">財務報告に係る内部統制の評価及び監査の基準・実施基準（金融庁、2019年12月の版、PDF）</a></li>
+    </ul>
+  </div>
+</div>
+
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <nav aria-label="規約とお問い合わせ">
+      <a href="../guide/index.html">使い方ガイド</a>
+      <a href="../index.html#faq">よくある質問</a>
+      <a href="../estimate.html">見積書の作成</a>
+      <a href="../privacy.html">プライバシーポリシー</a>
+      <a href="../terms.html">利用規約</a>
+      <a href="../tokushoho.html">特定商取引法に基づく表記</a>
+      <span>お問い合わせ：<a href="mailto:daichoya.plugins@gmail.com">daichoya.plugins@gmail.com</a></span>
+    </nav>
+    <p>kintoneはサイボウズ株式会社の登録商標です。台帳屋は、サイボウズ株式会社とは関係のない個人の開発者が提供しています。</p>
+    <p>&copy; 2026 台帳屋</p>
+  </div>
+</footer>
+</body>
+</html>
